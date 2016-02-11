@@ -12,7 +12,7 @@ TEST_PATH_DICT = {'STAT 24400 (Winter 16) Statistical Theory.Method-1' :
 
 TEST_HOME_PATH = os.getcwd()
 
-def create_filepaths(dirs_dict, cur_path):
+def make_dirs(dirs_dict, cur_path):
     '''
     Given a starting location and a hierarchy of directory names, this function
     creates the appropriate directory and subdirectories at the start loc.
@@ -29,9 +29,10 @@ def create_filepaths(dirs_dict, cur_path):
 
     for key in dirs_dict:
         if not dirs_dict[key]:
-            os.makedirs(cur_path + '/' + key)
+            if not os.path.exists(cur_path + '/' + key):
+                os.makedirs(cur_path + '/' + key)
         else:
-            create_filepaths(dirs_dict[key], cur_path + '/' + key)
+            make_dirs(dirs_dict[key], cur_path + '/' + key)
 
 
 def get_folder_name(proposed_dir_name):
