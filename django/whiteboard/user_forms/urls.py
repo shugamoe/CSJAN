@@ -6,6 +6,6 @@ from django.http import HttpResponse
 from . import views # have to add this in, to have views.THING down there
 
 urlpatterns = [
-    url(r'^select_downloads$', views.select_downloads),
-    url(r'^', views.get_info),
+    url(r'^$', views.get_info, name='start'),
+    url(r'^select_downloads$', views.get_info, name='select_downloads'),    
     ]

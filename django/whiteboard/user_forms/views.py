@@ -14,6 +14,7 @@ def get_info(request):
         form = UserForm(request.POST)
         if form.is_valid():
             print(form.cleaned_data)
+            # Might be looking to replace this with a call to url() function.
             return render(request, 'user_forms/select_downloads.html', \
                                                 {'classes': form.cleaned_data})
     else:
