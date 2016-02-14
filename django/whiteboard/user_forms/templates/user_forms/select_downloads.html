@@ -2,11 +2,10 @@
 <p>Choose Classes to Download</p>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="" method="post">
+<form action="{% url 'select_downloads' %}" method="post">
 {% csrf_token %}
 {% for class in classes %}
-    <input type="radio" name="class" id="class{{ forloop.counter }}" value="{{
-    class{{ forloop.counter }}" />
+    <input type="checkbox" name="class{{ forloop.counter }}" id="class{{ forloop.counter }}" value="{{ class }}" />
     <label for="class{{ forloop.counter }}">{{ class }}</label><br />
 {% endfor %}
 <input type="submit" value="Download" />

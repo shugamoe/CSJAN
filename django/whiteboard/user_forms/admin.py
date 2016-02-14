@@ -9,7 +9,7 @@ class ClassInline(admin.TabularInline):
 
 class SessionAdmin(admin.ModelAdmin):
     inlines = [ClassInline]             # quarter and year might not work.  
-    list_display = ('username', 'date', 'quarter', 'year')
+    list_display = ('cnet_id', 'date', 'quarter', 'year')
     list_filter = ['date']
     # search_fields = ['username']
 

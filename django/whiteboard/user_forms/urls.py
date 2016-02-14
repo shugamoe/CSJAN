@@ -7,5 +7,5 @@ from . import views # have to add this in, to have views.THING down there
 
 urlpatterns = [
     url(r'^$', views.get_info, name='start'),
-    url(r'^select_downloads$', views.get_info, name='select_downloads'),    
+    url(r'^select_downloads$', views.select_downloads, name='select_downloads'),    
     ]
