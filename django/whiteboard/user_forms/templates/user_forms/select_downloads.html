@@ -1,9 +1,13 @@
 <h1>Whiteboard</h1>
+<p>Choose Classes to Download</p>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<p>
-<ul>
-    {% for key in classes %}
-        <li>{{key}}</li>
-    {% endfor %}
-</ul>
-</p>
+<form action="" method="post">
+{% csrf_token %}
+{% for class in classes %}
+    <input type="radio" name="class" id="class{{ forloop.counter }}" value="{{
+    class{{ forloop.counter }}" />
+    <label for="class{{ forloop.counter }}">{{ class }}</label><br />
+{% endfor %}
+<input type="submit" value="Download" />
+</form>
