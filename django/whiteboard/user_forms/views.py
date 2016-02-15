@@ -20,7 +20,7 @@ def get_info(request):
             print(form.cleaned_data)
             # Might be looking to replace this with a call to url() function.
             return render(request, 'user_forms/select_downloads.html', \
-                                                {'classes': form.cleaned_data})
+                                                {'classes': TEST_CLASSES})
     else:
         form = SessionForm()
 
@@ -28,13 +28,17 @@ def get_info(request):
 
 def select_downloads(request):
     if request.method == 'POST':
-        for i in range(1, len(request.POST)):
-            print(i, request.POST.get('class' + str(i)))
-        print('classes should be here: ', request.POST.get('class'))
-    else:
-        form = ClassForm()
-    # print('other function')
+        classes = get_classes(request)
+        print('classes should be here: ', classes)
     return render(request, 'user_forms/select_downloads.html', \
                                                 {'classes': TEST_CLASSES})
 
+
+def get_classes(request):
+    classes = []
+    for i in range(1, len(request.POST) + 1):
+        if request.POST.get('class' + str(i)):
+            classes.append(request.POST.get('class' + str(i)))
+
+    return classes
 
