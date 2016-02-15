@@ -1,14 +1,14 @@
 from django.contrib import admin
-from .models import Session, Class
+from .models import Session, Course
 
 
-class ClassInline(admin.TabularInline):
-    model = Class
+class CourseInline(admin.TabularInline):
+    model = Course
     extra = 4
 
 
 class SessionAdmin(admin.ModelAdmin):
-    inlines = [ClassInline]             # quarter and year might not work.  
+    inlines = [CourseInline]             # quarter and year might not work.  
     list_display = ('cnet_id', 'date', 'quarter', 'year')
     list_filter = ['date']
     # search_fields = ['username']

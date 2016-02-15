@@ -21,5 +21,5 @@ from django.http import HttpResponse
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^user/', include('user_forms.urls')),
+    url(r'^start/', include('user_forms.urls')),
 ]

@@ -1,12 +1,12 @@
 <h1>Whiteboard</h1>
-<p>Choose Classes to Download</p>
+<p>Choose Courses to Download</p>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
-<form action="{% url 'select_downloads' %}" method="post">
+<form action="" method="post">
 {% csrf_token %}
-{% for class in classes %}
-    <input type="checkbox" name="class{{ forloop.counter }}" id="class{{ forloop.counter }}" value="{{ class }}" />
-    <label for="class{{ forloop.counter }}">{{ class }}</label><br />
+{% for course in courses %}
+    <input type="checkbox" name="course{{ forloop.counter }}" id="course{{ forloop.counter }}" value="{{ course }}" />
+    <label for="course{{ forloop.counter }}">{{ course }}</label><br />
 {% endfor %}
 <input type="submit" value="Download" />
 </form>
