@@ -34,6 +34,7 @@ def select_downloads(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     print(session.cnet_id, 'the current cnet id')
     print(session.course_set.all(), 'the course selection')
+    courses = session.course_set.all()
     if request.method == 'POST':
 
 
@@ -54,8 +55,10 @@ def select_downloads(request, session_id):
             print('courses has stuff in it')
             return HttpResponseRedirect(reverse('post', \
                                             args=(session.id,)))
+    else:
+        pass
     return render(request, 'user_forms/select_downloads.html', \
-                                                {'courses': TEST_COURSES})
+                                                {'courses': courses})
 
 
 def post(request, session_id):
