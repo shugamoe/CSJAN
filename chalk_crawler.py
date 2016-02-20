@@ -34,6 +34,7 @@ class Chalk_Page:
 
 
     def compile_courses(self): 
+        course_tags = []
         courses = []
 
         if self.quarter.lower() == 'fall':
@@ -46,16 +47,19 @@ class Chalk_Page:
         self.browser.follow_link(link_tag)
         for course_tag in self.browser.find_all('option'):
             if '({:} '.format(self.quarter.lower()) + '{:})'.format(self.year) in course_tag.string.lower(): 
-                courses.append(course_tag)
+                course_tags.append(course_tag)
 
         course_form = self.browser.get_form(action='bbcourseorg')
-        for course in courses:
+        for course in course_tags:
+            courses.append(course.string)
             course_form['amc.showcourse.{:}'.format(course['value'])] = ['true']
             course_form['amc.showcourseid.{:}'.format(course['value'])] = ['true']
-        self.browser.back(1) # is the form still updated?
+        self.browser.back(1) # values retained, but does form need to be submitted?
         # self.browser.submit_form(course_form, submit = course_form['top_Submit'])
-        print(self.browser.find('title'))
+        
+        # print(self.browser.find('title'))
+        return courses
 
 
-    # def access_courses(self):
-    #     print(self.browser.find(id='module:_25_1'))
+    def access_courses(self):
+        print(self.browser.find(id='div_25_1'))
