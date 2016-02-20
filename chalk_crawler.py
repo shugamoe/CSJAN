@@ -8,9 +8,12 @@ import getpass
 
 
 class Chalk_Page:
-    def __init__(self):
+    def __init__(self, quarter, year):
         self.url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1'
         self.browser = self.login()
+        self.quarter = quarter
+        self.year = year
+        self.courses = self.compile_courses()
 
 
     def login(self):
@@ -30,26 +33,28 @@ class Chalk_Page:
         return browser
 
 
-    def compile_courses(self):
-       # print(self.browser.find(id='module:_25_1'))
-       # for link_tag in self.browser.find_all('a'):
-       #  if link_tag.has_attr('title'):
-       #      if link_tag['title'] == "Manage Chalk Course List Module Settings":
-       #          print(link_tag)
-       #          print(self.browser.follow_link(link_tag))
+    def compile_courses(self): 
+        courses = []
 
-        print(self.browser.find('a'))
-        print(self.browser.follow_link((self.browser.find('a')))
+        if len(str(self.year)) == 4:
+            self.year = str(self.year)[2:]
 
-        return None
+        link_tag = self.browser.find(title="Manage Chalk Course List Module Settings")
+        self.browser.follow_link(link_tag)
+        for course_tag in self.browser.find_all('option'):
+            if '({:} '.format(self.quarter.lower()) + '{:})'.format(self.year) in course_tag.string.lower(): 
+                courses.append(course_tag)
 
+        # iterate through names and set value to [] to reset form
 
-
-
-
-
-
-
-
+        course_form = self.browser.get_form(action='bbcourseorg')
+        for course in courses:
+            course_form['amc.showcourse.{:}'.format(course['value'])] = ['true']
+            course_form['amc.showcourseid.{:}'.format(course['value'])] = ['true']
+            self.browser.submit_form(course_form)
 
 
+
+
+    # def access_courses(self):
+        # print(self.browser.find(id='module:_25_1'))
