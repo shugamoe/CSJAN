@@ -1,20 +1,40 @@
 #CHALK CRAWLER
 
-from lxml import html
 import requests
-import urllib3
+from robobrowser import RoboBrowser
 import getpass
 
-url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1'
 
-username = input('enter username: ')
-password = getpass.getpass('enter password: ')
+class Chalk_Page:
+    def __init__(self):
+        self.browser = self.login()
 
-pool_man = urllib3.PoolManager()
-pool_man.headers['username'] = username
-pool_man.headers['password'] = password
 
-r = pool_man.urlopen('GET', url)
-page = r.read()
+    def login(self):
+        url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1/'
 
-print(page)
+        username = input('enter username: ')
+        password = getpass.getpass('enter password: ')
+
+        browser = RoboBrowser(history = True)
+        browser.open(url)
+
+        login_form = browser.get_form(action='/webapps/login/')
+        login_form['user_id'] = username
+        login_form['password'] = password
+
+        browser.session.headers['Referer'] = url
+        browser.submit_form(login_form)
+        print(browser.parsed)
+        return browser
+
+
+    # def compile_courses(self):
+    #    for link in self.browser.find_all(
+            
+
+
+
+
+
+
