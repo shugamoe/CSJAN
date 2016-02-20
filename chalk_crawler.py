@@ -36,6 +36,9 @@ class Chalk_Page:
     def compile_courses(self): 
         courses = []
 
+        if self.quarter.lower() == 'fall':
+            self.quarter = 'autumn'
+
         if len(str(self.year)) == 4:
             self.year = str(self.year)[2:]
 
@@ -45,16 +48,14 @@ class Chalk_Page:
             if '({:} '.format(self.quarter.lower()) + '{:})'.format(self.year) in course_tag.string.lower(): 
                 courses.append(course_tag)
 
-        # iterate through names and set value to [] to reset form
-
         course_form = self.browser.get_form(action='bbcourseorg')
         for course in courses:
             course_form['amc.showcourse.{:}'.format(course['value'])] = ['true']
             course_form['amc.showcourseid.{:}'.format(course['value'])] = ['true']
-            self.browser.submit_form(course_form)
-
-
+        self.browser.back(1) # is the form still updated?
+        # self.browser.submit_form(course_form, submit = course_form['top_Submit'])
+        print(self.browser.find('title'))
 
 
     # def access_courses(self):
-        # print(self.browser.find(id='module:_25_1'))
+    #     print(self.browser.find(id='module:_25_1'))
