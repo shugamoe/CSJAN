@@ -4,7 +4,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from django.utils import timezone
 from .forms import UserForm
-from .models import SessionForm, CourseForm, Session, Course
+from .models import SessionForm, CourseForm, Session, Course, Student, \
+    Instructor, Assistant
 import sys
 
 # Change this before {FINAL}
@@ -82,7 +83,8 @@ def get_courses(request):
 
 def dummy_crawler(cleaned_data, session_object):
     for course in TEST_COURSES:
-        session_object.course_set.create(course_id=course, downloaded=False)
+        # {TO DO} Add in more fields 
+        session_object.course_set.create(course_id=course)
 
     session_object.save()
 

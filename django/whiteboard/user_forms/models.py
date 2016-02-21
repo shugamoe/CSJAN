@@ -21,12 +21,13 @@ class Session(models.Model):
 
 class Course(models.Model):
     Session = models.ForeignKey(Session)
-    course_id = models.CharField(max_length=200)
+    course_id = models.CharField(max_length=200, blank=True)
     downloaded = models.BooleanField(default=False)
-    department = models.CharField(max_length=200)
-    dept_code = models.CharField(max_length=10)
-    year = models.IntegerField()
-    quarter = models.CharField(max_length=42)
+
+    # department = models.CharField(max_length=200, blank=True)
+    # dept_code = models.CharField(max_length=10, blank=True)
+    # year = models.IntegerField(blank=True)
+    # quarter = models.CharField(max_length=42, blank=True)
 
     def __str__(self):
         return '{}'.format(self.course_id)
