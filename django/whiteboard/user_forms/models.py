@@ -37,6 +37,7 @@ class Student(models.Model):
     Course = models.ForeignKey(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
+    cnet_id = models.CharField(max_length=42)
 
 
 class Instructor(models.Model):
