@@ -33,7 +33,8 @@ class SessionForm(ModelForm):
     quarter = forms.MultipleChoiceField(label='quarter(s)', \
                                         choices=QUARTER_CHOICES)
     year = forms.IntegerField(label='Course year', initial=datetime.date.today().year)
-    cnet_pw = forms.CharField(label='CNET password', widget=forms.PasswordInput)
+    cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
+    cnet_id = forms.CharField(label='CNET ID')
     class Meta:
         model = Session
         fields = ['cnet_id','cnet_pw', 'quarter', 'year']
