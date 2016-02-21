@@ -23,10 +23,31 @@ class Course(models.Model):
     Session = models.ForeignKey(Session)
     course_id = models.CharField(max_length=200)
     downloaded = models.BooleanField(default=False)
+    department = models.CharField(max_length=200)
+    dept_code = models.CharField(max_length=10)
+    year = models.IntegerField()
+    quarter = models.CharField(max_length=42)
 
     def __str__(self):
         return '{}'.format(self.course_id)
+
+
+class Student(models.Model):
+    Course = models.ForeignKey(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
+
+
+class Instructor(models.Model):
+    Course = models.ForeignKey(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
     
+
+class Assistant(models.Model):
+    Course = models.ForeignKey(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
 
 
 class SessionForm(ModelForm):
@@ -45,3 +66,4 @@ class CourseForm(ModelForm):
     class Meta:
         model = Course
         fields = ['downloaded']
+
