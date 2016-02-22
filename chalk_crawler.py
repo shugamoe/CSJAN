@@ -1,65 +1,75 @@
-#CHALK CRAWLER
-# RoboBrowser: http://robobrowser.readthedocs.org/en/latest/api.html
-# bs4: http://www.crummy.com/software/BeautifulSoup/bs4/doc/
+# Chalk_Crawler w/ Selenium
 
-import requests
-from robobrowser import RoboBrowser
+# import pickle for cookies
+from selenium import webdriver
+import time
 import getpass
 
-
 class Chalk_Page:
-    def __init__(self, quarter, year):
+    def __init__(self, quarter, year): # username, password
         self.url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1'
         self.browser = self.login()
         self.quarter = quarter
         self.year = year
         self.courses = self.compile_courses()
+        # self.cookies = []
 
 
     def login(self):
         username = input('enter username: ')
         password = getpass.getpass('enter password: ')
 
-        browser = RoboBrowser(history = True)
-        browser.open(self.url)
+        browser = webdriver.Firefox()
+        browser.delete_all_cookies()
+        browser.implicitly_wait(7)
 
-        login_form = browser.get_form(action='/webapps/login/')
-        login_form['user_id'] = username
-        login_form['password'] = password
+        browser.get(self.url)
+        browser.find_element_by_name('user_id').send_keys(username)
+        browser.find_element_by_name('password').send_keys(password)
 
-        browser.session.headers['Referer'] = self.url
-        browser.submit_form(login_form)
+        login_form = browser.find_element_by_id('entry-login')
+        login_form.submit()
+
+        time.sleep(3)
+        # self.cookies.append(browser.get_cookies)
+
+        # Save cookies to file.
+        # with open('cookies.txt', mode ='w') as f:
+        #     for cookie in self.cookies:
+        #         line = '%s\tTRUE\t%s\t%s\t%s\t%s\t%s' % ( \
+        #             cookie['domain'], cookie['path'], 'TRUE' if cookie['secure'] else 'FALSE', \
+        #             cookie['expiry'] if cookie['expiry'] else 0, cookie['name'], cookie['value'])
+        #         f.write(line.encode('utf-8') + '\n')
+ 
+        # print 'DONE - Collected {:} cookies'.format(len(self.cookies))
+        # driver.close()
         
         return browser
 
 
     def compile_courses(self): 
-        course_tags = []
         courses = []
-
-        if self.quarter.lower() == 'fall':
-            self.quarter = 'autumn'
 
         if len(str(self.year)) == 4:
             self.year = str(self.year)[2:]
 
-        link_tag = self.browser.find(title="Manage Chalk Course List Module Settings")
-        self.browser.follow_link(link_tag)
-        for course_tag in self.browser.find_all('option'):
-            if '({:} '.format(self.quarter.lower()) + '{:})'.format(self.year) in course_tag.string.lower(): 
-                course_tags.append(course_tag)
+        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
+        for course_web_element in self.browser.find_elements_by_tag_name('strong'):
+            for quarter in self.quarter:
+                if quarter.lower() == 'fall':
+                    quarter = 'autumn'
+                if '({:} '.format(quarter.lower()) + '{:})'.format(self.year) in course_web_element.text.lower(): 
+                    if 'Unavailable' not in course_web_element.text:
+                        courses.append(course_web_element.text)
+                        course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
+                        course_name_box.click()
+                        course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
+                        course_id_box.click()
 
-        course_form = self.browser.get_form(action='bbcourseorg')
-        for course in course_tags:
-            courses.append(course.string)
-            course_form['amc.showcourse.{:}'.format(course['value'])] = ['true']
-            course_form['amc.showcourseid.{:}'.format(course['value'])] = ['true']
-        self.browser.back(1) # values retained, but does form need to be submitted?
-        # self.browser.submit_form(course_form, submit = course_form['top_Submit'])
-        
-        # print(self.browser.find('title'))
+        course_form = self.browser.find_element_by_id('moduleEditForm')
+        course_form.submit()
+
         return courses
 
 
-    def access_courses(self):
-        print(self.browser.find(id='div_25_1'))
+        def access_courses(self):
