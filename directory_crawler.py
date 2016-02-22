@@ -1,32 +1,43 @@
 from bs4 import BeautifulSoup
-from sys import argv
-import mechanicalsoup
-import cookiejar
-import sys
+from selenium import webdriver
+import getpass
 
 
 class Student:
     def __init__(self, program, email):
         self.program = "Undeclared"
-        self.email = ""
+        self.email = None
         
 class Instructor:
     def __init__(self, title, phone, office):
-        self.title = ""
-        self.phone = ""
-        self.office = ""
-
+        self.title = None
+        self.phone = None
+        self.office = None
+        
 #login:
-CNET = sys.argv[1]
-PASSWORD = sys.argv[2]
-print(CNET)
-print(PASSWORD)
+CNET = input('enter username: ')
+PASSWORD = getpass.getpass('enter password: ')
+
+directory = "https://directory.uchicago.edu"
+directory_login = "https://directory.uchicago.edu/return_after_login"
+
+#fire up the browser, visit the directory page and the login page
+browser = webdriver.Firefox()
+browser.delete_all_cookies()
+browser.get(directory)
+browser.get(directory_login)
+
+#fill out the login form, then submit
+browser.find_element_by_name('j_username').send_keys(CNET)
+browser.find_element_by_name('j_password').send_keys(PASSWORD)
+browser.find_element_by_class_name('form-button').click()
+
 
 # given a dict{list of string} "lastname, firstname', returns a dict of
 # student and instructor objects.
 
 
-def dir_lookup(name_dict):
+def dir_lookup(list_of_names):
     
     list_of_students = []
     list_of_instructors = []
@@ -36,11 +47,6 @@ def dir_lookup(name_dict):
         names = name.split(", ")
         firstname = names[1]
         lastname = names[0]
-        
-        query_front = "https://directory.uchicago.edu/individuals/results?utf8=%E2%9C%93&name="
-        query_mid   = firstname + "+" + lastname
-        query_end   = "&organization=&cnetid="
-        query_URL = query_front + query_mid + query_end
 
         query_page = requests.get(query_URL)
         
