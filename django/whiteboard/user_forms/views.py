@@ -6,10 +6,7 @@ from django.utils import timezone
 from .forms import UserForm
 from .models import SessionForm, CourseForm, Session, Course, Student, \
     Instructor, Assistant
-import sys
 
-# Change this before {FINAL}
-sys.path.insert(0, '/home/student/CSJAN//django/testing')
 import folders 
 # Create your views here.
 
