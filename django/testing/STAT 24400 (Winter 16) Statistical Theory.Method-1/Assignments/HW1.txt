@@ -1,0 +1,40 @@
+STAT 24400                      
+Homework 1
+
+1. Rice, Chapter 1, 20 
+
+2. Rice, Chapter 1, 60 
+
+
+
+3. Rice, Chapter 1, 72
+
+4. Rice, Chapter 1, 78
+
+5. Rice, Chapter 2, 8
+
+
+6. Rice, Chapter 2, 28
+
+
+
+
+7.  In heads up Texas hold 'em (two players, each dealt two
+cards), find the probability that neither is dealt a pair (two cards
+of the same rank). If there are three players, what is the probability
+that none have a pair?
+
+8. For a Poisson process N(,) with parameter \lambda, find the
+probabilities of the following events: 
+
+(a) N((1,5])>1 
+
+(b) N((0,1]) = N((0,2]) 
+
+(c) N((1,2]) + N((3,4]) = 6 
+
+(d) N((0,1]) = N((1,2]) + m for m a nonnegative integer.
+Express your answer as an infinite series and then write your result
+in terms of a Bessel function (look it up).  This result in terms of
+Bessel functions can be used to, for example, give a simple accurate
+approximation to this probability when m is large.
