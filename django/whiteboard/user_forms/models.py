@@ -53,7 +53,7 @@ class Assistant(models.Model):
 
 
 class SessionForm(ModelForm):
-    quarter = forms.MultipleChoiceField(label='quarter(s)', \
+    quarter = forms.MultipleChoiceField(label='Quarter(s)', \
                                         choices=QUARTER_CHOICES)
     year = forms.IntegerField(label='Course year', initial=datetime.date.today().year)
     cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
