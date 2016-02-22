@@ -21,18 +21,43 @@ class Session(models.Model):
 
 class Course(models.Model):
     Session = models.ForeignKey(Session)
-    course_id = models.CharField(max_length=200)
+    course_id = models.CharField(max_length=200, blank=True)
     downloaded = models.BooleanField(default=False)
+
+    # department = models.CharField(max_length=200, blank=True)
+    # dept_code = models.CharField(max_length=10, blank=True)
+    # year = models.IntegerField(blank=True)
+    # quarter = models.CharField(max_length=42, blank=True)
 
     def __str__(self):
         return '{}'.format(self.course_id)
+
+
+class Student(models.Model):
+    Course = models.ForeignKey(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
+    cnet_id = models.CharField(max_length=42)
+
+
+class Instructor(models.Model):
+    Course = models.ForeignKey(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
     
+
+class Assistant(models.Model):
+    Course = models.ForeignKey(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
 
 
 class SessionForm(ModelForm):
-    quarter = forms.ChoiceField(choices=QUARTER_CHOICES)
+    quarter = forms.MultipleChoiceField(label='quarter(s)', \
+                                        choices=QUARTER_CHOICES)
     year = forms.IntegerField(label='Course year', initial=datetime.date.today().year)
-    cnet_pw = forms.CharField(label='CNET password', widget=forms.PasswordInput)
+    cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
+    cnet_id = forms.CharField(label='CNET ID')
     class Meta:
         model = Session
         fields = ['cnet_id','cnet_pw', 'quarter', 'year']
@@ -43,3 +68,4 @@ class CourseForm(ModelForm):
     class Meta:
         model = Course
         fields = ['downloaded']
+

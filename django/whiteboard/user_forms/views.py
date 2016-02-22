@@ -4,7 +4,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from django.utils import timezone
 from .forms import UserForm
-from .models import SessionForm, CourseForm, Session, Course
+from .models import SessionForm, CourseForm, Session, Course, Student, \
+    Instructor, Assistant
+import sys
+
+# Change this before {FINAL}
+sys.path.insert(0, '/home/student/CSJAN//django/testing')
+import folders 
 # Create your views here.
 
 TEST_COURSES = ['STAT 244', 'ENGL 169']
@@ -18,7 +24,7 @@ def get_info(request):
             # Insert code here to interact with crawlers and add session info
             # to the database.
             courses = dummy_crawler(form.cleaned_data, session_object)
-            print(courses, session_object.id)
+            print(form.cleaned_data)
             return HttpResponseRedirect(reverse('select_downloads', \
                                                         args=(session_object.id,)))
         else:
@@ -34,6 +40,7 @@ def select_downloads(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     print(session.cnet_id, 'the current cnet id')
     print(session.course_set.all(), 'the course selection')
+    
     if request.method == 'POST':
 
 
@@ -54,8 +61,10 @@ def select_downloads(request, session_id):
             print('courses has stuff in it')
             return HttpResponseRedirect(reverse('post', \
                                             args=(session.id,)))
+    else:
+        courses = session.course_set.all()
     return render(request, 'user_forms/select_downloads.html', \
-                                                {'courses': TEST_COURSES})
+                                                {'courses': courses})
 
 
 def post(request, session_id):
@@ -74,7 +83,8 @@ def get_courses(request):
 
 def dummy_crawler(cleaned_data, session_object):
     for course in TEST_COURSES:
-        session_object.course_set.create(course_id=course, downloaded=False)
+        # {TO DO} Add in more fields 
+        session_object.course_set.create(course_id=course)
 
     session_object.save()
 
