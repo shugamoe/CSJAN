@@ -5,6 +5,8 @@
 
 import os
 import subprocess
+import re
+import time
 
 
 
@@ -89,5 +91,24 @@ def test():
   print('IMPORTED FUNCTION FROM OTHER FOLDER')
 
 
+def get_file_mod_times():
+  '''
+  '''
+  file_list = subprocess.check_output("find -not -name '*.ini'", shell = True)
+  file_list = file_list.decode('utf-8')
+  file_list = file_list.split('\n')
 
 
+  file_mod_dict = {}
+
+  print(file_list)
+
+  pattern = '([\w.-]+\.[\w]+)$'
+  for file_path in file_list:
+    file_name = re.search(pattern, file_path)
+
+    if file_name != None:
+      file_name = file_name.group()
+      file_mod_dict[file_name] = time.ctime(os.path.getmtime(file_path))
+
+  return file_mod_dict

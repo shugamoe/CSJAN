@@ -20,9 +20,21 @@ class Session(models.Model):
 
 
 class Course(models.Model):
-    Session = models.ForeignKey(Session)
+    sessions = models.ManyToManyField(Session)
     course_id = models.CharField(max_length=200, blank=True)
     downloaded = models.BooleanField(default=False)
+
+    def __str__(self):
+        return str(self.course_id)
+
+
+class Student(models.Model):
+    Course = models.ManyToManyField(Course)
+    first_name = models.CharField(max_length=42)
+    last_name = models.CharField(max_length=42)
+    cnet_id = models.CharField(max_length=42)
+
+
 
     # department = models.CharField(max_length=200, blank=True)
     # dept_code = models.CharField(max_length=10, blank=True)
@@ -33,28 +45,24 @@ class Course(models.Model):
         return '{}'.format(self.course_id)
 
 
-class Student(models.Model):
-    Course = models.ForeignKey(Course)
-    first_name = models.CharField(max_length=42)
-    last_name = models.CharField(max_length=42)
-    cnet_id = models.CharField(max_length=42)
+
 
 
 class Instructor(models.Model):
-    Course = models.ForeignKey(Course)
+    Course = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     
 
 class Assistant(models.Model):
-    Course = models.ForeignKey(Course)
+    Course = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
 
 
 class SessionForm(ModelForm):
     quarter = forms.MultipleChoiceField(label='Quarter(s)', \
-                                        choices=QUARTER_CHOICES)
+                                        choices=QUARTER_CHOICES, required = False)
     year = forms.IntegerField(label='Course year', initial=datetime.date.today().year)
     cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
     cnet_id = forms.CharField(label='CNET ID')

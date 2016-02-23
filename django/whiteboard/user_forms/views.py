@@ -7,21 +7,29 @@ from .forms import UserForm
 from .models import SessionForm, CourseForm, Session, Course, Student, \
     Instructor, Assistant
 
-import folders 
+import random
+
+# import folders 
 # Create your views here.
 
-TEST_COURSES = ['STAT 244', 'ENGL 169']
+TEST_COURSES_0 = ['STAT 244', 'ENGL 169']
+TEST_COURSES_1 = ['CMSC 122', 'MATH 195']
+TEST_COURSES_2 = ['SEXY 101', 'FUCK 504']
 
 
 def get_info(request):
+    print('get_info view')
+    print()
     if request.method == 'POST':
         form = SessionForm(request.POST)
         if form.is_valid():
             session_object = form.save()
+            print('session object ID should be here', session_object.id)
             # Insert code here to interact with crawlers and add session info
             # to the database.
             courses = dummy_crawler(form.cleaned_data, session_object)
             print(form.cleaned_data)
+            print(session_object.id)
             return HttpResponseRedirect(reverse('select_downloads', \
                                                         args=(session_object.id,)))
         else:
@@ -34,9 +42,10 @@ def get_info(request):
     
 
 def select_downloads(request, session_id):
+    print('select downloads view')
+    print()
+    print(session_id)
     session = get_object_or_404(Session, pk=session_id)
-    print(session.cnet_id, 'the current cnet id')
-    print(session.course_set.all(), 'the course selection')
     
     if request.method == 'POST':
 
@@ -44,10 +53,9 @@ def select_downloads(request, session_id):
         # We obtain a list of the 
         courses = get_courses(request)
         for course in courses:
-            course_model = session.course_set.get(course_id=course)
-            course_model.downloaded=True
+            course_model = Course.objects.get(course_id=course)
+            course_model.downloaded = True
             course_model.save()
-
 
         print('courses should be here: ', courses)
         if not courses:
@@ -59,16 +67,20 @@ def select_downloads(request, session_id):
             return HttpResponseRedirect(reverse('post', \
                                             args=(session.id,)))
     else:
-        courses = session.course_set.all()
+        print('Session ID: {}'.format(session_id))
+        courses = Course.objects.filter(sessions__id = session_id)
+        print('courses should be here', courses)
     return render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': courses})
 
 
 def post(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
+    all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id).distinct()
     return render(request, 'user_forms/post.html',
                     {'cnet_id': session.cnet_id,
-                      'courses': session.course_set.filter(downloaded=True)})
+                      'courses': session.course_set.filter(downloaded=True),
+                      'all_courses': all_courses})
 
 def get_courses(request):
     courses = []
@@ -79,16 +91,32 @@ def get_courses(request):
     return courses
 
 def dummy_crawler(cleaned_data, session_object):
-    for course in TEST_COURSES:
-        # {TO DO} Add in more fields 
-        session_object.course_set.create(course_id=course)
 
-    session_object.save()
+    num = random.randrange(0,3)
+    print(cleaned_data['cnet_id'])
+
+    if num == 0:
+        test_courses = TEST_COURSES_0
+    elif num == 1:
+        test_courses = TEST_COURSES_1
+    elif num == 2: 
+        test_courses = TEST_COURSES_2
+
+    for course in test_courses:
+        num_results = Course.objects.filter(course_id = course).count()
+        if num_results == 0:
+        # {TO DO} Add in more fields 
+            course_object = Course(course_id = course)
+            course_object.save()
+        else:
+            course_object = Course.objects.get(course_id = course)
+
+        course_object.sessions.add(session_object)
 
     # Should call actually web crawler from here to obtain list of courses.  
     # For now we will just use TEST_COURSES.  
 
-    return TEST_COURSES
+    return test_courses
 
 
 

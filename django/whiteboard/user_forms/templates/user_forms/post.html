@@ -8,7 +8,21 @@
 
 </p>
 
- <a href="{% url 'start' %}">Download more classes</a> 
+ <a href="{% url 'start' %}">Download more classes</a>
+
+
+ <h2>Classes Previously Downloaded</h2>
+ <ul>
+    {% for course in all_courses %}
+    <li>{{ course.course_id }}</li>
+    {% endfor %} 
+</ul>
+
+
+
+
+
+
 
 <!-- Will probably need to format this to look nicely, this can be a good
      page to be a 'jumping off point' to look at demographic info and what not
