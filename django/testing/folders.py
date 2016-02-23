@@ -7,6 +7,7 @@ import os
 import subprocess
 import re
 import time
+from pdfrw import PdfReader
 
 
 
@@ -72,19 +73,40 @@ def find_pdfs(path):
 
 
 
+# >>> x = PdfReader('source.pdf')
+# >>> x.keys()
+# ['/Info', '/Size', '/Root']
+# >>> x.Info
+# {'/Producer': '(cairo 1.8.6 (http://cairographics.org))',
+#  '/Creator': '(cairo 1.8.6 (http://cairographics.org))'}
+# >>> x.Root.keys()
+# ['/Type', '/Pages']
+
+# >>> len(x.pages)
+# 1
+# >>> x.pages[0]
+# {'/Parent': {'/Kids': [{...}], '/Type': '/Pages', '/Count': '1'},
+#  '/Contents': {'/Length': '11260', '/Filter': None},
+#  '/Resources': ... (Lots more stuff snipped)
+# >>> x.pages[0].Contents
+# {'/Length': '11260', '/Filter': None}
+# >>> x.pages[0].Contents.stream
+# 'q\n1 1 1 rg /a0 gs\n0 0 0 RG 0.657436
+#   w\n0 J\n0 j\n[] 0.0 d\n4 M q' ... (Lots more stuff snipped)
 
 
 def test_batch_pdf():
   path = os.getcwd()
   pdf_list = find_pdfs(path)
 
-  pdf_strings = []
+  all_pdf_strings = []
   for pdf in pdf_list:
     # pdf_strings.append(os.system('pdf2txt.py' + ' ' + "'" + str(pdf) + "'"))
     # thing = subprocess.check_output(['pdf2txt.py', "'" + str(pdf) + "'"])
-    thing = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf) + "'",\
-                                      shell=True)
-    pdf_strings.append(thing)
+    cur_pdf_string = []
+    pdfrw_obj = PdfReader(pdf)
+    for page in pdfrw_obj.pages
+
   return pdf_strings
 
 def test():
@@ -112,3 +134,6 @@ def get_file_mod_times():
       file_mod_dict[file_name] = time.ctime(os.path.getmtime(file_path))
 
   return file_mod_dict
+
+
+
