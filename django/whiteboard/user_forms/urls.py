@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^session=(?P<session_id>[0-9]+)/select_downloads/$', views.select_downloads, \
                                                     name='select_downloads'),
     url(r'^session=(?P<session_id>[0-9]+)/post/$', views.post, name='post'),
-    url(r'^$', views.get_info, name='start'),    
+    url(r'^dl_info$', views.get_info, name='dl_query'),
+    url(r'^$', views.start, name='start'),    
     ]

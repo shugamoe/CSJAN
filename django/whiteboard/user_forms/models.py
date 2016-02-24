@@ -60,21 +60,5 @@ class Assistant(models.Model):
     last_name = models.CharField(max_length=42)
 
 
-class SessionForm(ModelForm):
-    quarter = forms.MultipleChoiceField(label='Quarter(s)', \
-                                     choices=QUARTER_CHOICES, required = False)
-    year = forms.IntegerField(label='Course year', \
-                          initial=datetime.date.today().year, required = False)
-    cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
-    cnet_id = forms.CharField(label='CNET ID')
-    class Meta:
-        model = Session
-        fields = ['cnet_id','cnet_pw', 'quarter', 'year']
 
-
-class CourseForm(ModelForm):
-
-    class Meta:
-        model = Course
-        fields = ['downloaded']
 

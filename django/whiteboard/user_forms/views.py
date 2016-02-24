@@ -2,10 +2,9 @@ from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
-from django.utils import timezone
-from .forms import UserForm
-from .models import SessionForm, CourseForm, Session, Course, Student, \
-    Instructor, Assistant
+
+from .forms import DownloadForm, CourseForm, SessionForm
+from .models import Session, Course, Student, Instructor, Assistant
 
 import random
 
@@ -27,18 +26,22 @@ def get_info(request):
             print('session object ID should be here', session_object.id)
             # Insert code here to interact with crawlers and add session info
             # to the database.
-            courses = dummy_crawler(form.cleaned_data, session_object)
-            print(form.cleaned_data)
-            print(session_object.id)
+            courses = crawler_link(form.cleaned_data, session_object)
+            print("Dict passed to crawlers {}".format(form.cleaned_data))
             return HttpResponseRedirect(reverse('select_downloads', \
                                                         args=(session_object.id,)))
         else:
             form = SessionForm()
-            return render(request, 'user_forms/start.html', {'form': form})
+            return render(request, 'user_forms/dl_query.html', {'form': form})
     else:
         form = SessionForm()
 
-    return render(request, 'user_forms/start.html', {'form': form})
+    return render(request, 'user_forms/dl_query.html', {'form': form})
+
+
+def start(request):
+    print('At start page')
+    return render(request, 'user_forms/start.html')
     
 
 def select_downloads(request, session_id):
@@ -90,7 +93,13 @@ def get_courses(request):
 
     return courses
 
-def dummy_crawler(cleaned_data, session_object):
+def crawler_link(cleaned_data, session_object):
+    '''
+    Will function as the connector to Andy and Bonar's crawlers.
+    '''
+
+    if cleaned_data['dl_all']:
+        print('Crawler should attempt to download all classes')
 
     num = random.randrange(0,3)
     print(cleaned_data['cnet_id'])
