@@ -45,9 +45,6 @@ class Student(models.Model):
         return '{}'.format(self.course_id)
 
 
-
-
-
 class Instructor(models.Model):
     Course = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)

@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from .forms import DownloadForm, CourseForm, SessionForm
 from .models import Session, Course, Student, Instructor, Assistant
+from django.views.generic import ListView, DetailView
 
 import random
 
@@ -42,6 +43,26 @@ def get_info(request):
 def start(request):
     print('At start page')
     return render(request, 'user_forms/start.html')
+
+def view_stats(request):
+    print('At view stats page')
+    return render(request, 'user_forms/view_stats.html')
+
+
+class CourseList(ListView):
+    model = Course
+    context_object_name = 'course_list'
+
+class CourseDetail(DetailView):
+    model = Course
+    pk_url_kwarg = 'course_id'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(CourseDetail, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['sessions_in'] = Session.objects.filter(course__id = self.kwargs['course_id'])
+        return context
     
 
 def select_downloads(request, session_id):
@@ -128,22 +149,3 @@ def crawler_link(cleaned_data, session_object):
     return test_courses
 
 
-
-
-# class Session(models.Model):
-#     cnet_id = models.CharField(max_length=42)
-#     date = models.DateTimeField('date published')
-#     quarter = models.CharField(max_length=42)
-#     year = models.IntegerField(default=datetime.date.today().year)
-
-#     def __str__(self):
-#         return (self.cnet_id, self.date)
-
-
-# class Course(models.Model):
-#     Session = models.ForeignKey(Session)
-#     course_id = models.CharField(max_length=200)
-#     downloaded = models.BooleanField(default=False)
-
-#     def __str__(self):
-#         return (self.Session, self.course_id, self.downloaded)
