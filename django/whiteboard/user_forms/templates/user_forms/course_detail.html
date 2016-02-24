@@ -1,0 +1,24 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+
+<h1>{{ object.course_id }}</h1>
+
+
+<p>Downloaded?  {{ object.downloaded }}</p>
+
+
+
+<p> 
+
+Taken by: 
+{% for session in sessions_in %}
+
+{{session.cnet_id}} | 
+
+{% endfor %}
+</p>
+
+{% endblock %}
