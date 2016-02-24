@@ -27,10 +27,10 @@ def get_info(request):
             # Insert code here to interact with crawlers and add session info
             # to the database.
             courses = crawler_link(form.cleaned_data, session_object)
-            print("Dict passed to crawlers {}".format(form.cleaned_data))
-            return HttpResponseRedirect(reverse('select_downloads', \
-                                                        args=(session_object.id,)))
+            url = reverse('select_downloads', args=(session_object.id,))
+            return HttpResponseRedirect(url)
         else:
+            print('form not valid')
             form = SessionForm()
             return render(request, 'user_forms/dl_query.html', {'form': form})
     else:

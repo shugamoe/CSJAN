@@ -26,7 +26,8 @@ class SessionForm(ModelForm):
                           initial=datetime.now().year, required = False)
     cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
     cnet_id = forms.CharField(label='CNET ID')
-    dl_all = forms.BooleanField(label='Download All Chalk Classes')
+    dl_all = forms.BooleanField(label='Download All Chalk Classes',
+        required=False)
     class Meta:
         model = Session
         fields = ['cnet_id','cnet_pw', 'quarter', 'year']
