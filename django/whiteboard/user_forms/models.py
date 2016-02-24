@@ -62,8 +62,9 @@ class Assistant(models.Model):
 
 class SessionForm(ModelForm):
     quarter = forms.MultipleChoiceField(label='Quarter(s)', \
-                                        choices=QUARTER_CHOICES, required = False)
-    year = forms.IntegerField(label='Course year', initial=datetime.date.today().year)
+                                     choices=QUARTER_CHOICES, required = False)
+    year = forms.IntegerField(label='Course year', \
+                          initial=datetime.date.today().year, required = False)
     cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
     cnet_id = forms.CharField(label='CNET ID')
     class Meta:

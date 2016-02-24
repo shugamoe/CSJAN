@@ -74,7 +74,8 @@ def find_pdfs(path):
 
 
 
-def test_batch_pdf():
+def get_path_and_text_of files():
+  # Ought to pass the path in alter as an argument.
   path = os.getcwd()
   pdf_list = find_pdfs(path)
 
