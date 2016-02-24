@@ -14,9 +14,9 @@
 <p> 
 
 Taken by: 
-{% for session in sessions_in %}
+{% for student in students %}
 
-{{session.cnet_id}} | 
+{{student.get_fullname}} | 
 
 {% endfor %}
 </p>

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Session, Course
+from .models import Session, Course, Student
 
 
 class CourseInline(admin.TabularInline):
@@ -18,7 +18,12 @@ class CourseAdmin(admin.ModelAdmin):
     list_display = ('course_id', 'downloaded')
 
 
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('cnet_id', 'last_name', 'first_name')
+
+
 
 admin.site.register(Session, SessionAdmin)
 admin.site.register(Course, CourseAdmin)
+admin.site.register(Student, StudentAdmin)
 # Register your models here.

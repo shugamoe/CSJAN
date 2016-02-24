@@ -29,7 +29,7 @@ class Course(models.Model):
 
 
 class Student(models.Model):
-    Course = models.ManyToManyField(Course)
+    courses_in = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     cnet_id = models.CharField(max_length=42)
@@ -41,8 +41,12 @@ class Student(models.Model):
     # year = models.IntegerField(blank=True)
     # quarter = models.CharField(max_length=42, blank=True)
 
+
+    def get_fullname(self):
+        return str(self.first_name + ' '  + self.last_name)
+
     def __str__(self):
-        return '{}'.format(self.course_id)
+        return '{}'.format(self.cnet_id)
 
 
 class Instructor(models.Model):

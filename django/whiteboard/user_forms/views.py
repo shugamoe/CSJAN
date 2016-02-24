@@ -61,8 +61,9 @@ class CourseDetail(DetailView):
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
-        context['sessions_in'] = Session.objects.filter(course__id = self.kwargs['course_id'])
+        context['students'] = Student.objects.filter(courses_in__id = self.kwargs['course_id'])
         return context
+    
     
 
 def select_downloads(request, session_id):
