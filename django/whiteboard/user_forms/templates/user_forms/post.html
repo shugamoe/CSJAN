@@ -1,5 +1,7 @@
-<h1>Whiteboard</h1>
+{% extends 'user_forms/base.html' %}
 
+
+{% block body %}
 
 <p>Congratulations {{ cnet_id }}!  You have downloaded:
 {% for course in courses %}
@@ -17,6 +19,8 @@
     <li>{{ course.course_id }}</li>
     {% endfor %} 
 </ul>
+
+{% endblock %}
 
 
 
