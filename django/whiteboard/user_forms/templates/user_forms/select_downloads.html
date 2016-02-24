@@ -1,7 +1,4 @@
-{% extends 'user_forms/base.html' %}
-
-
-{% block content %}
+<h1>Whiteboard</h1>
 
 <p>Choose Courses to Download</p>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -14,5 +11,3 @@
 {% endfor %}
 <input type="submit" value="Download" />
 </form>
-
-{% endblock %}
