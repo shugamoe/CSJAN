@@ -25,8 +25,9 @@ def get_info(request):
         if form.is_valid():
             session_object = form.save()
             print('session object ID should be here', session_object.id)
-            # Insert code here to interact with crawlers and add session info
-            # to the database.
+            
+            # Need to have conditional logic for whether dl_all is True or 
+            # False.
             courses = crawler_link(form.cleaned_data, session_object)
             url = reverse('select_downloads', args=(session_object.id,))
             return HttpResponseRedirect(url)
