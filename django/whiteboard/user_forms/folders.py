@@ -71,6 +71,31 @@ def find_pdfs(path):
 
 
 
+
+
+
+from pdfminer.pdfinterp import PDFResourceManager, process_pdf
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from cStringIO import StringIO
+
+def convert_pdf(path):
+
+    rsrcmgr = PDFResourceManager()
+    retstr = StringIO()
+    codec = 'utf-8'
+    laparams = LAParams()
+    device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+
+    fp = file(path, 'rb')
+    process_pdf(rsrcmgr, device, fp)
+    fp.close()
+    device.close()
+
+    str = retstr.getvalue()
+    retstr.close()
+    return str
+
 def get_pdf_paths_and_strings(user):
   path = '../../Classes/'
   path += user
@@ -79,13 +104,10 @@ def get_pdf_paths_and_strings(user):
 
   pdf_strings = []
   for pdf in pdf_list:
-    # pdf_strings.append(os.system('pdf2txt.py' + ' ' + "'" + str(pdf) + "'"))
-    # thing = subprocess.check_output(['pdf2txt.py', "'" + str(pdf) + "'"])
     thing = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf) + "'",\
                                       shell=True)
     thing = thing.decode('utf-8')
     thing = re.sub(r'\n|\x0c', r' ', thing)
-    # thing = thing.replace('\n', '')
     pdf_strings.append(thing)
   return pdf_strings
 
