@@ -84,7 +84,7 @@ def get_pdf_paths_and_strings(user):
     thing = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf) + "'",\
                                       shell=True)
     thing = thing.decode('utf-8')
-    thing = re.sub(r'\[\w]{1}', ' ', thing)
+    thing = re.sub(r'\n|\x0c', r' ', thing)
     # thing = thing.replace('\n', '')
     pdf_strings.append(thing)
   return pdf_strings
