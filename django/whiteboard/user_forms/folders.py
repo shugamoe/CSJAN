@@ -12,7 +12,7 @@ import time
 
 
 
-TEST_PATH_DICT = {'STAT 24400 (Winter 16) Statistical Theory.Method-1' : 
+TEST_PATH_DICT = {'STAT 24400 (Winter 16) Statistical Theory.Method-1': 
                {'Announcements': None, 'Syllabus' : None, 'Assignments' : None, 
                   'Course Material' : {'Lectures' : None, \
                                        'Stigler Lecture Notes' : None}}}
@@ -71,11 +71,10 @@ def find_pdfs(path):
 
 
 
-
-
-
-def test_batch_pdf():
-  path = os.getcwd()
+def get_pdf_paths_and_strings(user):
+  path = '../../Classes/'
+  path += user
+  print(path)
   pdf_list = find_pdfs(path)
 
   pdf_strings = []
@@ -84,6 +83,8 @@ def test_batch_pdf():
     # thing = subprocess.check_output(['pdf2txt.py', "'" + str(pdf) + "'"])
     thing = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf) + "'",\
                                       shell=True)
+    thing = thing.communicate()
+    thing = thing.replace('\n', '')
     pdf_strings.append(thing)
   return pdf_strings
 
