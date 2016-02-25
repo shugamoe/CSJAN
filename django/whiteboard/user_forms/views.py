@@ -121,11 +121,16 @@ def crawler_link(cleaned_data, session_object):
     '''
 
     if cleaned_data['dl_all']:
-        print('Crawler should attempt to download all classes')
+        dled_default = True
+        print('Crawler should attempt to download all classes')\
+    else:
+        dled_default = False
 
+    # print(cleaned_data['cnet_id'])
+
+    # These lines use some simple random stuff to "select" classes.  Remove
+    # once the crawlers are online.  
     num = random.randrange(0,3)
-    print(cleaned_data['cnet_id'])
-
     if num == 0:
         test_courses = TEST_COURSES_0
     elif num == 1:
@@ -137,7 +142,8 @@ def crawler_link(cleaned_data, session_object):
         num_results = Course.objects.filter(course_id = course).count()
         if num_results == 0:
         # {TO DO} Add in more fields 
-            course_object = Course(course_id = course)
+            course_object = Course(course_id = course, 
+                                downloaded = dled_default)
             course_object.save()
         else:
             course_object = Course.objects.get(course_id = course)
