@@ -3,7 +3,7 @@
 
 {% block body %}
 
-<p>Congratulations {{ cnet_id }}!  You have downloaded:
+<p>Congratulations {{ cnet_id }}!  You are now downloading:
 {% for course in courses %}
     <l>{{ course }}</l>
 {% endfor %}
@@ -16,7 +16,7 @@
  <h2>Classes Previously Downloaded</h2>
  <ul>
     {% for course in all_courses %}
-    <li>{{ course.course_id }}</li>
+    <li>{{ course.name }}</li>
     {% endfor %} 
 </ul>
 

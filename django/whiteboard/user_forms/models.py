@@ -28,19 +28,23 @@ class Course(models.Model):
     year = models.IntegerField()
 
     def __str__(self):
-        return str(self.course_id)
+        return str(self.name)
 
 
 class Student(models.Model):
     courses_in = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
-    cnet_id = models.CharField(max_length=42)
-    major = models.CharField(max_length=50)
+    email = models.CharField(max_length=100)
+    program = models.CharField(max_length=50)
 
 
     def get_fullname(self):
         return str(self.first_name + ' '  + self.last_name)
+
+
+    def cnet_id(self):
+        return re.search("^([\w-]*\w)", self.email).group()
 
     def __str__(self):
         return '{}'.format(self.cnet_id)
@@ -50,13 +54,21 @@ class Instructor(models.Model):
     Course = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
+    email = models.CharField(max_length=100)
+
+    def cnet_id(self):
+        return re.search("^([\w-]*\w)", self.email).group()
     
 
 class Assistant(models.Model):
     Course = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
+    email = models.CharField(max_length=100)
+    program = models.CharField(max_length=50)
 
+    def cnet_id(self):
+        return re.search("^([\w-]*\w)", self.email).group()
 
 
 class File(models.Model):
