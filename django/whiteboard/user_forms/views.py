@@ -28,7 +28,9 @@ def get_info(request):
                 print('Will move directly to post page, everything will be \
                     downloaded')
             else:
-                courses_to_confirm = crawler_link(form.cleaned_data, 
+
+                # Replace with get_prelim_courses when crawlers are integrated.
+                courses_to_confirm = dummy_crawler(form.cleaned_data, 
                     session_object)
                 # print('cnet id {}'.format(form.cleaned_data['cnet_id']))
                 url = reverse('select_downloads', kwargs=
@@ -143,6 +145,19 @@ def crawler_link(cleaned_data, session_object):
     # For now we will just use TEST_COURSES.  
 
     return test_courses
+
+def get_prelim_courses(cleaned_data, sessions_object):
+    '''
+    This function calls the Chalk Crawler and asks it for a preliminary set of 
+    courses for the user to confirm at the select_downloads section.
+    '''
+
+    # c_crawler.find_matching is a dummy function, replace with the 
+    # actual function later.
+    course_dicts = c_crawler.find_matching(cleaned_data)
+
+    for course in course_dicts
+
 
 
 
