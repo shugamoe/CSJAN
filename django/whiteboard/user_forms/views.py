@@ -69,7 +69,7 @@ def select_downloads(request, session_id, cnet_id):
         # Link into crawlers here.
         courses = get_courses(request)
         for course in courses:
-            course_model = Course.objects.get(course_id=course)
+            course_model = Course.objects.get(name=course)
             course_model.downloaded = True
             course_model.save()
 
@@ -106,7 +106,7 @@ def get_courses(request):
 
     return courses
 
-def crawler_link(cleaned_data, session_object):
+def dummy_crawler(cleaned_data, session_object):
     '''
     Will function as the connector to Andy and Bonar's crawlers.
     '''
@@ -130,14 +130,14 @@ def crawler_link(cleaned_data, session_object):
         test_courses = TEST_COURSES_2
 
     for course in test_courses:
-        num_results = Course.objects.filter(course_id = course).count()
+        num_results = Course.objects.filter(name = course).count()
         if num_results == 0:
         # {TO DO} Add in more fields 
-            course_object = Course(course_id = course, 
+            course_object = Course(name = course, 
                                 downloaded = dled_default)
             course_object.save()
         else:
-            course_object = Course.objects.get(course_id = course)
+            course_object = Course.objects.get(name = course)
 
         course_object.sessions.add(session_object)
 
@@ -156,7 +156,21 @@ def get_prelim_courses(cleaned_data, sessions_object):
     # actual function later.
     course_dicts = c_crawler.find_matching(cleaned_data)
 
-    for course in course_dicts
+    prelim_courses = []
+
+    for course_dict in course_dicts:
+        course_name = course_dict['name']
+        prelim_courses.append(course_name)
+
+        num_results = Course.objects.filter(name = course_name)
+        if num_results == 0:
+            course_object = Course(**course_dict)
+            course_object.save()
+        else:
+            course_object = Course.objects.get(name = course_name)
+
+    return prelim_courses
+
 
 
 
@@ -168,12 +182,12 @@ class CourseList(ListView):
 
 class CourseDetail(DetailView):
     model = Course
-    pk_url_kwarg = 'course_id'
+    pk_url_kwarg = 'name'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['students'] = Student.objects.filter(courses_in__id = 
-            self.kwargs['course_id'])
+            self.kwargs['name'])
         return context

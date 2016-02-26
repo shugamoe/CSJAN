@@ -15,11 +15,11 @@ class SessionAdmin(admin.ModelAdmin):
 
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('course_id', 'downloaded')
+    list_display = ('name', 'downloaded')
 
 
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('cnet_id', 'last_name', 'first_name')
+    list_display = ('email', 'last_name', 'first_name')
 
 
 
