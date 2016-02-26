@@ -20,9 +20,12 @@ class Session(models.Model):
 
 
 class Course(models.Model):
-    sessions = models.ManyToManyField(Session)
-    course_id = models.CharField(max_length=200, blank=True)
+    sessions = models.ManyToManyField(Session) # Don't worry about this Andy.
+    name = models.CharField(max_length=200, blank=True)
     downloaded = models.BooleanField(default=False)
+    quarter = models.CharField(max_length=42)
+    dept = models.CharField(max_length=4)
+    year = models.IntegerField()
 
     def __str__(self):
         return str(self.course_id)
@@ -33,6 +36,8 @@ class Student(models.Model):
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     cnet_id = models.CharField(max_length=42)
+    major = models.CharField(max_length=50)
+
 
     def get_fullname(self):
         return str(self.first_name + ' '  + self.last_name)
