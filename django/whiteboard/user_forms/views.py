@@ -24,12 +24,13 @@ def get_info(request):
         form = SessionForm(request.POST)
         if form.is_valid():
             session_object = form.save()
-            print('session object ID should be here', session_object.id)
-            
-            # Need to have conditional logic for whether dl_all is True or 
-            # False.
-            courses = crawler_link(form.cleaned_data, session_object)
-            url = reverse('select_downloads', args=(session_object.id,))
+            if form.cleaned_data['dl_all']:
+                print('Will move directly to post page, everything will be \
+                    downloaded')
+            else:
+                courses_to_confirm = crawler_link(form.cleaned_data, 
+                    session_object)
+                url = reverse('select_downloads', args=(session_object.id,))
             return HttpResponseRedirect(url)
         else:
             print('form not valid')
@@ -59,7 +60,7 @@ def select_downloads(request, session_id):
     
     if request.method == 'POST':
 
-
+        cnet_pw = request.POST.get('cnet_pw')))
         # Link into crawlers here.
         courses = get_courses(request)
         for course in courses:

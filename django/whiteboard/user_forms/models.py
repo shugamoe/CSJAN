@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.forms import ModelForm
 from django import forms
 import datetime
-
+import re
 QUARTER_CHOICES = (('Fall', 'Fall'), ('Winter', 'Winter'), \
                                     ('Spring', 'Spring'), ('Summer', 'Summer'))
 
@@ -34,14 +34,6 @@ class Student(models.Model):
     last_name = models.CharField(max_length=42)
     cnet_id = models.CharField(max_length=42)
 
-
-
-    # department = models.CharField(max_length=200, blank=True)
-    # dept_code = models.CharField(max_length=10, blank=True)
-    # year = models.IntegerField(blank=True)
-    # quarter = models.CharField(max_length=42, blank=True)
-
-
     def get_fullname(self):
         return str(self.first_name + ' '  + self.last_name)
 
@@ -60,6 +52,26 @@ class Assistant(models.Model):
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
 
+
+
+class File(models.Model):
+    owner = models.ForeignKey(Student)
+    heading = models.CharField(max_length=100)
+    subheading = models.TextField()
+    body = models.TextField()
+    course = models.CharField(max_length=100)
+    path = models.CharField(max_length=300)
+
+    def get_filename(self):
+        # Extract the filename from the end of the path and return it
+        pattern = '([\w.-]+\.[\w]+)$'
+        filename = re.search(pattern, str(self.path))
+
+        if filename != None:
+            filename = filename.group()
+            return filename
+        else:
+            return str(self.path)
 
 
 
