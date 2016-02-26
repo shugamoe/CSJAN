@@ -66,6 +66,8 @@ class Chalk_Page:
         if len(str(self.year)) == 4:
             self.year = str(self.year)[2:]
 
+        #Handle invalid logins        
+    
         self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
@@ -110,7 +112,7 @@ class Chalk_Page:
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
             # if item.text == 'Announcements':
-            #     material_dict[item.text] = None
+            #     material_dict[item.text] = {}
             #     item.find_element_by_tag_name('a').click()              
             #     content_list_container = self.browser.find_element_by_id('content_listContainer')
             #     for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
@@ -143,15 +145,19 @@ class Chalk_Page:
 
             #elif
             if item.text != 'Announcements' and item.text != 'Send Email' and item.text != 'My Grades' and item.text != 'Discussion Board':
+                component = item.text
+                material_dict[component] = {}
                 item.find_element_by_tag_name('a').click()
                 if self.check_id_exists('content_listContainer'):
-                    for unit_index in range(len(self.browser_.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))):
+                    num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+                    for unit_index in range(num_of_items):
                         unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                         if self.check_tag_exists_in_web_element(unit, 'img'):
                             img = unit.find_element_by_tag_name('img')
                             if img.get_attribute('class') == 'item_icon':
                                 if 'folder_on' in img.get_attribute('src'):
-                                    material_dict[unit.text] = self.gen_folder(unit)
+                                    folder_name = unit.text
+                                    material_dict[component][folder_name] = self.gen_folder(unit)
 
         return material_dict
 
@@ -188,17 +194,18 @@ class Chalk_Page:
         return True 
 
 
-    def gen_folder(self, unit):
+    def gen_folder(self, unit): #unit corresponds to a folder
         folder_dict = {}
-        unit.find_element_by_tag_name('a').click()
+        unit.find_element_by_tag_name('a').click() # clicking 'Additional Practice problems'
         if self.check_id_exists('content_listContainer'):
-            for unit_index in range(len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))):
-                unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
-                if self.check_tag_exists_in_web_element(unit, 'img'):
-                    img = unit.find_element_by_tag_name('img')
+            num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+            for unit_index in range(num_of_items):
+                inner_unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
+                if self.check_tag_exists_in_web_element(inner_unit, 'img'):
+                    img = self.browser.find_element_by_tag_name('img')
                     if img.get_attribute('class') == 'item_icon':
                         if 'folder_on' in img.get_attribute('src'):
-                            folder_dict[unit.text] = self.gen_folder(unit)
+                            folder_dict[inner_unit.text] = self.gen_folder(inner_unit)
         self.browser.execute_script("window.history.go(-1)")
 
 
