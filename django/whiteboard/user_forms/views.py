@@ -30,7 +30,10 @@ def get_info(request):
             else:
                 courses_to_confirm = crawler_link(form.cleaned_data, 
                     session_object)
-                url = reverse('select_downloads', args=(session_object.id,))
+                # print('cnet id {}'.format(form.cleaned_data['cnet_id']))
+                url = reverse('select_downloads', kwargs=
+                    {'session_id': session_object.id, 
+                    'cnet_id': form.cleaned_data['cnet_id']})
             return HttpResponseRedirect(url)
         else:
             print('form not valid')
@@ -52,7 +55,7 @@ def view_stats(request):
  
     
 
-def select_downloads(request, session_id):
+def select_downloads(request, session_id, cnet_id):
     print('select downloads view')
     print()
     print(session_id)
@@ -60,7 +63,7 @@ def select_downloads(request, session_id):
     
     if request.method == 'POST':
 
-        cnet_pw = request.POST.get('cnet_pw')))
+        cnet_pw = request.POST.get('cnet_pw')
         # Link into crawlers here.
         courses = get_courses(request)
         for course in courses:

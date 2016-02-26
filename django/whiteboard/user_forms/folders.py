@@ -42,7 +42,7 @@ def make_dirs(dirs_dict, cur_path):
             make_dirs(dirs_dict[key], cur_path + '/' + key)
 
 
-def get_folder_name(proposed_dir_name):
+def check_folder_name(proposed_dir_name):
     '''
     Given a proposed directory name, this function replaces any '/' characters 
     (which cannot be part of a directory name) with a '.' character.
@@ -54,7 +54,8 @@ def get_folder_name(proposed_dir_name):
         correct_dir_name: a string of the correct directory name.  Will not 
                           include a '/' character.
     '''
-    correct_dir_name = proposed_dir_name.replace('/', '.')
+    # correct_dir_name = proposed_dir_name.replace('/', '.')
+    correct_dir_name = re.sub(r'/|:', r'_', proposed_dir_name)
     return correct_dir_name
 
 
@@ -85,6 +86,14 @@ def get_pdf_paths_and_strings(user):
     thing = re.sub(r'\n|\x0c', r' ', thing)
     pdf_strings.append(thing)
   return pdf_strings
+
+
+def convert_pdf(pdf_path):
+  text = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf_path) + "'",
+                                      shell=True)
+  text = text.decode('utf-8')
+  final_string = re.sub(r'\n|\x0c', r' ', text)
+  
 
 def test():
   print('IMPORTED FUNCTION FROM OTHER FOLDER')
