@@ -48,23 +48,7 @@ def start(request):
 def view_stats(request):
     print('At view stats page')
     return render(request, 'user_forms/view_stats.html')
-
-
-class CourseList(ListView):
-    model = Course
-    context_object_name = 'course_list'
-
-class CourseDetail(DetailView):
-    model = Course
-    pk_url_kwarg = 'course_id'
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super(CourseDetail, self).get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
-        context['students'] = Student.objects.filter(courses_in__id = self.kwargs['course_id'])
-        return context
-    
+ 
     
 
 def select_downloads(request, session_id):
@@ -76,7 +60,7 @@ def select_downloads(request, session_id):
     if request.method == 'POST':
 
 
-        # We obtain a list of the 
+        # Link into crawlers here.
         courses = get_courses(request)
         for course in courses:
             course_model = Course.objects.get(course_id=course)
@@ -123,7 +107,7 @@ def crawler_link(cleaned_data, session_object):
 
     if cleaned_data['dl_all']:
         dled_default = True
-        print('Crawler should attempt to download all classes')\
+        print('Crawler should attempt to download all classes')
     else:
         dled_default = False
 
@@ -157,3 +141,20 @@ def crawler_link(cleaned_data, session_object):
     return test_courses
 
 
+
+
+class CourseList(ListView):
+    model = Course
+    context_object_name = 'course_list'
+
+class CourseDetail(DetailView):
+    model = Course
+    pk_url_kwarg = 'course_id'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(CourseDetail, self).get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['students'] = Student.objects.filter(courses_in__id = 
+            self.kwargs['course_id'])
+        return context
