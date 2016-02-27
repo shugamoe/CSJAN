@@ -116,15 +116,6 @@ class Node(object):
 
 
 
-    # def gen_attr(self):
-
-    #     gini = 1
-    #     attr_cnts = []
-    #     attr_cnts.append([]) for attr in range(len(self.attrs))
-    #     for obs in self.observations:
-    #         for attr_ind, attr in enumerate(self.attrs):
-                
-
     def gen_attr_cnts(self):
 
         attr_info = [['', {}] for attr in range(len(self.attrs))]
@@ -146,24 +137,43 @@ class Node(object):
         return attr_info
 
 
-    def gen_gini(self, attr):
+    def gen_gini(self, attr, obs_attr = None, obs_attr_val = None):
 
         gini = 1
         attr_ind = self.attrs.index(attr)
-        for attr_val in attr_info[attr_ind][1].keys():
-            gini -= (attr_info[attr_ind][1][attr_val][0] / \
-                len(self.observations)) ** 2
+        attr_info = self.gen_attr_cnts()
+
+        if obs_attr != None and obs_attr_val != None:
+            obs_attr_ind = self.attrs.index(obs_attr)
+            list_of_obs_inds = attr_info[obs_attr_ind][1][obs_attr_val][1]
+
+            val_cnt = 0
+            for val_ind in attr_info[attr_ind][1][attr_info[attr_ind][1].keys()[0]][1]:
+                if val_ind in list_of_obs_inds:
+                    val_cnt += 1
+            
+            gini -= ((val_cnt / len(list_of_obs_inds)) ** 2) - \
+                (1 - (val_cnt / len(list_of_obs_inds))) ** 2
+
+        else:
+            for val in attr_info[attr_ind][1].keys():
+                gini -= (attr_info[attr_ind][1][val][0] / \
+                    len(self.observations)) ** 2
             
         return gini 
 
 
-    def gen_gain(self, attr, )
+    def gen_gain(self, attr):
+
+        gain = self.gini_t 
+
 
 
 
 
 
         # return attr_ind, dict(attr_values, [list_of obs_indides])
+
 
 
 
