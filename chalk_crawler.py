@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchAttributeException, NoSuchElementException
 import time
 import getpass
+import django.whiteboard.user_forms.folders as local_dir
 
 class Chalk_Page:
     
@@ -11,16 +12,15 @@ class Chalk_Page:
 
         self.url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1'
         self.username = 'andyz422'
-        self.browser = self.login()
         self.quarter = quarter
         self.year = year
+        self.browser = self.login()
+        
+        self.all_courses_list = [] # all course ids
+        self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
         self.course_material_dict = self.access_courses()
-        self.all_courses_dict = []
-        self.course_dict = []
-
-        # for course in self.all_courses:
-        #     self.all_courses.dict['dept']
+        
 
         # self.cookies = []
 
@@ -87,6 +87,8 @@ class Chalk_Page:
                         course_name_box.click()
                         course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
                         course_id_box.click()
+                        course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
+                        course_instructor_box.click()
 
         course_form = self.browser.find_element_by_id('moduleEditForm')
         course_form.submit()
@@ -98,38 +100,45 @@ class Chalk_Page:
 
         course_material_dict = {}
         course_material_dict[self.username] = {}
-        # for course in self.courses:
-        course_material_dict[self.username][self.courses[0]] = self.build_course_dict(self.courses[0])
+
+        for ind, course in enumerate(self.courses): 
+            course_material_dict[self.username][local_dir.check_folder_name(course)] = self.build_course_dict(course, ind) 
 
         return course_material_dict
 
 
-    def build_course_dict(self, first_key):
+    def build_course_dict(self, first_key, prof_ind):
+        course = [first_key]
+        
+        professor = self.browser.find_elements_by_class_name('courseInformation')[prof_ind].text
+        course.append(professor.replace('Instructor: ', '').replace(';', ''))
+
         self.browser.find_element_by_link_text(first_key).click()
         
         material_dict = {}
 
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
+            
             if item.text == 'Announcements':
                 material_dict[item.text] = {}
                 item.find_element_by_tag_name('a').click()              
-                content_list_container = self.browser.find_element_by_id('content_listContainer')
-                for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
-                    print(file_or_folder.text + '\n')    
+                if self.check_id_exists('content_listContainer'):
+                    content_list_container = self.browser.find_element_by_id('content_listContainer')
+                    for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
+                        print(file_or_folder.text + '\n')  
+                else:
+                    content = self.browser.find_element_by_id('content')
+                    print(content.find_element_by_id('announcementList').text)
 
             elif item.text == 'Send Email':
                 item.find_element_by_tag_name('a').click()
-                self.browser.find_element_by_link_text('All Instructor Users').click()
-                if not self.check_id_exists('inlineReceipt_bad'):
-                    professor = self.browser.find_element_by_id('stepcontent1').find_elements_by_tag_name('li')[0].text[2:]
-                    print(professor)
-                self.browser.execute_script("window.history.go(-1)")
                 
                 self.browser.find_element_by_link_text('All Teaching Assistant Users').click()
+                list_of_tas = []
                 if not self.check_id_exists('inlineReceipt_bad'):
                     list_of_tas = self.browser.find_element_by_id('stepcontent1').find_elements_by_tag_name('li')[0].text[3:].split('; ')
-                    print(list_of_tas)
+                    course.append(list_of_tas)
                 self.browser.execute_script("window.history.go(-1)")
                 
                 if self.check_link_text_exists('Select Users'):
@@ -139,12 +148,15 @@ class Chalk_Page:
                     for student_web_element in list_of_students_web_elements:
                         if student_web_element.text not in professor and student_web_element.text not in list_of_tas and 'PreviewUser' not in student_web_element.text:
                             list_of_students.append(student_web_element.text)
-                    print(list_of_students)
+                    course.append(list_of_students)
                     self.browser.execute_script("window.history.go(-1)")
 
 
-            elif item.text != 'Announcements' and item.text != 'Send Email' and item.text != 'My Grades' and item.text != 'Discussion Board':
-                component = item.text
+            elif item.text not in ['Home', 'Announcements', 'Send Email', \
+                'My Grades', 'Discussion Board', 'Discussions', \
+                'Library Course Reserves', 'Tools', 'Groups']:
+
+                component = local_dir.check_folder_name(item.text)
                 material_dict[component] = {}
                 item.find_element_by_tag_name('a').click()
                 if self.check_id_exists('content_listContainer'):
@@ -155,8 +167,12 @@ class Chalk_Page:
                             img = unit.find_element_by_tag_name('img')
                             if img.get_attribute('class') == 'item_icon':
                                 if 'folder_on' in img.get_attribute('src'):
-                                    folder_name = unit.text
+                                    folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
+
+        self.course_list.append(course)
+        self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
+
 
         return material_dict
 
@@ -204,7 +220,7 @@ class Chalk_Page:
                     img = self.browser.find_element_by_tag_name('img')
                     if img.get_attribute('class') == 'item_icon':
                         if 'folder_on' in img.get_attribute('src'):
-                            folder_dict[inner_unit.text] = self.gen_folder(inner_unit)
+                            folder_dict[local_dir.check_folder_name(inner_unit.text)] = self.gen_folder(inner_unit)
         self.browser.execute_script("window.history.go(-1)")
 
 
