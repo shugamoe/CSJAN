@@ -91,6 +91,7 @@ class Node(object):
 
         return label, uniform, 1 - gini_sum
 
+    
     def make_tree(self):
         self.split_col, col_info_dict = Node.calc_split_col(self)
         
@@ -105,6 +106,47 @@ class Node(object):
     #     for obs in self.observations:
     #         for attr_ind, attr in enumerate(self.attrs):
                 
+
+    def gen_attr_cnts(self):
+
+        attr_info = [['', {}] for attr in range(len(self.attrs))]
+        for obs in self.observations:
+            for attr_ind, attr in enumerate(self.attrs):
+                if attr_info[attr_ind][0] != attr:
+                    attr_info[attr_ind][0] = attr
+                
+                attr_val = obs[attr_ind]
+                attr_val_dict = attr_info[attr_ind][1]
+                
+                if attr_val_dict.get(attr_val, 0) == 0:
+                    attr_val_dict[attr_val] = [1, [attr_ind]]
+
+                else:
+                    attr_val_dict[attr_val][0] += 1
+                    attr_val_dict[attr_val][1].append(attr_ind)
+
+        return attr_info
+
+
+    def gen_gini(self, attr):
+
+        gini = 1
+        attr_ind = self.attrs.index(attr)
+        for attr_val in attr_info[attr_ind][1].keys():
+            gini -= (attr_info[attr_ind][1][attr_val][0] / \
+                len(self.observations)) ** 2
+            
+        return gini 
+
+
+    def gen_gain(self, attr, )
+
+
+
+
+
+        # return attr_ind, dict(attr_values, [list_of obs_indides])
+
 
 
 
