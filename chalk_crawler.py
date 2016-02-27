@@ -20,7 +20,9 @@ class Chalk_Page:
         self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
         self.course_material_dict = self.access_courses()
-        
+
+        local_dir.make_dirs(self.course_material_dict, \
+            'django/Classes')  
 
         # self.cookies = []
 
