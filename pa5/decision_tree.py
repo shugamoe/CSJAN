@@ -181,15 +181,46 @@ class Node(object):
     def gen_gain(self, attr):
 
         gain = self.gini_t 
+        attr_ind = self.attrs.index(attr)
+        attr_info = self.gen_attr_cnts()
+
+        for val in attr_info[attr_ind][1].keys():
+            gain -= ((attr_info[attr_ind][1][val][0] / len(self.observations)) \
+                * (self.gen_gini(self.attrs[-1], obs_attr = attr, obs_attr_val \
+                    = val)))
+
+        return gain
 
 
+    def gen_gain_ratio(self, attr):
+
+        gain = self.gen_gain(attr)
+        attr_info = self.gen_attr_cnts()
+        split_info = 0
+        for val in attr_info[attr_ind][1].keys():
+            val_ratio = (attr_info[attr_ind][1][val][0] / \
+                len(self.observations))
+            split_info -= (val_ratio * math.log(val_ratio))
+
+        gain_ratio = gain / split_info
+
+        return gain_ratio
 
 
+    def gen_split_attr(self):
+        
+        split_attr = 0
+        attr_info = self.gen_attr_cnts()
+        for attr in self.attrs:
+            if self.gen_gain_ratio(attr) > split_attr:
+                split_attr = attr
 
+        attr_ind = self.attrs.index(attr)
+        attr_dict = attr_info[attr_ind][1]
+        for key in attr_info[attr_ind][1].keys():
+            del attr_info[attr_ind][1][key][0]
 
-        # return attr_ind, dict(attr_values, [list_of obs_indides])
-
-
+        return attr_ind, attr_info[attr_ind][1]
 
 
 
