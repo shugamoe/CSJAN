@@ -84,6 +84,13 @@ class Node(object):
         return label, uniform
 
 
+    def gen_attr(self):
+
+        gini = 1
+        attr_cnts = []
+        attr_cnts.append([]) for attr in range(len(self.attrs))
+        for obs in self.observations:
+            for attr_ind, attr in enumerate(self.attrs):
                 
 
 
