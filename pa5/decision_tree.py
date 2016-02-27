@@ -10,9 +10,24 @@ import sys
 
 
 def go(training_filename, testing_filename):
-    # replace return with a suitable return value
-    # and remove this comment!
+    training_data, testing_data, target_attribute = unpack_train_test(
+        training_filename, testing_filename)
+
+
     return []
+
+def unpack_train_test(training_filename, testing_filename):
+    '''
+    '''
+    training_data = unpack_csv(training_filename)
+    testing_data = unpack_csv(testing_filename)
+
+    assert training_data[0] == testing_data[0], 'The headers for the files do'
+    'not match!'
+
+    target_attribute = training_data[0][-1]
+
+    return training_data[1:], testing_data[1:], target_attribute
 
 
 def unpack_csv(csv_filename):
