@@ -33,14 +33,14 @@ def unpack_csv(csv_filename):
 
 
 class Node(object):
-    def __init__(self, observations, attrs, edge = None):
-        self.headers = observations[0]
-        self.observations = observations[1:]
+    def __init__(self, data, attrs, edge = None):
+        self.headers = data[0]
+        self.observations = data[1:]
         self.label, self.uniform = Node.calc_label(self)
         self.edge = edge
         self.children = []
 
-    def calc_label(self): # This is step 1 and 2 of the algorithm.
+    def calc_label_unif_gini(self): 
 
         # Keys correspond to possible labels and values to counts of how many
         # times they have appeared in self.observations. 
@@ -54,7 +54,6 @@ class Node(object):
         assert len(pos_labels.keys()) <= 2, 'Target attribute T should only'
         'have 2 values, there are currently {}'.format(len(pos_labels.keys()))
 
-        # This ifelse is step 2.
         if len(pos_labels.keys()) == 1: # If all the obs share the same class
             uniform = True
         else:
@@ -63,9 +62,16 @@ class Node(object):
         m_often = 0
         label = ''
         label_inserted = False
+        gini_sum = 0
 
+        # We want to claculate
         for pos_label in pos_labels:
             pos_label_cnt = pos_labels[pos_label]
+
+            # Gini Calculation 
+            pos_label_prob_sq = (pos_label_cnt / len(self.observations)) ** 2
+            gini_sum += pos_label_prob_sq
+
 
             if pos_label_cnt > m_often:
                 label = pos_label
@@ -81,7 +87,7 @@ class Node(object):
                     if pos_label < label: 
                         label = pos_label
 
-        return label, uniform
+        return label, uniform, 1 - gini_sum
 
 
     def gen_attr(self):
