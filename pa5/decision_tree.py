@@ -33,9 +33,8 @@ def unpack_csv(csv_filename):
 
 
 class Node(object):
-    def __init__(self, data, attrs, edge = None):
-        self.headers = data[0]
-        self.observations = data[1:]
+    def __init__(self, observations, attrs, edge = None):
+        self.observations = observations
         self.label, self.uniform, self.gini_t = Node.calc_label_unif_gini(self)
         self.attrs = attrs
         self.edge = edge
@@ -93,8 +92,27 @@ class Node(object):
 
     
     def make_tree(self):
-        self.split_col, col_info_dict = Node.calc_split_col(self)
         
+        # We only want to make a tree from the node if each observation does 
+        # not have the same value for the target attribute 
+        if (not self.uniform) and not(self.attrs):
+            self.split_col, vals_locs_dict = Node.calc_split_col(self)
+            child_attrs = 1 * self.attrs
+            del child_attrs[self.split_col]
+
+            for val in vals_locs_dict:
+                child_edge = val
+                
+                obs_with_val = vals_locs_dict[val]
+                child_obs = [self.observations[i] for i in obs_with_val]
+
+                self.children.append(Node(child_obs, child_attrs, child_edge))
+
+            self.observations = None
+
+            for child in self.children: 
+                child.make_tree()
+
 
 
 
