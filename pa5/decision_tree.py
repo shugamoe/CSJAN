@@ -36,9 +36,11 @@ class Node(object):
     def __init__(self, data, attrs, edge = None):
         self.headers = data[0]
         self.observations = data[1:]
-        self.label, self.uniform = Node.calc_label(self)
+        self.label, self.uniform, self.gini_t = Node.calc_label_unif_gini(self)
+        self.attrs = attrs
         self.edge = edge
         self.children = []
+        self.split_col = None
 
     def calc_label_unif_gini(self): 
 
@@ -89,14 +91,19 @@ class Node(object):
 
         return label, uniform, 1 - gini_sum
 
+    def make_tree(self):
+        self.split_col, col_info_dict = Node.calc_split_col(self)
+        
 
-    def gen_attr(self):
 
-        gini = 1
-        attr_cnts = []
-        attr_cnts.append([]) for attr in range(len(self.attrs))
-        for obs in self.observations:
-            for attr_ind, attr in enumerate(self.attrs):
+
+    # def gen_attr(self):
+
+    #     gini = 1
+    #     attr_cnts = []
+    #     attr_cnts.append([]) for attr in range(len(self.attrs))
+    #     for obs in self.observations:
+    #         for attr_ind, attr in enumerate(self.attrs):
                 
 
 
