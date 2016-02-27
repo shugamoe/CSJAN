@@ -104,7 +104,7 @@ class Chalk_Page:
         course_material_dict[self.username] = {}
 
         for ind, course in enumerate(self.courses): 
-            course_material_dict[self.username][local_dir.check_folder_name(course)] = self.build_course_dict(course, ind) 
+            course_material_dict[self.username][local_dir.check_folder_name(course[20:])] = self.build_course_dict(course, ind) 
 
         return course_material_dict
 
@@ -121,7 +121,7 @@ class Chalk_Page:
 
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
-            
+
             if item.text == 'Announcements':
                 material_dict[item.text] = {}
                 item.find_element_by_tag_name('a').click()              
@@ -161,7 +161,11 @@ class Chalk_Page:
                 component = local_dir.check_folder_name(item.text)
                 material_dict[component] = {}
                 item.find_element_by_tag_name('a').click()
-                if self.check_id_exists('content_listContainer'):
+
+                if self.check_xpath_exists('//*div[@class = "noItems container-empty"]'):
+                    continue
+
+                elif self.check_id_exists('content_listContainer'):
                     num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
                     for unit_index in range(num_of_items):
                         unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
