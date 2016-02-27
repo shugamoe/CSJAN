@@ -56,7 +56,7 @@ class Node(object):
         'have 2 values, there are currently {}'.format(len(pos_labels.keys()))
 
         # This ifelse is step 2.
-        if len(pos_labels.keys()) == 1: # If all the obs
+        if len(pos_labels.keys()) == 1: # If all the obs share the same class
             uniform = True
         else:
             uniform = False

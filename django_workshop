@@ -1,0 +1,14 @@
+Julian McClellan
+Django Workshop
+
+
+Ctrl-alt-F1
+Ctrl-alt-F7 
+
+Clears the screen and shit
+
+$ tree . 
+is useful
+
+
+Every model change use $ python manage.py makemigrations
