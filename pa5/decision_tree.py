@@ -36,18 +36,17 @@ class Node(object):
     def __init__(self, observations, attrs, edge = None):
         self.headers = observations[0]
         self.observations = observations[1:]
-        self.label, self.uniform = Node.calc_label(self.observations)
+        self.label, self.uniform = Node.calc_label(self)
         self.edge = edge
         self.children = []
 
-    @staticmethod
-    def calc_label(observations): # This is step 1 and 2 of the algorithm.
+    def calc_label(self): # This is step 1 and 2 of the algorithm.
 
         # Keys correspond to possible labels and values to counts of how many
         # times they have appeared in self.observations. 
         pos_labels = {}
 
-        for obs in observations:
+        for obs in self.observations:
             pos_labels[obs[-1]] = pos_labels.get(obs[-1], 0) + 1
 
         # This dictionary method could technically work for more than 2 
