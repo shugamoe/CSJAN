@@ -146,7 +146,7 @@ def dummy_crawler(cleaned_data, session_object):
 
     return test_courses
 
-def get_prelim_courses(cleaned_data, sessions_object):
+def get_prelim_courses(credens_and_filters, sessions_object):
     '''
     This function calls the Chalk Crawler and asks it for a preliminary set of 
     courses for the user to confirm at the select_downloads section.
@@ -154,7 +154,7 @@ def get_prelim_courses(cleaned_data, sessions_object):
 
     # c_crawler.find_matching is a dummy function, replace with the 
     # actual function later.
-    course_dicts = c_crawler.find_matching(cleaned_data)
+    course_dicts = c_crawler.find_matching(credens_and_filters)
 
     prelim_courses = []
 
@@ -185,6 +185,7 @@ def dl_specific_courses(course_list, credentials_tuple):
     # dicts to make Student, teacher, and TA models.  Do not make duplicates
     # of the Student, teacher, and TA models.
     # 
+    c_crawler.dl_
     # File models can be duplicated across cnet_ids but not within cnet_ids.
     #
     # 
