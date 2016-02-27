@@ -5,6 +5,7 @@ from selenium.common.exceptions import NoSuchAttributeException, NoSuchElementEx
 import time
 import getpass
 import django.whiteboard.user_forms.folders as local_dir
+import os
 
 class Chalk_Page:
     
@@ -124,11 +125,18 @@ class Chalk_Page:
 
             if item.text == 'Announcements':
                 material_dict[item.text] = {}
+                # Create dir so download_text will work
                 item.find_element_by_tag_name('a').click()              
                 if self.check_id_exists('content_listContainer'):
                     content_list_container = self.browser.find_element_by_id('content_listContainer')
+                    announcement_text = ''
+
                     for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
-                        print(file_or_folder.text + '\n')  
+                        announcement_text += file_or_folder.text + '\n'  
+                        # self.download_text(item.text, announcement_text, \
+                        #     'django/Classes/' + self.username + '/' + \
+                        #     local_dir.check_folder_name(course[20:]) + '/' + item.text)
+
                 else:
                     content = self.browser.find_element_by_id('content')
                     print(content.find_element_by_id('announcementList').text)
@@ -241,6 +249,20 @@ class Chalk_Page:
             # no img: download text
 
         return folder_dict
+
+
+    def download_text(self, filename, text, path):
+
+        if os.path.exists(path + filename + '.txt'):
+            print('file already exists')
+
+        else:
+            with open(path + filename + '.txt', 'w') as f:
+                f.write(text)
+
+
+
+
 
 
 
