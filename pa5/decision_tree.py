@@ -55,8 +55,6 @@ class Node(object):
         self.edge = edge
         self.children = []
         self.split_col = None
-        self.attr_info = self.gen_attr_info()
-        print(self.gen_split_attr())
 
     def calc_label_unif_gini(self): 
 
@@ -66,7 +64,6 @@ class Node(object):
 
         for obs in self.observations:
             pos_labels[obs[-1]] = pos_labels.get(obs[-1], 0) + 1
-
 
         # This dictionary method could technically work for more than 2 
         # possible values of T, but we're going to constrain it for the PA.
@@ -114,7 +111,7 @@ class Node(object):
         # We only want to make a tree from the node if each observation does 
         # not have the same value for the target attribute 
         if (not self.uniform) and not(self.attrs):
-            self.split_col, vals_locs_dict = Node.calc_split_col(self)
+            self.split_col, vals_locs_dict = self.gen_split_attr(self)
             child_attrs = 1 * self.attrs
             del child_attrs[self.split_col]
 
@@ -130,6 +127,16 @@ class Node(object):
 
             for child in self.children: 
                 child.make_tree()
+
+    def classify(self, obs):
+        '''
+        '''
+        if self.label != None:
+            return self.label
+        else:
+            for child in self.children:
+                if obs[self.split]:
+                    pass
 
 
 
