@@ -55,6 +55,8 @@ class Node(object):
         self.edge = edge
         self.children = []
         self.split_col = None
+        self.attr_info = self.gen_attr_info()
+        print(self.gen_split_attr())
 
     def calc_label_unif_gini(self): 
 
@@ -64,6 +66,7 @@ class Node(object):
 
         for obs in self.observations:
             pos_labels[obs[-1]] = pos_labels.get(obs[-1], 0) + 1
+
 
         # This dictionary method could technically work for more than 2 
         # possible values of T, but we're going to constrain it for the PA.
@@ -131,49 +134,40 @@ class Node(object):
 
 
 
-    def gen_attr_cnts(self):
+    def gen_attr_info(self):
 
-        attr_info = [['', {}] for attr in range(len(self.attrs))]
-        for obs in self.observations:
-            for attr_ind, attr in enumerate(self.attrs):
-                if attr_info[attr_ind][0] != attr:
-                    attr_info[attr_ind][0] = attr
+
+        attr_info = {}
+        for obs_row, obs in enumerate(self.observations):
+            for attr in self.attrs: 
+                if attr not in attr_info:
+                    attr_info[attr] = {}
+                attr_val = obs[attr]
                 
-                attr_val = obs[attr_ind]
-                attr_val_dict = attr_info[attr_ind][1]
-                
-                if attr_val_dict.get(attr_val, 0) == 0:
-                    attr_val_dict[attr_val] = [1, [attr_ind]]
+                if attr_val not in attr_info[attr]:
+                    attr_info[attr][attr_val] = [1, [obs_row], {}]
+                    attr_info[attr][attr_val][2][obs[-1]] = \
+                        attr_info[attr][attr_val][2].get(obs[-1], 0) + 1
 
                 else:
-                    attr_val_dict[attr_val][0] += 1
-                    attr_val_dict[attr_val][1].append(attr_ind)
+                    attr_info[attr][attr_val][0] += 1
+                    attr_info[attr][attr_val][1].append(obs_row)
+                    attr_info[attr][attr_val][2][obs[-1]] = \
+                        attr_info[attr][attr_val][2].get(obs[-1], 0) + 1
+        print(attr_info)
 
         return attr_info
 
 
-    def gen_gini(self, attr, obs_attr = None, obs_attr_val = None):
+    def gen_gini(self, attr, attr_val):
 
-        gini = 1
-        attr_ind = self.attrs.index(attr)
-        attr_info = self.gen_attr_cnts()
-
-        if obs_attr != None and obs_attr_val != None:
-            obs_attr_ind = self.attrs.index(obs_attr)
-            list_of_obs_inds = attr_info[obs_attr_ind][1][obs_attr_val][1]
-
-            val_cnt = 0
-            for val_ind in attr_info[attr_ind][1][attr_info[attr_ind][1].keys()[0]][1]:
-                if val_ind in list_of_obs_inds:
-                    val_cnt += 1
-            
-            gini -= ((val_cnt / len(list_of_obs_inds)) ** 2) - \
-                (1 - (val_cnt / len(list_of_obs_inds))) ** 2
-
-        else:
-            for val in attr_info[attr_ind][1].keys():
-                gini -= (attr_info[attr_ind][1][val][0] / \
-                    len(self.observations)) ** 2
+        gini = 1 
+        attr_info = self.attr_info
+        print(self.attr_info)
+        attr_vals_dict = attr_info[attr][attr_val]
+        print(attr_vals_dict)
+        for tgt_attr_val in attr_vals_dict[2]:  
+            gini -= (attr_vals_dict[2][tgt_attr_val] / attr_vals_dict[0]) ** 2               
             
         return gini 
 
@@ -181,13 +175,12 @@ class Node(object):
     def gen_gain(self, attr):
 
         gain = self.gini_t 
-        attr_ind = self.attrs.index(attr)
-        attr_info = self.gen_attr_cnts()
+        attr_info = self.attr_info
 
-        for val in attr_info[attr_ind][1].keys():
-            gain -= ((attr_info[attr_ind][1][val][0] / len(self.observations)) \
-                * (self.gen_gini(self.attrs[-1], obs_attr = attr, obs_attr_val \
-                    = val)))
+        for attr_val in attr_info[attr]:
+            attr_val_count = 0
+            gain -= ((attr_info[attr][attr_val][attr_val_count] /  
+                len(self.observations)) * (self.gen_gini(attr, attr_val)))
 
         return gain
 
@@ -195,12 +188,14 @@ class Node(object):
     def gen_gain_ratio(self, attr):
 
         gain = self.gen_gain(attr)
-        attr_info = self.gen_attr_cnts()
+        attr_info = self.attr_info
         split_info = 0
-        for val in attr_info[attr_ind][1].keys():
-            val_ratio = (attr_info[attr_ind][1][val][0] / \
-                len(self.observations))
-            split_info -= (val_ratio * math.log(val_ratio))
+        attr_val_count = 0
+
+        for attr_val in attr_info[attr]:
+            attr_val_ratio = ((attr_info[attr][attr_val][attr_val_count] / 
+                len(self.observations)))
+            split_info -= (attr_val_ratio * math.log(attr_val_ratio))
 
         gain_ratio = gain / split_info
 
@@ -209,18 +204,25 @@ class Node(object):
 
     def gen_split_attr(self):
         
-        split_attr = 0
-        attr_info = self.gen_attr_cnts()
-        for attr in self.attrs:
-            if self.gen_gain_ratio(attr) > split_attr:
+        split_attr = None
+        best_gain = -1
+        attr_info = self.attr_info
+
+        for attr in attr_info:
+            attr_gain = self.gen_gain_ratio(attr)
+            if attr_gain > best_gain:
                 split_attr = attr
+                best_gain = attr_gain
+            elif attr_gain == best_gain:
+                if attr < split_attr:
+                    best_gain = attr_gain
 
-        attr_ind = self.attrs.index(attr)
-        attr_dict = attr_info[attr_ind][1]
-        for key in attr_info[attr_ind][1].keys():
-            del attr_info[attr_ind][1][key][0]
-
-        return attr_ind, attr_info[attr_ind][1]
+        attr_val_dict = attr_info[attr]
+        for attr_val in attr_val_dict:
+            attr_val_dict[attr_val] = attr_val_dict[attr_val][1]
+            # print('attr_val_dict: {}'.format(attr_val_dict[attr_val]))
+        print(split_attr, attr_val_dict)
+        return split_attr, attr_val_dict
 
 
 
