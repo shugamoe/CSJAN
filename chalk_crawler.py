@@ -33,9 +33,11 @@ class Chalk_Page:
         username = input('enter username: ')
         password = getpass.getpass('enter password: ')
 
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference("browser.download.folderList", 2)
+        profile.set_preference
         browser = webdriver.Firefox()
-        browser.delete_all_cookies()
-        browser.implicitly_wait(7)
+        browser.implicitly_wait(2)
 
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(username)
@@ -44,19 +46,6 @@ class Chalk_Page:
         login_form = browser.find_element_by_id('entry-login')
         login_form.submit()
 
-        # time.sleep(3)
-        # self.cookies.append(browser.get_cookies)
-
-        # Save cookies to file.
-        # with open('cookies.txt', mode ='w') as f:
-        #     for cookie in self.cookies:
-        #         line = '%s\tTRUE\t%s\t%s\t%s\t%s\t%s' % ( \
-        #             cookie['domain'], cookie['path'], 'TRUE' if cookie['secure'] else 'FALSE', \
-        #             cookie['expiry'] if cookie['expiry'] else 0, cookie['name'], cookie['value'])
-        #         f.write(line.encode('utf-8') + '\n')
- 
-        # print 'DONE - Collected {:} cookies'.format(len(self.cookies))
-        # driver.close()
         
         return browser
 
@@ -125,17 +114,14 @@ class Chalk_Page:
 
             if item.text == 'Announcements':
                 material_dict[item.text] = {}
-                # Create dir so download_text will work
                 item.find_element_by_tag_name('a').click()              
-                if self.check_id_exists('content_listContainer'):
+                if self.check_id_exists('content_listContainer'): 
+
                     content_list_container = self.browser.find_element_by_id('content_listContainer')
                     announcement_text = ''
 
                     for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
-                        announcement_text += file_or_folder.text + '\n'  
-                        # self.download_text(item.text, announcement_text, \
-                        #     'django/Classes/' + self.username + '/' + \
-                        #     local_dir.check_folder_name(course[20:]) + '/' + item.text)
+                        announcement_text += file_or_folder.text + '\n' 
 
                 else:
                     content = self.browser.find_element_by_id('content')
@@ -254,11 +240,11 @@ class Chalk_Page:
     def download_text(self, filename, text, path):
 
         if os.path.exists(path + filename + '.txt'):
-            print('file already exists')
+            print('File already exists. Updating file.')
+            os.remove(path + filename + '.txt')
 
-        else:
-            with open(path + filename + '.txt', 'w') as f:
-                f.write(text)
+        with open(path + filename + '.txt', 'w') as f:
+            f.write(text)
 
 
 
