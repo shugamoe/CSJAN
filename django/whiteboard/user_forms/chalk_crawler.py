@@ -1,4 +1,5 @@
 # Chalk_Crawler w/ Selenium
+#https://chalk.uchicago.edu/bbcswebdav/pid-3030087-dt-content-rid-6454815_1/courses/2016.01.80030000M2/Transaction%20Analysis%20and%20Financial%20Statement%20Design%20BLANK%20-%20Jan%205%202014%281%29.pdf
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchAttributeException, NoSuchElementException
@@ -6,7 +7,7 @@ import time
 import getpass
 import folders as local_dir
 import os
-import urllib
+import robobrowser
 
 class Chalk_Page:
     
@@ -16,14 +17,20 @@ class Chalk_Page:
         self.username = 'andyz422'
         self.quarter = quarter
         self.year = year
-        self.browser = self.login()
         self.default_folder = '../../Classes'
+        
+        self.browser_ = robobrowser(history = True)
+
+
+
+        self.browser = self.login()
         
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
         self.course_material_dict = {}
         self.access_courses()
+
 
         local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
@@ -170,22 +177,16 @@ class Chalk_Page:
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
                                 elif 'file_on' in img.get_attribute('src'):
-                                    print(unit.find_element_by_tag_name('a').get_attribute('href'))
-                                    return None
-
- # elif 'file_on' in img.get_attribute('src')):
+                                    urllib.urlretrieve(unit.find_element_by_tag_name('a').get_attribute('href'), '{:}/{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item.text), unit.find_element_by_tag_name('a').text)
 
                         # elif 'document_on' in img.get_attribute('src')):
                         # else:
                         # download text
 
-            #     document_on: download text, include links
-            #     file_on
-            # no img: download text
         self.course_list.append(course)
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
 
-
+  
         return material_dict
 
 
@@ -242,9 +243,6 @@ class Chalk_Page:
                         # else:
                         # download text
 
-            #     document_on: download text, include links
-            #     file_on
-            # no img: download text
 
         return folder_dict
 
