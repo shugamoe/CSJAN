@@ -6,6 +6,7 @@ import time
 import getpass
 import django.whiteboard.user_forms.folders as local_dir
 import os
+import urllib
 
 class Chalk_Page:
     
@@ -16,26 +17,21 @@ class Chalk_Page:
         self.quarter = quarter
         self.year = year
         self.browser = self.login()
+        self.default_folder = 'django/Classes'
         
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
         self.course_material_dict = self.access_courses()
 
-        local_dir.make_dirs(self.course_material_dict, \
-            'django/Classes')  
-
-        # self.cookies = []
+        local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
 
     def login(self):
 
         username = input('enter username: ')
         password = getpass.getpass('enter password: ')
-
-        profile = webdriver.FirefoxProfile()
-        profile.set_preference("browser.download.folderList", 2)
-        profile.set_preference
+        
         browser = webdriver.Firefox()
         browser.implicitly_wait(2)
 
