@@ -185,7 +185,7 @@ def dl_specific_courses(course_list, credentials_tuple):
     # dicts to make Student, teacher, and TA models.  Do not make duplicates
     # of the Student, teacher, and TA models.
     # 
-    c_crawler.dl_
+    # c_crawler.dl_
     # File models can be duplicated across cnet_ids but not within cnet_ids.
     #
     # 
