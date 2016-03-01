@@ -13,8 +13,10 @@ urlpatterns = [
     url(r'^session=(?P<session_id>[0-9]+)/post/$', views.post, name='post'),
     url(r'^dl_info$', views.get_info, name='dl_query'),
     url(r'^view_stats$', views.view_stats, name='view_stats'),
-    url(r'^view_courses/$', views.CourseList.as_view(), name='view_courses'),
+    url(r'^view_courses/(?P<cnet_id>[a-zA-Z0-9]+)$', views.CourseList.as_view()
+        , name='view_courses'),
     url(r'^view_course(?P<course_id>[0-9]+)/$', views.CourseDetail.as_view(), 
         name='course_detail'),
+    url(r'^get_cnet_id/$', views.get_cnet_id, name='get_cnet_id'),
     url(r'^$', views.start, name='start'),
     ]

@@ -36,15 +36,12 @@ class Student(models.Model):
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     email = models.CharField(max_length=100)
+    cnet_id = models.CharField(max_length=42)
     program = models.CharField(max_length=50)
 
 
     def get_fullname(self):
         return str(self.first_name + ' '  + self.last_name)
-
-
-    def cnet_id(self):
-        return re.search("^([\w-]*\w)", self.email).group()
 
     def __str__(self):
         return '{}'.format(self.cnet_id)
