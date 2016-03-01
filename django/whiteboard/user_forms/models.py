@@ -75,7 +75,7 @@ class File(models.Model):
     owner = models.ForeignKey(Student)
     heading = models.CharField(max_length=100)
     subheading = models.TextField()
-    body = models.TextField()
+    body = models.TextField(blank = True)
     course = models.CharField(max_length=100)
     path = models.CharField(max_length=300)
 

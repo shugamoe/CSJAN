@@ -185,7 +185,7 @@ def dl_specific_courses(course_list, credentials_tuple):
     # dicts to make Student, teacher, and TA models.  Do not make duplicates
     # of the Student, teacher, and TA models.
     # 
-    c_crawler.dl_
+    # c_crawler.dl_
     # File models can be duplicated across cnet_ids but not within cnet_ids.
     #
     # 
@@ -217,14 +217,15 @@ class CourseList(ListView):
 
 class CourseDetail(DetailView):
     model = Course
-    pk_url_kwarg = 'name'
+    pk_url_kwarg = 'course_id'
+    context_object_name = 'course'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['students'] = Student.objects.filter(courses_in__id = 
-            self.kwargs['name'])
+            self.kwargs['course_id'])
         return context
 
 
