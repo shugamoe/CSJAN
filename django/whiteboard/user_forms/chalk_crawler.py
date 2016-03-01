@@ -177,7 +177,7 @@ class Chalk_Page:
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
                                 elif 'file_on' in img.get_attribute('src'):
-                                    urllib.urlretrieve(unit.find_element_by_tag_name('a').get_attribute('href'), '{:}/{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item.text), unit.find_element_by_tag_name('a').text)
+                                    # urllib.urlretrieve(unit.find_element_by_tag_name('a').get_attribute('href'), '{:}/{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item.text), unit.find_element_by_tag_name('a').text)
 
                         # elif 'document_on' in img.get_attribute('src')):
                         # else:
