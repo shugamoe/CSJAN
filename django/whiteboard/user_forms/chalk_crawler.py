@@ -20,7 +20,6 @@ class Chalk_Page:
         self.default_folder = '../../Classes'
 
         self.browser = self.login()
-        self.browser_ = RoboBrowser(history = True)
       
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
@@ -182,8 +181,9 @@ class Chalk_Page:
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
                                 elif 'file_on' in img.get_attribute('src'):
-                                    self.browser_.open(self.url)
-                                    request = self.browser_(unit.find_element_by_tag_name('a').get_attribute('href'), stream = True)
+                                    browser_ = RoboBrowser(history = True)
+                                    browser_.open(self.url)
+                                    request = browser_(unit.find_element_by_tag_name('a').get_attribute('href'), stream = True)
                                     with open('{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item.text), unit.find_element_by_tag_name('a').text) as download_file:
                                         download_file.write(request.content)
 
