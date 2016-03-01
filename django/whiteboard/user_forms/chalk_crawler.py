@@ -19,8 +19,9 @@ class Chalk_Page:
         self.year = year
         self.default_folder = '../../Classes'
 
-        self.browser, self.browser_ = self.login()
-        
+        self.browser = self.login()
+        self.browser_ = RoboBrowser(history = True)
+      
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
@@ -47,8 +48,7 @@ class Chalk_Page:
         login_form.submit()
 
 
-        browser_ = RoboBrowser(history = True)
-        browser_.open(self.url)
+        # browser_.open(self.url)
 
         # login_form = browser_.get_form(action='webapps/login/')
         # login_form['user_id'] = username
@@ -56,7 +56,7 @@ class Chalk_Page:
         # browser.submit_form(login_form)
 
         
-        return browser, browser_
+        return browser
 
 
     def compile_courses(self): 
@@ -182,6 +182,7 @@ class Chalk_Page:
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
                                 elif 'file_on' in img.get_attribute('src'):
+                                    self.browser_.open(self.url)
                                     request = self.browser_(unit.find_element_by_tag_name('a').get_attribute('href'), stream = True)
                                     with open('{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item.text), unit.find_element_by_tag_name('a').text) as download_file:
                                         download_file.write(request.content)
