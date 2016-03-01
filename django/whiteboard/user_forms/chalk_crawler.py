@@ -162,6 +162,7 @@ class Chalk_Page:
             elif item.text not in ['Home', 'Announcements', 'Send Email', \
                 'My Grades', 'Discussion Board', 'Discussions', \
                 'Library Course Reserves', 'Tools', 'Groups']:
+                item_name = item.text
 
                 component = local_dir.check_folder_name(item.text)
                 material_dict[component] = {}
@@ -181,14 +182,14 @@ class Chalk_Page:
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
                                 elif 'file_on' in img.get_attribute('src'):
+                                    unit_name = unit.find_element_by_tag_name('a').text
                                     unit.find_element_by_tag_name('a').click()
-                                    file_url = self.browser.find_elements_by_tag_name('a')[0]
-                                    self.browser.execute_script("window.history.go(-1)")
+                                    file_url = self.browser.find_elements_by_tag_name('a')[0].get_attribute('href')
+                                    # close pdf window and navigate back to chalk
                                     browser_ = RoboBrowser(history = True)
                                     browser_.open(file_url)
-                                    request = browser_(unit.find_element_by_tag_name('a').get_attribute('href'), stream = True)
-                                    with open('{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item.text), unit.find_element_by_tag_name('a').text) as download_file:
-                                        download_file.write(request.content)
+                                    with open('{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name), 'w') as download_file:
+                                        download_file.write(browser_.parsed)
 
 
                         # elif 'document_on' in img.get_attribute('src')):
