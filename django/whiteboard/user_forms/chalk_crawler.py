@@ -50,10 +50,10 @@ class Chalk_Page:
         browser_ = RoboBrowser(history = True)
         browser_.open(self.url)
 
-        login_form = browser_.get_form(action='webapps/login/')
-        login_form['user_id'] = username
-        login_form['password'] = password
-        browser.submit_form(login_form)
+        # login_form = browser_.get_form(action='webapps/login/')
+        # login_form['user_id'] = username
+        # login_form['password'] = password
+        # browser.submit_form(login_form)
 
         
         return browser, browser_
