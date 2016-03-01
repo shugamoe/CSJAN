@@ -18,5 +18,7 @@ urlpatterns = [
     url(r'^view_course(?P<course_id>[0-9]+)/$', views.CourseDetail.as_view(), 
         name='course_detail'),
     url(r'^get_cnet_id/$', views.get_cnet_id, name='get_cnet_id'),
+    url(r'^view_student(?P<student_id>[a-zA-Z0-9]+)$', 
+        views.StudentDetail.as_view(), name='view_student'),
     url(r'^$', views.start, name='start'),
     ]

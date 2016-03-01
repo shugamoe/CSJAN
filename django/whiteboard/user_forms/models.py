@@ -40,7 +40,7 @@ class Student(models.Model):
     program = models.CharField(max_length=50)
 
 
-    def get_fullname(self):
+    def full_name(self):
         return str(self.first_name + ' '  + self.last_name)
 
     def __str__(self):
@@ -76,7 +76,7 @@ class File(models.Model):
     course = models.CharField(max_length=100)
     path = models.CharField(max_length=300)
 
-    def get_filename(self):
+    def filename(self):
         # Extract the filename from the end of the path and return it
         pattern = '([\w.-]+\.[\w]+)$'
         filename = re.search(pattern, str(self.path))

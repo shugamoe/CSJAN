@@ -16,9 +16,21 @@
 Taken by: 
 {% for student in students %}
 
-{{student.get_fullname}} | 
+<li><a href="{% url 'view_student' student_id=student.id %}">
+            {{ student.cnet_id }}</a></li>
 
 {% endfor %}
 </p>
+
+
+<p>
+
+Files:
+
+{% for file in files %}
+
+<li>{{ file.filename }}</li>
+
+{% endfor %}
 
 {% endblock %}
