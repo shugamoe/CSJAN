@@ -97,6 +97,21 @@ def select_downloads(request, session_id, cnet_id):
                                                 {'courses': courses})
 
 
+def get_cnet_id(request):
+    print('getting cnet id')
+    if request.method == 'POST':
+        cnet_id = request.POST.get('cnet_id')
+        print('CNET ID is {}'.format(cnet_id))
+        if not cnet_id:
+            return render(request, 'user_forms/get_cnet_id.html', \
+            {'error_message': "You didn't enter a CNET ID"})
+        else:
+            return HttpResponseRedirect(reverse('view_courses', kwargs = 
+                {'cnet_id': cnet_id}))
+    else:
+        return render(request, 'user_forms/get_cnet_id.html')
+
+
 def post(request, session_id):
     session = get_object_or_404(Session, pk=session_id)
     all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id).distinct()
@@ -215,6 +230,11 @@ class CourseList(ListView):
     model = Course
     context_object_name = 'course_list'
 
+    def get_queryset(self):
+        self.cnet_id = self.kwargs['cnet_id']
+        return Course.objects.filter(student__cnet_id=self.cnet_id)\
+        .order_by('dept')
+
 class CourseDetail(DetailView):
     model = Course
     pk_url_kwarg = 'course_id'
@@ -225,7 +245,7 @@ class CourseDetail(DetailView):
         context = super(CourseDetail, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
         context['students'] = Student.objects.filter(courses_in__id = 
-            self.kwargs['course_id'])
+        self.kwargs['course_id'])
         return context
 
 
