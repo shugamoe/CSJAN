@@ -1,0 +1,39 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+
+<h1>{{ student.full_name }}</h1>
+
+    <l> {{ student.email }}</l> | 
+    <l>Program of Study: {{ student.program }}</l>
+
+<p> 
+
+Classes Taken: 
+{% for course in courses_in %}
+
+<li><a href="{% url 'course_detail' course_id=course.id %}">
+            {{ course.name }}</a></li>
+
+{% endfor %}
+</p>
+
+
+<p>
+
+Files:
+
+{% for file in files %}
+
+<li>{{ file.filename }}</li>
+
+{% endfor %}
+
+
+
+
+
+
+{% endblock %}
