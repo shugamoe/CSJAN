@@ -188,8 +188,8 @@ class Chalk_Page:
                                     # close pdf window and navigate back to chalk
                                     browser_ = RoboBrowser(history = True)
                                     browser_.open(file_url)
-                                    with open('{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name), 'w') as download_file:
-                                        download_file.write(browser_.parsed)
+                                    with open('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name), 'w') as download_file:
+                                        download_file.write(str(browser_.parsed))
 
 
                         # elif 'document_on' in img.get_attribute('src')):
