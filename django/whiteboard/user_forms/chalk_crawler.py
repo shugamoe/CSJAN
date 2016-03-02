@@ -2,12 +2,12 @@
 # https://chalk.uchicago.edu/bbcswebdav/pid-3030087-dt-content-rid-6454815_1/courses/2016.01.80030000M2/Transaction%20Analysis%20and%20Financial%20Statement%20Design%20BLANK%20-%20Jan%205%202014%281%29.pdf
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchAttributeException, NoSuchElementException
+# from selenium.common.exceptions import NoSuchAttributeException, NoSuchElementException
 import time
 import getpass
 import folders as local_dir
 import os
-from robobrowser import RoboBrowser
+import urllib
 
 class Chalk_Page:
     
@@ -18,7 +18,6 @@ class Chalk_Page:
         self.quarter = quarter
         self.year = year
         self.default_folder = '../../Classes'
-
         self.browser = self.login()
       
         self.all_courses_list = [] # all course ids
@@ -45,14 +44,6 @@ class Chalk_Page:
 
         login_form = browser.find_element_by_id('entry-login')
         login_form.submit()
-
-
-        # browser_.open(self.url)
-
-        # login_form = browser_.get_form(action='webapps/login/')
-        # login_form['user_id'] = username
-        # login_form['password'] = password
-        # browser.submit_form(login_form)
 
         
         return browser
@@ -183,13 +174,10 @@ class Chalk_Page:
                                     material_dict[component][folder_name] = self.gen_folder(unit)
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
-                                    unit.find_element_by_tag_name('a').click()
-                                    file_url = self.browser.find_elements_by_tag_name('a')[0].get_attribute('href')
+                                    file_url = unit.find_element_by_tag_name('a').get_attribute('href')
+                                    urllib.request.urlretrieve(file_url, filename = '{:}/{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name))
                                     # close pdf window and navigate back to chalk
-                                    browser_ = RoboBrowser(history = True)
-                                    browser_.open(file_url)
-                                    with open('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name), 'w') as download_file:
-                                        download_file.write(str(browser_.parsed))
+                                    return None
 
 
                         # elif 'document_on' in img.get_attribute('src')):
