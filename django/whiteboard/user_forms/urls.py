@@ -15,6 +15,8 @@ urlpatterns = [
     url(r'^view_stats$', views.view_stats, name='view_stats'),
     url(r'^view_courses/(?P<cnet_id>[a-zA-Z0-9]+)$', views.CourseList.as_view()
         , name='view_courses'),
+    url(r'^my_classes_plot(?P<cnet_id>[a-zA-Z0-9]+)/$', views.user_classes_plot,
+        name='user_classes_plot'),
     url(r'^view_course(?P<course_id>[0-9]+)/$', views.CourseDetail.as_view(), 
         name='course_detail'),
     url(r'^get_cnet_id/$', views.get_cnet_id, name='get_cnet_id'),

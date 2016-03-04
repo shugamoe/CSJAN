@@ -3,14 +3,26 @@
 {% block body %}
 
 
-<h2>Courses</h2>
+<h2>My Courses</h2>
 <ul>
+<form action="" method="get">
+{% csrf_token %}
     {% for course in course_list %}
-        <li><a href="{% url 'course_detail' course_id=course.id %}">
-            {{ course.name }}</a></li>
+        
+        <input type="checkbox" name="course{{ forloop.counter }}" id="course{{ forloop.counter }}" value="{{ course }}" />
+    <label for="course{{ forloop.counter }}"><a href="{% url 'course_detail' course_id=course.id %}">
+            {{ course.name }}</a></label><br />    
     {% endfor %}
+<input type="submit" value="Select Classes for More Demographic Info"/>
+</form>
 </ul>
 
+
+<img src="{% url 'user_classes_plot' cnet_id=cnet_id %}" alt="Class Stats" />
+
+
+
+{{ form_processed }}
 
 
 {% endblock %}
