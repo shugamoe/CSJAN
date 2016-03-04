@@ -43,7 +43,6 @@ def get_info(request):
         else:
             print('form not valid')
             form = SessionForm()
-            return render(request, 'user_forms/dl_query.html', {'form': form})
     else:
         form = SessionForm()
 
