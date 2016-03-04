@@ -7,6 +7,11 @@ from .forms import DownloadForm, CourseForm, SessionForm
 from .models import Session, Course, Student, Instructor, Assistant
 from django.views.generic import ListView, DetailView
 
+
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+
 import random
 
 # import folders 
@@ -69,7 +74,7 @@ def select_downloads(request, session_id, cnet_id):
 
         # cnet_pw = request.POST.get('cnet_pw')
 
-        courses = get_courses(request)
+        courses = get_courses_post(request)
 
         print('courses should be here: ', courses)
         if not courses:
@@ -231,7 +236,17 @@ class CourseList(ListView):
     def get_queryset(self):
         self.cnet_id = self.kwargs['cnet_id']
         return Course.objects.filter(student__cnet_id=self.cnet_id)\
-        .order_by('dept')
+             .order_by('dept')
+
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(CourseList, self).get_context_data(*args, **kwargs)
+        # I also want to pass the cnet_id and not just use it to filter 
+        # for courses.
+        context['cnet_id'] = self.kwargs['cnet_id']
+        get = get_courses_get(self.request)
+        context['form_processed'] = get
+        return context 
 
 class CourseDetail(DetailView):
     model = Course
@@ -260,10 +275,60 @@ class StudentDetail(DetailView):
         return context
 
 
-def get_courses(request):
+def get_courses_post(request):
     courses = []
     for i in range(1, len(request.POST) + 1):
         if request.POST.get('course' + str(i)):
             courses.append(request.POST.get('course' + str(i)))
 
     return courses
+
+def get_courses_get(request):
+    courses = []
+    for i in range(1, len(request.GET) + 1):
+        if request.GET.get('course' + str(i)):
+            courses.append(request.GET.get('course' + str(i)))
+    print('get courses are:', courses)
+    return courses
+
+
+
+
+from django.db.models.fields.related import ManyToManyField
+
+def to_dict(instance):
+    '''
+    This function is able to turn model instances into an easier form to digest
+    for any plotting that might be done.
+    '''
+    opts = instance._meta
+    data = {}
+    for f in opts.concrete_fields + opts.many_to_many:
+        if isinstance(f, ManyToManyField):
+            if instance.pk is None:
+                data[f.name] = []
+            else:
+                data[f.name] = list(f.value_from_object(instance).values_list(\
+                    'pk', flat=True))
+        else:
+            data[f.name] = f.value_from_object(instance)
+    return data
+
+
+def user_classes_plot(request, cnet_id):
+    '''
+    This plot will display information about all the classes the user has 
+    uploaded to Whiteboard.
+    '''
+    # print('demographics received user courses!!!', courses)
+    response = HttpResponse(content_type='image/png')
+    plt.figure(figsize=(4, 4))
+
+    test_names = ['CLASS 1', 'CLASS 2', cnet_id]
+    test_nums = [40, 50, 100]
+
+    plt.pie(test_nums, labels=test_names)
+    plt.savefig(response)
+    plt.close()
+
+    return response
