@@ -2,7 +2,6 @@
 # https://chalk.uchicago.edu/bbcswebdav/pid-3030087-dt-content-rid-6454815_1/courses/2016.01.80030000M2/Transaction%20Analysis%20and%20Financial%20Statement%20Design%20BLANK%20-%20Jan%205%202014%281%29.pdf
 
 from selenium import webdriver
-# from selenium.common.exceptions import NoSuchAttributeException, NoSuchElementException
 import time
 import getpass
 import folders as local_dir
@@ -11,30 +10,29 @@ import urllib
 
 class Chalk_Page:
     
-    def __init__(self, quarter, year):
+    def __init__(self, quarter, year): # dict
 
         self.url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1'
         self.username = 'andyz422'
-        self.quarter = quarter
-        self.year = year
+        # self.password = dict['password']
+        self.quarter = quarter # dict['quarter']
+        self.year = year # dict['year']
         self.default_folder = '../../Classes'
-        self.browser = self.login()
-        self.cookies = self.browser.get_cookies()
-      
+        self.browser, self.opener = self.login() 
+
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
         self.course_material_dict = {}
         self.access_courses()
 
-
         local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
 
     def login(self):
 
-        username = input('enter username: ')
-        password = getpass.getpass('enter password: ')
+        username = input('enter username: ') # self.username
+        password = getpass.getpass('enter password: ') # self.password
         
         browser = webdriver.Firefox()
         browser.implicitly_wait(2)
@@ -44,10 +42,15 @@ class Chalk_Page:
         browser.find_element_by_name('password').send_keys(password)
 
         login_form = browser.find_element_by_id('entry-login')
-        login_form.submit()
+        login_form.submit() 
 
+        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+        password_mgr.add_password(None, self.url, username, password)
+        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
+        opener = urllib.request.build_opener(handler)
+        urllib.request.install_opener(opener)
         
-        return browser
+        return browser, opener
 
 
     def compile_courses(self): 
@@ -104,7 +107,8 @@ class Chalk_Page:
         course = [first_key]
         
         professor = self.browser.find_elements_by_class_name('courseInformation')[prof_ind].text
-        course.append(professor.replace('Instructor: ', '').replace(';', ''))
+        prof_cnt = professor.count(';')
+        course.append(professor.replace('Instructor: ', '').split('; ')[:prof_cnt])
 
         self.browser.find_element_by_link_text(first_key).click()
         
@@ -172,23 +176,21 @@ class Chalk_Page:
                                 if 'folder_on' in img.get_attribute('src'):
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = self.gen_folder(unit)
+                                
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                    # obtain cookies
-                                    opener = urllib.request.build_opener()
-                                    for cookie in self.cookies:
-                                        for key in cookie.keys():
-                                            name, value = key, cookie[key]
-                                            opener.add_header(name, value)
-                                    opener.retrieve(url, filename = '{:}/{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name))
+                                      
+                                    self.opener.open(file_url)
+                                    print('opened')
+                                    urllib.request.urlretrieve(file_url, filename = '{:}/{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name))
                                     # close pdf window and navigate back to chalk
+                                    print('download complete')
                                     return None
 
 
                         # elif 'document_on' in img.get_attribute('src')):
-                        # else:
-                        # download text
+                        # download text for all
 
         self.course_list.append(course)
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
@@ -229,7 +231,7 @@ class Chalk_Page:
         return True 
 
 
-    def gen_folder(self, unit): #unit corresponds to a folder
+    def gen_folder(self, unit): 
         folder_dict = {}
         unit.find_element_by_tag_name('a').click() # clicking 'Additional Practice problems'
         if self.check_id_exists('content_listContainer'):
@@ -247,8 +249,7 @@ class Chalk_Page:
                         # elif 'file_on' in img.get_attribute('src')):
 
                         # elif 'document_on' in img.get_attribute('src')):
-                        # else:
-                        # download text
+                        # download text for all
 
 
         return folder_dict
