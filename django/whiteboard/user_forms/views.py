@@ -29,21 +29,14 @@ def get_info(request):
         form = SessionForm(request.POST)
         if form.is_valid():
             session_object = form.save()
-            if form.cleaned_data['dl_all']:
-                print('Will move directly to post page, everything will be \
-                    downloaded')
-                # dl_all_courses(form.cleaned_data)
-                url = reverse('post', kwargs = 
-                    {'session_id': session_object.id})
-            else:
-
-                # Replace with get_prelim_courses when crawlers are integrated.
-                courses_to_confirm = dummy_crawler(form.cleaned_data, 
-                    session_object)
-                # print('cnet id {}'.format(form.cleaned_data['cnet_id']))
-                url = reverse('select_downloads', kwargs=
-                    {'session_id': session_object.id, 
-                    'cnet_id': form.cleaned_data['cnet_id']})
+            print(form.cleaned_data)
+            # Replace with get_prelim_courses when crawlers are integrated.
+            courses_to_confirm = dummy_crawler(form.cleaned_data, 
+                session_object)
+            # print('cnet id {}'.format(form.cleaned_data['cnet_id']))
+            url = reverse('select_downloads', kwargs=
+                {'session_id': session_object.id, 
+                'cnet_id': form.cleaned_data['cnet_id']})
             return HttpResponseRedirect(url)
         else:
             print('form not valid')
@@ -129,12 +122,6 @@ def dummy_crawler(cleaned_data, session_object):
     Will function as the connector to Andy and Bonar's crawlers.
     '''
 
-    if cleaned_data['dl_all']:
-        dled_default = True
-        print('Crawler should attempt to download all classes')
-    else:
-        dled_default = False
-
     # print(cleaned_data['cnet_id'])
 
     # These lines use some simple random stuff to "select" classes.  Remove
@@ -152,7 +139,7 @@ def dummy_crawler(cleaned_data, session_object):
         if num_results == 0:
         # {TO DO} Add in more fields 
             course_object = Course(name = course, 
-                                downloaded = dled_default)
+                                downloaded = False)
             course_object.save()
         else:
             course_object = Course.objects.get(name = course)
