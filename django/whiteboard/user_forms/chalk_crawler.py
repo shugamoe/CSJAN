@@ -7,12 +7,13 @@ import getpass
 import folders as local_dir
 import os
 import urllib
+import pickle
 
 class Chalk_Page:
     
     def __init__(self, quarter, year): # dict
 
-        self.url = 'https://chalk.uchicago.edu/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1'
+        self.url = 'https://chalk.uchicago.edu'
         self.username = 'andyz422'
         # self.password = dict['password']
         self.quarter = quarter # dict['quarter']
@@ -111,6 +112,7 @@ class Chalk_Page:
         course.append(professor.replace('Instructor: ', '').split('; ')[:prof_cnt])
 
         self.browser.find_element_by_link_text(first_key).click()
+
         
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
@@ -162,6 +164,7 @@ class Chalk_Page:
                 component = local_dir.check_folder_name(item.text)
                 material_dict[component] = {}
                 item.find_element_by_tag_name('a').click()
+                # store item_url
 
                 if self.check_xpath_exists('//*div[@class = "noItems container-empty"]'):
                     continue
@@ -180,14 +183,12 @@ class Chalk_Page:
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                      
-                                    self.opener.open(file_url)
-                                    print('opened')
-                                    urllib.request.urlretrieve(file_url, filename = '{:}/{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:])), item_name, unit_name))
-                                    # close pdf window and navigate back to chalk
-                                    print('download complete')
-                                    return None
+                                    self.opener.open(self.url + file_url)
+                                    self.browser.refresh()
+                                    # urllib.request.urlretrieve(file_url, )
 
+
+                        
 
                         # elif 'document_on' in img.get_attribute('src')):
                         # download text for all
