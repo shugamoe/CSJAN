@@ -183,7 +183,7 @@ class Chalk_Page:
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                    self.opener.open(self.url + file_url)
+                                    urllib.request.urlopen(self.url + file_url)
                                     self.browser.refresh()
                                     # urllib.request.urlretrieve(file_url, )
 
