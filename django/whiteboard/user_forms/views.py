@@ -67,8 +67,7 @@ def select_downloads(request, session_id, cnet_id):
     
     if request.method == 'POST':
 
-        cnet_pw = request.POST.get('cnet_pw')
-        # Link into crawlers here.
+        # cnet_pw = request.POST.get('cnet_pw')
 
         courses = get_courses(request)
 
