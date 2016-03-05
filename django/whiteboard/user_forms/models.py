@@ -58,6 +58,8 @@ class Instructor(models.Model):
     def cnet_id(self):
         return re.search("^([\w-]*\w)", self.email).group()
     
+    def full_name(self):
+        return str(self.first_name + ' ' + self.last_name)
 
 class Assistant(models.Model):
     courses_taught = models.ManyToManyField(Course)
@@ -69,6 +71,9 @@ class Assistant(models.Model):
 
     def cnet_id(self):
         return re.search("^([\w-]*\w)", self.email).group()
+
+    def full_name(self):
+        return str(self.first_name + ' ' + self.last_name)
 
 
 class File(models.Model):

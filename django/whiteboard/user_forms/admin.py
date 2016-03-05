@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Session, Course, Student
+from .models import Session, Course, Student, Instructor, Assistant
 
 
 class CourseInline(admin.TabularInline):
@@ -21,9 +21,16 @@ class CourseAdmin(admin.ModelAdmin):
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('email', 'last_name', 'first_name')
 
+class InstructorAdmin(admin.ModelAdmin):
+    list_display = ('email', 'last_name', 'first_name')
+
+class AssistantAdmin(admin.ModelAdmin):
+    list_display = ('email', 'last_name', 'first_name')
 
 
+# Register your models here.
+admin.site.register(Assistant, AssistantAdmin)
+admin.site.register(Instructor, InstructorAdmin)
 admin.site.register(Session, SessionAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Student, StudentAdmin)
-# Register your models here.

@@ -24,7 +24,7 @@ urlpatterns = [
 
     # Plot of all or selected courses for a user
     url(r'^my_classes_plot(?P<cnet_id>[a-zA-Z0-9]+)/(?P<course_ids>.+)/$', 
-        views.user_classes_plot, name='user_classes_plot'),
+        views.student_classes_plot, name='student_classes_plot'),
 
     # Plot of a single course.
     url(r'^single_class_plot(?P<course_id>[0-9]+)$', views.single_class_plot,

@@ -11,13 +11,13 @@
 </p>
 
 <l><a href="{% url 'dl_query' %}">Download more classes</a></l>
-<l><a href="{% url 'view_courses' cnet_id=cnet_id %}">View My Courses</a></l>
+<l><a href="{% url 'view_courses' cnet_id=cnet_id %}">View My Stats</a></l>
 
 
  <h2>Classes Previously Downloaded</h2>
  <ul>
     {% for course in all_courses %}
-    <li><a href="{% url 'course_detail' course_id=course.id %}">
+    <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
             {{ course.name }}</a></li>
     {% endfor %} 
 </ul>
@@ -34,6 +34,3 @@
 <!-- Will probably need to format this to look nicely, this can be a good
      page to be a 'jumping off point' to look at demographic info and what not
       -->
-
-
-
