@@ -17,8 +17,16 @@ alt="Class Stats" />
 
 <p> 
 
-Taken by: 
+<b>
+{% if students %}
+Also taken by:
+{% else %}
+No Students found.  Chalk has likely cleared the data because the class is not
+recent enough.
+{% endif %}
+</b> 
 {% for student in students %}
+
 
 <li><a href="{% url 'view_student' student_id=student.id %}">
             {{ student.cnet_id }}</a></li>
@@ -30,18 +38,22 @@ Taken by:
 <p>
 
 
+
+<b>
 {% if files %}
 My Files:
+{% else %}
+You have no files for this class
+</b>
+
+
+
+{% endif %}
 
 {% for file in files %}
 
 <li>{{ file.filename }}</li>
 
 {% endfor %}
-
-{% else %}
-You have no files for this class
-
-{% endif %}
 
 {% endblock %}

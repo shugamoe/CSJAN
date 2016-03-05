@@ -236,7 +236,9 @@ class CourseList(ListView):
         context = super(CourseList, self).get_context_data(*args, **kwargs)
         # I also want to pass the cnet_id and not just use it to filter 
         # for courses.
-        context['cnet_id'] = self.kwargs['cnet_id']
+        cnet_id = self.kwargs['cnet_id']
+        context['cnet_id'] = cnet_id
+        context['student_id'] = Student.objects.get(cnet_id = cnet_id).id
         course_ids = get_courses_get(self.request)
         course_ids = '/'.join(course_ids)
         context['course_ids'] = course_ids
@@ -266,11 +268,13 @@ class StudentDetail(DetailView):
     context_object_name = 'student'
 
     def get_context_data(self, **kwargs):
+        student_id = self.kwargs['student_id']
         # Call the base implementation first to get a context
         context = super(StudentDetail, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
-        context['courses_in'] = Course.objects.filter(student__id = 
-            self.kwargs['student_id'])
+        context['courses_in'] = Course.objects.filter(student__id = student_id)
+            
+        context['cnet_id'] = Student.objects.get(id = student_id).cnet_id
         return context
 
 

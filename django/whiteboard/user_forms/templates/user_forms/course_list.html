@@ -2,17 +2,21 @@
 
 {% block body %}
 
+<p>
+     <a href="{% url 'view_student' student_id=student_id %}">
+            View My Profile</a>
+</p>
 
 <h2>My Courses</h2>
+
 <ul>
 <form action="" method="get">
 {% csrf_token %}
     {% for course in course_list %}
-        
-        <input type="checkbox" name="course{{ forloop.counter }}" id="course{{ forloop.counter }}" value="{{ course.id }}" />
-        <label for="course{{ forloop.counter }}"><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+    <input type="checkbox" name="course{{ forloop.counter }}" id="course{{ 
+    forloop.counter }}" value="{{ course.id }}"/>
+    <label for="course{{ forloop.counter }}"><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}"></a>
         {{ course.name }}</label><br/>
-
     {% endfor %}
 <input type="submit" value="View Plot of Selected Classes"/>
 </form>
@@ -26,5 +30,6 @@ alt="Class Stats" />
 <img src="{% url 'user_classes_plot' cnet_id=cnet_id course_ids='No_courses_selected' %}" 
 alt="Class Stats" />
 {% endif %}
+
 
 {% endblock %}
