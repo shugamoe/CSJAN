@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 
 from .forms import DownloadForm, CourseForm, SessionForm
-from .models import Session, Course, Student, Instructor, Assistant
+from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
 
@@ -22,8 +22,12 @@ TEST_COURSES_1 = ['CMSC 122', 'MATH 195']
 TEST_COURSES_2 = ['SEXY 101', 'FUCK 504']
 
 
-def get_info(request):
-    print('get_info view')
+def get_chalk_info(request):
+    '''
+    This view is written to obtain user credentials and class filters for 
+    Chalk.
+    '''
+    print('get_chalk_info view')
     print()
     if request.method == 'POST':
         form = SessionForm(request.POST)
@@ -48,6 +52,10 @@ def get_info(request):
 
 
 def start(request):
+    '''
+    This view simply renders the start page, where the user can choose between
+    downloading classes from Chalk or viewing stats.
+    '''
     print('At start page')
     return render(request, 'user_forms/start.html')
 
@@ -58,15 +66,15 @@ def view_stats(request):
     
 
 def select_downloads(request, session_id, cnet_id):
-    print('select downloads view')
-    print()
-    print(session_id)
+    '''
+    After the user has provided their chalk information, the Chalk crawler 
+    retrieves a list of matching courses.  This view brings up a page where
+    the user can confirm which classes they want from these matching courses.
+    '''
     session = get_object_or_404(Session, pk=session_id)
     
     if request.method == 'POST':
-
-        # cnet_pw = request.POST.get('cnet_pw')
-
+        cnet_pw = request.POST.get('cnet_pw')
         courses = get_courses_post(request)
 
         print('courses should be here: ', courses)
@@ -86,18 +94,23 @@ def select_downloads(request, session_id, cnet_id):
             return HttpResponseRedirect(reverse('post', \
                                             args=(session.id,)))
     else:
-        print('Session ID: {}'.format(session_id))
         courses = Course.objects.filter(sessions__id = session_id)
-        print('courses should be here', courses)
+
     return render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': courses})
 
 
 def get_cnet_id(request):
+    '''
+    This view is called when the user wishes to view their statistics.  The 
+    user enters their CNET ID so that the website can retrieve all of the 
+    classes associated with that CNET_ID.
+    '''
     print('getting cnet id')
     if request.method == 'POST':
         cnet_id = request.POST.get('cnet_id')
         print('CNET ID is {}'.format(cnet_id))
+
         if not cnet_id:
             return render(request, 'user_forms/get_cnet_id.html', \
             {'error_message': "You didn't enter a CNET ID"})
@@ -109,8 +122,15 @@ def get_cnet_id(request):
 
 
 def post(request, session_id):
+    '''
+    This view is called after the user has confirmed their choice of classes to
+    download.  The view will retrieve all courses downloaded by the user in
+    previous sessions as well as display courses selected for download in the
+    current session.
+    '''
     session = get_object_or_404(Session, pk=session_id)
-    all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id).distinct()
+    all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id)\
+    .filter(downloaded=True).distinct()
     return render(request, 'user_forms/post.html',
                     {'cnet_id': session.cnet_id,
                       'courses': session.course_set.filter(downloaded=True),
@@ -201,20 +221,6 @@ def dl_specific_courses(course_list, credentials_tuple):
 
     pass
 
-def dl_all_courses(cleaned_data):
-    '''
-    This function will call the Chalk Crawler and Directory Crawler if the user
-    desires to download all their courses.
-    '''
-    # Pass the cleaned_data dict
-
-
-    pass
-
-
-
-
-
 
 class CourseList(ListView):
     model = Course
@@ -230,9 +236,12 @@ class CourseList(ListView):
         context = super(CourseList, self).get_context_data(*args, **kwargs)
         # I also want to pass the cnet_id and not just use it to filter 
         # for courses.
-        context['cnet_id'] = self.kwargs['cnet_id']
-        get = get_courses_get(self.request)
-        context['form_processed'] = get
+        cnet_id = self.kwargs['cnet_id']
+        context['cnet_id'] = cnet_id
+        context['student_id'] = Student.objects.get(cnet_id = cnet_id).id
+        course_ids = get_courses_get(self.request)
+        course_ids = '/'.join(course_ids)
+        context['course_ids'] = course_ids
         return context 
 
 class CourseDetail(DetailView):
@@ -246,6 +255,11 @@ class CourseDetail(DetailView):
         # Add in a QuerySet of all the books
         context['students'] = Student.objects.filter(courses_in__id = 
         self.kwargs['course_id'])
+        context['instructors'] = Instructor.objects.filter(courses_taught__id = 
+        self.kwargs['course_id'])
+
+        context['files'] = File.objects.filter(owner__cnet_id = 
+        self.kwargs['cnet_id'])
         return context
 
 class StudentDetail(DetailView):
@@ -254,15 +268,21 @@ class StudentDetail(DetailView):
     context_object_name = 'student'
 
     def get_context_data(self, **kwargs):
+        student_id = self.kwargs['student_id']
         # Call the base implementation first to get a context
         context = super(StudentDetail, self).get_context_data(**kwargs)
         # Add in a QuerySet of all the books
-        context['courses_in'] = Course.objects.filter(student__id = 
-            self.kwargs['student_id'])
+        context['courses_in'] = Course.objects.filter(student__id = student_id)
+            
+        context['cnet_id'] = Student.objects.get(id = student_id).cnet_id
         return context
 
 
 def get_courses_post(request):
+    '''
+    This function is used to extract courses selected from a dynamic form 
+    populated with potential classes the user will want to download.
+    '''
     courses = []
     for i in range(1, len(request.POST) + 1):
         if request.POST.get('course' + str(i)):
@@ -271,6 +291,10 @@ def get_courses_post(request):
     return courses
 
 def get_courses_get(request):
+    '''
+    This function is used to extract courses from a dynamic form populated with
+    the classes the user wants to view demographic information about.
+    '''
     courses = []
     for i in range(1, len(request.GET) + 1):
         if request.GET.get('course' + str(i)):
@@ -283,7 +307,7 @@ def get_courses_get(request):
 
 from django.db.models.fields.related import ManyToManyField
 
-def to_dict(instance):
+def to_dict(instance, ignore_m2m = False):
     '''
     This function is able to turn model instances into an easier form to digest
     for any plotting that might be done.
@@ -291,7 +315,7 @@ def to_dict(instance):
     opts = instance._meta
     data = {}
     for f in opts.concrete_fields + opts.many_to_many:
-        if isinstance(f, ManyToManyField):
+        if isinstance(f, ManyToManyField) and (not ignore_m2m):
             if instance.pk is None:
                 data[f.name] = []
             else:
@@ -302,16 +326,49 @@ def to_dict(instance):
     return data
 
 
-def user_classes_plot(request, cnet_id):
+def user_classes_plot(request, cnet_id, course_ids):
     '''
     This plot will display information about all the classes the user has 
     uploaded to Whiteboard.
     '''
+    test_names = ['CLASS 1', 'CLASS 2', cnet_id]
+    test_nums = [40, 50, 100]
+
+    # If we recieve course_ids, that means that the user has hand selected
+    # the classes they want to retrieve information about.  Thus, the plot 
+    # presented will only attain information for those selected courses.  
+    # (Still needs to be fully implemented)
+    if course_ids != 'No_courses_selected':
+        course_ids = course_ids.split('/')
+        course_ids = [int(course_id) for course_id in course_ids]
+        test_names[0] = 'Override CNET_ID'
+    else:
+        courses = Course.objects.filter(student__cnet_id = cnet_id)
+    
     # print('demographics received user courses!!!', courses)
     response = HttpResponse(content_type='image/png')
+    plt.figure(figsize=(10, 10))
+
+
+
+    plt.pie(test_nums, labels=test_names)
+    plt.savefig(response)
+    plt.close()
+
+    return response
+
+
+def single_class_plot(request, course_id):
+    '''
+    This plot will display information pertaining to a single class.
+    '''
+
+
+    response = HttpResponse(content_type='image/png')
+
     plt.figure(figsize=(4, 4))
 
-    test_names = ['CLASS 1', 'CLASS 2', cnet_id]
+    test_names = ['MAJOR 1', 'MAJOR 2', 'course id is: ' + str(course_id)]
     test_nums = [40, 50, 100]
 
     plt.pie(test_nums, labels=test_names)

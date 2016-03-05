@@ -7,14 +7,26 @@
 <h1>{{ course.name }}</h1>
 
 
-<p>Downloaded?  {{ course.downloaded }}</p>
+<p> <img src="{% url 'single_class_plot' course_id=course.id %}" 
+alt="Class Stats" />
+
+
+</p>
 
 
 
 <p> 
 
-Taken by: 
+<b>
+{% if students %}
+Also taken by:
+{% else %}
+No Students found.  Chalk has likely cleared the data because the class is not
+recent enough.
+{% endif %}
+</b> 
 {% for student in students %}
+
 
 <li><a href="{% url 'view_student' student_id=student.id %}">
             {{ student.cnet_id }}</a></li>
@@ -25,7 +37,18 @@ Taken by:
 
 <p>
 
+
+
+<b>
+{% if files %}
 My Files:
+{% else %}
+You have no files for this class
+</b>
+
+
+
+{% endif %}
 
 {% for file in files %}
 

@@ -10,14 +10,15 @@
 
 </p>
 
- <a href="{% url 'dl_query' %}">Download more classes</a>
- <a href="{% url 'view_courses' cnet_id=cnet_id %}">View My Courses</a>
+<l><a href="{% url 'dl_query' %}">Download more classes</a></l>
+<l><a href="{% url 'view_courses' cnet_id=cnet_id %}">View My Courses</a></l>
 
 
  <h2>Classes Previously Downloaded</h2>
  <ul>
     {% for course in all_courses %}
-    <li>{{ course.name }}</li>
+    <li><a href="{% url 'course_detail' course_id=course.id %}">
+            {{ course.name }}</a></li>
     {% endfor %} 
 </ul>
 

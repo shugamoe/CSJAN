@@ -14,7 +14,7 @@
 Classes Taken: 
 {% for course in courses_in %}
 
-<li><a href="{% url 'course_detail' course_id=course.id %}">
+<li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
             {{ course.name }}</a></li>
 
 {% endfor %}

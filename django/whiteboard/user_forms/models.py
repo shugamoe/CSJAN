@@ -49,7 +49,7 @@ class Student(models.Model):
 
 
 class Instructor(models.Model):
-    Course = models.ManyToManyField(Course)
+    courses_taught = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     email = models.CharField(max_length=100)
@@ -60,7 +60,7 @@ class Instructor(models.Model):
     
 
 class Assistant(models.Model):
-    Course = models.ManyToManyField(Course)
+    courses_taught = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     email = models.CharField(max_length=100)

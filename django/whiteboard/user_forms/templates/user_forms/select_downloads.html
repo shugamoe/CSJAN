@@ -10,7 +10,7 @@
 {% csrf_token %}
 {% for course in courses %}
     <input type="checkbox" name="course{{ forloop.counter }}" id="course{{ forloop.counter }}" value="{{ course }}" />
-    <label for="course{{ forloop.counter }}">{{ course }}</label><br />
+    <label for="course{{ forloop.counter }}">{{ course }}</label><br/>
 {% endfor %}
   Re-enter CNET Password<br>
     <input type="password" name="cnet_pw">
