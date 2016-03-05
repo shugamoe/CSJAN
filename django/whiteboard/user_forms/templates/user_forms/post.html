@@ -17,7 +17,8 @@
  <h2>Classes Previously Downloaded</h2>
  <ul>
     {% for course in all_courses %}
-    <li>{{ course.name }}</li>
+    <li><a href="{% url 'course_detail' course_id=course.id %}">
+            {{ course.name }}</a></li>
     {% endfor %} 
 </ul>
 

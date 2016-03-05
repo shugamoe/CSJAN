@@ -11,7 +11,7 @@ urlpatterns = [
         views.select_downloads, name='select_downloads'),
 
     url(r'^session=(?P<session_id>[0-9]+)/post/$', views.post, name='post'),
-    url(r'^dl_info$', views.get_info, name='dl_query'),
+    url(r'^dl_info$', views.get_chalk_info, name='dl_query'),
     url(r'^view_stats$', views.view_stats, name='view_stats'),
     url(r'^view_courses/(?P<cnet_id>[a-zA-Z0-9]+)$', views.CourseList.as_view()
         , name='view_courses'),

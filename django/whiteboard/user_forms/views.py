@@ -22,8 +22,12 @@ TEST_COURSES_1 = ['CMSC 122', 'MATH 195']
 TEST_COURSES_2 = ['SEXY 101', 'FUCK 504']
 
 
-def get_info(request):
-    print('get_info view')
+def get_chalk_info(request):
+    '''
+    This view is written to obtain user credentials and class filters for 
+    Chalk.
+    '''
+    print('get_chalk_info view')
     print()
     if request.method == 'POST':
         form = SessionForm(request.POST)
@@ -48,6 +52,10 @@ def get_info(request):
 
 
 def start(request):
+    '''
+    This view simply renders the start page, where the user can choose between
+    downloading classes from CHalk or viewing stats.
+    '''
     print('At start page')
     return render(request, 'user_forms/start.html')
 
@@ -58,15 +66,15 @@ def view_stats(request):
     
 
 def select_downloads(request, session_id, cnet_id):
-    print('select downloads view')
-    print()
-    print(session_id)
+    '''
+    After the user has provided their chalk information, the Chalk crawler 
+    retrieves a list of matching courses.  This view brings up a page where
+    the user can confirm which classes they want from these matching courses.
+    '''
     session = get_object_or_404(Session, pk=session_id)
     
     if request.method == 'POST':
-
-        # cnet_pw = request.POST.get('cnet_pw')
-
+        cnet_pw = request.POST.get('cnet_pw')
         courses = get_courses_post(request)
 
         print('courses should be here: ', courses)
@@ -86,18 +94,23 @@ def select_downloads(request, session_id, cnet_id):
             return HttpResponseRedirect(reverse('post', \
                                             args=(session.id,)))
     else:
-        print('Session ID: {}'.format(session_id))
         courses = Course.objects.filter(sessions__id = session_id)
-        print('courses should be here', courses)
+
     return render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': courses})
 
 
 def get_cnet_id(request):
+    '''
+    This view is called when the user wishes to view their statistics.  The 
+    user enters their CNET ID so that the website can retrieve all of the 
+    classes associated with that CNET_ID.
+    '''
     print('getting cnet id')
     if request.method == 'POST':
         cnet_id = request.POST.get('cnet_id')
         print('CNET ID is {}'.format(cnet_id))
+
         if not cnet_id:
             return render(request, 'user_forms/get_cnet_id.html', \
             {'error_message': "You didn't enter a CNET ID"})
@@ -109,8 +122,15 @@ def get_cnet_id(request):
 
 
 def post(request, session_id):
+    '''
+    This view is called after the user has confirmed their choice of classes to
+    download.  The view will retrieve all courses downloaded by the user in
+    previous sessions as well as display courses selected for download in the
+    current session.
+    '''
     session = get_object_or_404(Session, pk=session_id)
-    all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id).distinct()
+    all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id)\
+    .filter(downloaded=True).distinct()
     return render(request, 'user_forms/post.html',
                     {'cnet_id': session.cnet_id,
                       'courses': session.course_set.filter(downloaded=True),
@@ -201,20 +221,6 @@ def dl_specific_courses(course_list, credentials_tuple):
 
     pass
 
-def dl_all_courses(cleaned_data):
-    '''
-    This function will call the Chalk Crawler and Directory Crawler if the user
-    desires to download all their courses.
-    '''
-    # Pass the cleaned_data dict
-
-
-    pass
-
-
-
-
-
 
 class CourseList(ListView):
     model = Course
@@ -263,6 +269,10 @@ class StudentDetail(DetailView):
 
 
 def get_courses_post(request):
+    '''
+    This function is used to extract courses selected from a dynamic form 
+    populated with potential classes the user will want to download.
+    '''
     courses = []
     for i in range(1, len(request.POST) + 1):
         if request.POST.get('course' + str(i)):
@@ -271,6 +281,10 @@ def get_courses_post(request):
     return courses
 
 def get_courses_get(request):
+    '''
+    This function is used to extract courses from a dynamic form populated with
+    the classes the user wants to view demographic information about.
+    '''
     courses = []
     for i in range(1, len(request.GET) + 1):
         if request.GET.get('course' + str(i)):
