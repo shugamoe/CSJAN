@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 
 from .forms import DownloadForm, CourseForm, SessionForm
-from .models import Session, Course, Student, Instructor, Assistant
+from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
 
@@ -54,7 +54,7 @@ def get_chalk_info(request):
 def start(request):
     '''
     This view simply renders the start page, where the user can choose between
-    downloading classes from CHalk or viewing stats.
+    downloading classes from Chalk or viewing stats.
     '''
     print('At start page')
     return render(request, 'user_forms/start.html')
@@ -237,8 +237,9 @@ class CourseList(ListView):
         # I also want to pass the cnet_id and not just use it to filter 
         # for courses.
         context['cnet_id'] = self.kwargs['cnet_id']
-        get = get_courses_get(self.request)
-        context['form_processed'] = get
+        course_ids = get_courses_get(self.request)
+        course_ids = '/'.join(course_ids)
+        context['course_ids'] = course_ids
         return context 
 
 class CourseDetail(DetailView):
@@ -252,6 +253,11 @@ class CourseDetail(DetailView):
         # Add in a QuerySet of all the books
         context['students'] = Student.objects.filter(courses_in__id = 
         self.kwargs['course_id'])
+        context['instructors'] = Instructor.objects.filter(courses_taught__id = 
+        self.kwargs['course_id'])
+
+        context['files'] = File.objects.filter(owner__cnet_id = 
+        self.kwargs['cnet_id'])
         return context
 
 class StudentDetail(DetailView):
@@ -297,7 +303,7 @@ def get_courses_get(request):
 
 from django.db.models.fields.related import ManyToManyField
 
-def to_dict(instance):
+def to_dict(instance, ignore_m2m = False):
     '''
     This function is able to turn model instances into an easier form to digest
     for any plotting that might be done.
@@ -305,7 +311,7 @@ def to_dict(instance):
     opts = instance._meta
     data = {}
     for f in opts.concrete_fields + opts.many_to_many:
-        if isinstance(f, ManyToManyField):
+        if isinstance(f, ManyToManyField) and (not ignore_m2m):
             if instance.pk is None:
                 data[f.name] = []
             else:
@@ -316,16 +322,49 @@ def to_dict(instance):
     return data
 
 
-def user_classes_plot(request, cnet_id):
+def user_classes_plot(request, cnet_id, course_ids):
     '''
     This plot will display information about all the classes the user has 
     uploaded to Whiteboard.
     '''
+    test_names = ['CLASS 1', 'CLASS 2', cnet_id]
+    test_nums = [40, 50, 100]
+
+    # If we recieve course_ids, that means that the user has hand selected
+    # the classes they want to retrieve information about.  Thus, the plot 
+    # presented will only attain information for those selected courses.  
+    # (Still needs to be fully implemented)
+    if course_ids != 'No_courses_selected':
+        course_ids = course_ids.split('/')
+        course_ids = [int(course_id) for course_id in course_ids]
+        test_names[0] = 'Override CNET_ID'
+    else:
+        courses = Course.objects.filter(student__cnet_id = cnet_id)
+    
     # print('demographics received user courses!!!', courses)
     response = HttpResponse(content_type='image/png')
+    plt.figure(figsize=(10, 10))
+
+
+
+    plt.pie(test_nums, labels=test_names)
+    plt.savefig(response)
+    plt.close()
+
+    return response
+
+
+def single_class_plot(request, course_id):
+    '''
+    This plot will display information pertaining to a single class.
+    '''
+
+
+    response = HttpResponse(content_type='image/png')
+
     plt.figure(figsize=(4, 4))
 
-    test_names = ['CLASS 1', 'CLASS 2', cnet_id]
+    test_names = ['MAJOR 1', 'MAJOR 2', 'course id is: ' + str(course_id)]
     test_nums = [40, 50, 100]
 
     plt.pie(test_nums, labels=test_names)
