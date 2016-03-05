@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.forms import ModelForm
 from django import forms
 import datetime
-
+import re
 QUARTER_CHOICES = (('Fall', 'Fall'), ('Winter', 'Winter'), \
                                     ('Spring', 'Spring'), ('Summer', 'Summer'))
 
@@ -20,52 +20,80 @@ class Session(models.Model):
 
 
 class Course(models.Model):
-    Session = models.ForeignKey(Session)
-    course_id = models.CharField(max_length=200, blank=True)
+    sessions = models.ManyToManyField(Session) # Don't worry about this Andy.
+    name = models.CharField(max_length=200, blank=True)
     downloaded = models.BooleanField(default=False)
-
-    # department = models.CharField(max_length=200, blank=True)
-    # dept_code = models.CharField(max_length=10, blank=True)
-    # year = models.IntegerField(blank=True)
-    # quarter = models.CharField(max_length=42, blank=True)
+    quarter = models.CharField(max_length=42)
+    dept = models.CharField(max_length=4)
+    year = models.IntegerField()
 
     def __str__(self):
-        return '{}'.format(self.course_id)
+        return str(self.name)
 
 
 class Student(models.Model):
-    Course = models.ForeignKey(Course)
+    courses_in = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
+    email = models.CharField(max_length=100)
     cnet_id = models.CharField(max_length=42)
+    program = models.CharField(max_length=50)
+    duplicates = models.BooleanField(default=False)
+
+
+    def full_name(self):
+        return str(self.first_name + ' '  + self.last_name)
+
+    def __str__(self):
+        return '{}'.format(self.cnet_id)
 
 
 class Instructor(models.Model):
-    Course = models.ForeignKey(Course)
+    courses_taught = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
+    email = models.CharField(max_length=100)
+    duplicates = models.BooleanField(default=False)
+
+    def cnet_id(self):
+        return re.search("^([\w-]*\w)", self.email).group()
     
+    def full_name(self):
+        return str(self.first_name + ' ' + self.last_name)
 
 class Assistant(models.Model):
-    Course = models.ForeignKey(Course)
+    courses_taught = models.ManyToManyField(Course)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
+    email = models.CharField(max_length=100)
+    program = models.CharField(max_length=50)
+    duplicates = models.BooleanField(default=False)
+
+    def cnet_id(self):
+        return re.search("^([\w-]*\w)", self.email).group()
+
+    def full_name(self):
+        return str(self.first_name + ' ' + self.last_name)
 
 
-class SessionForm(ModelForm):
-    quarter = forms.MultipleChoiceField(label='Quarter(s)', \
-                                        choices=QUARTER_CHOICES)
-    year = forms.IntegerField(label='Course year', initial=datetime.date.today().year)
-    cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
-    cnet_id = forms.CharField(label='CNET ID')
-    class Meta:
-        model = Session
-        fields = ['cnet_id','cnet_pw', 'quarter', 'year']
+class File(models.Model):
+    owner = models.ForeignKey(Student)
+    heading = models.CharField(max_length=100)
+    subheading = models.TextField()
+    body = models.TextField(blank = True)
+    course = models.CharField(max_length=100)
+    path = models.CharField(max_length=300)
+
+    def filename(self):
+        # Extract the filename from the end of the path and return it
+        pattern = '([\w.-]+\.[\w]+)$'
+        filename = re.search(pattern, str(self.path))
+
+        if filename != None:
+            filename = filename.group()
+            return filename
+        else:
+            return str(self.path)
 
 
-class CourseForm(ModelForm):
-
-    class Meta:
-        model = Course
-        fields = ['downloaded']
 

@@ -1,0 +1,15 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="" method="post">
+{% csrf_token %}
+  Please Enter CNET ID<br>
+    <input type="text" name="cnet_id">
+<input type="submit" value="View My Stats"/>
+</form>
+
+{% endblock %}

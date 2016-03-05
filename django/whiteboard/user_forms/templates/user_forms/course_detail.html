@@ -1,0 +1,89 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+<!-- Course name header -->
+<h1>{{ course.name }}</h1>
+
+
+<!-- Instructors and TAs Section -->
+
+<!-- There will always be a course instructor -->
+<ul style="float:left;">
+<p><b>Taught by:</b></p> 
+{% for instructor in instructors %}
+{% if instructor.duplicates %}
+<l>{{ instructor.full_name }}*</l>
+{% else %}
+<l>{{ instructor.full_name }}</l>
+{% endif %}
+{% endfor %}
+</ul>
+
+<!-- Some classes might not have TAs? -->
+{% if assistants %}
+<ul style="float:left;">
+<p><b>TAs:</b></p>
+{% for assistant in assistants %}
+{% if assistant.duplicates %}
+<l>{{ assistant.full_name }}*</l>
+{% else %}
+<l>{{ assistant.full_name }}</l>
+{% endif %}
+{% endfor %}
+</ul>
+{% endif %}
+    
+<!-- End -->
+
+
+<!-- Single Class Plot -->
+<div style="clear:both;"><img src="{% url 'single_class_plot' course_id=course.id %}"alt="Class Stats" /></div>
+<!-- Single Class Plot -->
+
+
+
+<!-- Students in Class Section -->
+<ul style="float:left;">
+
+<b>
+{% if students %}
+Taken by:
+{% else %}
+No Students found.  Chalk has likely cleared the data because the class is not
+recent enough.
+{% endif %}
+</b> 
+{% for student in students %}
+
+<li><a href="{% url 'view_student' student_id=student.id %}">
+{% if student.duplicates %}
+{{ student.cnet_id }}*</a></li>
+{% else %}
+{{ student.cnet_id }}</a></li>
+{% endif %}
+
+{% endfor %}
+</ul>
+<!-- End -->
+
+
+<!-- Current User Files for Class Section -->
+<ul style="float:left;">
+<p>
+<b>
+{% if files %}
+My Files:
+{% else %}
+You have no files for this class
+{% endif %}
+</b>
+{% for file in files %}
+
+<li>{{ file.filename }}</li>
+{% endfor %}
+</p>
+</ul>
+<!-- End  -->
+{% endblock %}

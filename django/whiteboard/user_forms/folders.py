@@ -5,12 +5,14 @@
 
 import os
 import subprocess
+import re
+import time
 
 
 
 
 
-TEST_PATH_DICT = {'STAT 24400 (Winter 16) Statistical Theory.Method-1' : 
+TEST_PATH_DICT = {'STAT 24400 (Winter 16) Statistical Theory.Method-1': 
                {'Announcements': None, 'Syllabus' : None, 'Assignments' : None, 
                   'Course Material' : {'Lectures' : None, \
                                        'Stigler Lecture Notes' : None}}}
@@ -40,7 +42,7 @@ def make_dirs(dirs_dict, cur_path):
             make_dirs(dirs_dict[key], cur_path + '/' + key)
 
 
-def get_folder_name(proposed_dir_name):
+def check_folder_name(proposed_dir_name):
     '''
     Given a proposed directory name, this function replaces any '/' characters 
     (which cannot be part of a directory name) with a '.' character.
@@ -52,7 +54,8 @@ def get_folder_name(proposed_dir_name):
         correct_dir_name: a string of the correct directory name.  Will not 
                           include a '/' character.
     '''
-    correct_dir_name = proposed_dir_name.replace('/', '.')
+    # correct_dir_name = proposed_dir_name.replace('/', '.')
+    correct_dir_name = re.sub(r'/|:', r'_', proposed_dir_name)
     return correct_dir_name
 
 
@@ -68,26 +71,76 @@ def find_pdfs(path):
   return pdf_list
 
 
-
-
-
-
-def test_batch_pdf():
-  path = os.getcwd()
+def get_pdf_paths_and_strings(user):
+  path = '../../Classes/'
+  path += user
+  print(path)
   pdf_list = find_pdfs(path)
 
   pdf_strings = []
   for pdf in pdf_list:
-    # pdf_strings.append(os.system('pdf2txt.py' + ' ' + "'" + str(pdf) + "'"))
-    # thing = subprocess.check_output(['pdf2txt.py', "'" + str(pdf) + "'"])
+    # Use command line utility because of python version shennanigans.
     thing = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf) + "'",\
                                       shell=True)
+    thing = thing.decode('utf-8')
+    thing = re.sub(r'\n|\x0c', r' ', thing)
     pdf_strings.append(thing)
   return pdf_strings
+
+
+def convert_pdf(pdf_path):
+  text = subprocess.check_output('pdf2txt.py' + ' ' + "'" + str(pdf_path) + "'",
+                                      shell=True)
+  text = text.decode('utf-8')
+  final_string = re.sub(r'\n|\x0c', r' ', text)
+  
 
 def test():
   print('IMPORTED FUNCTION FROM OTHER FOLDER')
 
 
+def get_file_mod_times():
+  '''
+  '''
+  file_list = subprocess.check_output("find -not -name '*.ini'", shell = True)
+  file_list = file_list.decode('utf-8')
+  file_list = file_list.split('\n')
 
 
+  file_mod_dict = {}
+
+  print(file_list)
+
+  pattern = '([\w.-]+\.[\w]+)$'
+  for file_path in file_list:
+    file_name = re.search(pattern, file_path)
+
+    if file_name != None:
+      file_name = file_name.group()
+      file_mod_dict[file_name] = time.ctime(os.path.getmtime(file_path))
+
+  return file_mod_dict
+
+
+
+# from pdfminer.pdfinterp import PDFResourceManager, process_pdf
+# from pdfminer.converter import TextConverter
+# from pdfminer.layout import LAParams
+# from cStringIO import StringIO
+
+# def convert_pdf(path):
+
+#     rsrcmgr = PDFResourceManager()
+#     retstr = StringIO()
+#     codec = 'utf-8'
+#     laparams = LAParams()
+#     device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+
+#     fp = file(path, 'rb')
+#     process_pdf(rsrcmgr, device, fp)
+#     fp.close()
+#     device.close()
+
+#     str = retstr.getvalue()
+#     retstr.close()
+#     return str

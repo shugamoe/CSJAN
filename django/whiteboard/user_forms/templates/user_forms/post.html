@@ -1,18 +1,36 @@
-<h1>Whiteboard</h1>
+{% extends 'user_forms/base.html' %}
 
 
-<p>Congratulations {{ cnet_id }}!  You have downloaded:
+{% block body %}
+
+<p>Congratulations {{ cnet_id }}!  You are now downloading:
 {% for course in courses %}
     <l>{{ course }}</l>
 {% endfor %}
 
 </p>
 
- <a href="{% url 'start' %}">Download more classes</a> 
+<l><a href="{% url 'dl_query' %}">Download more classes</a></l>
+<l><a href="{% url 'view_courses' cnet_id=cnet_id %}">View My Stats</a></l>
+
+
+ <h2>Classes Previously Downloaded</h2>
+ <ul>
+    {% for course in all_courses %}
+    <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+            {{ course.name }}</a></li>
+    {% endfor %} 
+</ul>
+
+
+{% endblock %}
+
+
+
+
+
+
 
 <!-- Will probably need to format this to look nicely, this can be a good
      page to be a 'jumping off point' to look at demographic info and what not
       -->
-
-
-
