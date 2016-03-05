@@ -227,8 +227,8 @@ class CourseList(ListView):
     context_object_name = 'course_list'
 
     def get_queryset(self):
-        self.cnet_id = self.kwargs['cnet_id']
-        return Course.objects.filter(student__cnet_id=self.cnet_id)\
+        cnet_id = self.kwargs['cnet_id']
+        return Course.objects.filter(student__cnet_id=cnet_id)\
              .order_by('dept')
 
 
@@ -260,6 +260,8 @@ class CourseDetail(DetailView):
         context['assistants'] = Assistant.objects.filter(courses_taught__id = 
         course_id)
 
+
+        # This will retrieve the user's files.
         context['files'] = File.objects.filter(owner__cnet_id = 
         self.kwargs['cnet_id'])
 

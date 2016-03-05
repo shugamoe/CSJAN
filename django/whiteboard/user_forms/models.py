@@ -78,13 +78,13 @@ class Assistant(models.Model):
 
 class File(models.Model):
     owner = models.ForeignKey(Student)
-    heading = models.CharField(max_length=100)
-    subheading = models.TextField()
+    course = models.ForeignKey(Course)
+    heading = models.CharField(max_length=100, blank = True)
+    description = models.TextField(blank = True)
     body = models.TextField(blank = True)
-    course = models.CharField(max_length=100)
     path = models.CharField(max_length=300)
 
-    def filename(self):
+    def file_name(self):
         # Extract the filename from the end of the path and return it
         pattern = '([\w.-]+\.[\w]+)$'
         filename = re.search(pattern, str(self.path))
@@ -94,6 +94,9 @@ class File(models.Model):
             return filename
         else:
             return str(self.path)
+
+    def __str__(self):
+        return str(self.file_name())
 
 
 
