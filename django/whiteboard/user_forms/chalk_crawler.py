@@ -123,7 +123,7 @@ class Chalk_Page:
                     announcement_text = ''
 
                     for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
-                        announcement_text += file_or_folder.text + '\n' 
+                        announcement_text += file_or_folder.text + '\n\n' 
 
                 else:
                     content = self.browser.find_element_by_id('content')
@@ -173,7 +173,7 @@ class Chalk_Page:
                             if img.get_attribute('class') == 'item_icon':
                                 if 'folder_on' in img.get_attribute('src'):
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
-                                    material_dict[component][folder_name] = self.gen_folder(unit, '{:}/{:}/{:}'.format(material_dict, component, folder_name))
+                                    material_dict[component][folder_name] = self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course[0][20:]), component, folder_name))
                                 
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
@@ -182,20 +182,21 @@ class Chalk_Page:
                                     s = requests.session()
                                     s.get(file_url, auth = (self.username, self.password))
                                     r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                                    with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, course[0][20:], component, unit_name), 'wb') as f:
+                                    with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course[0][20:]), component, unit_name), 'wb') as f:
                                         r.raw.decode_content = True
                                         f.write(r.content)  
 
                                 elif 'document_on' in img.get_attribute('src'):
                                     if self.check_tag_exists_in_web_element(unit, 'a'):
-                                        unit_name = unit.find_element_by_tag_name('a').text
-                                        file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                        s = requests.session()
-                                        s.get(file_url, auth = (self.username, self.password))
-                                        r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                                        with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, course[0][20:], component, unit_name), 'wb') as f:
-                                            r.raw.decode_content = True
-                                            f.write(r.content)  
+                                        for download_file in unit.find_elements_by_tag_name('a'):
+                                            unit_name = download_file.text
+                                            file_url = download_file.get_attribute('href')   
+                                            s = requests.session()
+                                            s.get(file_url, auth = (self.username, self.password))
+                                            r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                            with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course[0][20:]), component, unit_name), 'wb') as f:
+                                                r.raw.decode_content = True
+                                                f.write(r.content)  
 
                             # download text for link_on, download text for all
 
@@ -246,23 +247,36 @@ class Chalk_Page:
             for unit_index in range(num_of_items):
                 inner_unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                 if self.check_tag_exists_in_web_element(inner_unit, 'img'):
-                    img = self.browser.find_element_by_tag_name('img')
+                    img = inner_unit.find_element_by_tag_name('img')
                     if img.get_attribute('class') == 'item_icon':
                         if 'folder_on' in img.get_attribute('src'):
                             folder_dict[local_dir.check_folder_name(inner_unit.text)] = self.gen_folder(inner_unit)
 
 
-                        elif 'file_on' in img.get_attribute('src')):
+                        elif 'file_on' in img.get_attribute('src'):
                             unit_name = inner_unit.find_element_by_tag_name('a').text
                             file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
-                                    
                             s = requests.session()
                             s.get(file_url, auth = (self.username, self.password))
                             r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                            with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, course[0][20:], component, unit_name), 'wb') as f:
+                            with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
                                 r.raw.decode_content = True
                                 f.write(r.content)  
-                        # elif 'document_on' in img.get_attribute('src')):
+                        
+
+                        elif 'document_on' in img.get_attribute('src'):
+                            if self.check_tag_exists_in_web_element(inner_unit, 'a'):
+                                for download_file in inner_unit.find_elements_by_tag_name('a'):
+                                    unit_name = download_file.text
+                                    file_url = download_file.get_attribute('href')
+                                    s = requests.session()
+                                    s.get(file_url, auth = (self.username, self.password))
+                                    r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                    with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
+                                        r.raw.decode_content = True
+                                        f.write(r.content)  
+
+
                         # download text for all
         self.browser.execute_script("window.history.go(-1)")
 
