@@ -252,14 +252,17 @@ class CourseDetail(DetailView):
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
-        context['students'] = Student.objects.filter(courses_in__id = 
-        self.kwargs['course_id'])
+        course_id = self.kwargs['course_id']
+        context['students'] = Student.objects.filter(courses_in__id = course_id
+        )
         context['instructors'] = Instructor.objects.filter(courses_taught__id = 
-        self.kwargs['course_id'])
+        course_id)
+        context['assistants'] = Assistant.objects.filter(courses_taught__id = 
+        course_id)
 
         context['files'] = File.objects.filter(owner__cnet_id = 
         self.kwargs['cnet_id'])
+
         return context
 
 class StudentDetail(DetailView):
@@ -271,10 +274,14 @@ class StudentDetail(DetailView):
         student_id = self.kwargs['student_id']
         # Call the base implementation first to get a context
         context = super(StudentDetail, self).get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
         context['courses_in'] = Course.objects.filter(student__id = student_id)
             
         context['cnet_id'] = Student.objects.get(id = student_id).cnet_id
+
+
+        course_ids = get_courses_get(self.request)
+        course_ids = '/'.join(course_ids)
+        context['course_ids'] = course_ids
         return context
 
 
@@ -326,13 +333,14 @@ def to_dict(instance, ignore_m2m = False):
     return data
 
 
-def user_classes_plot(request, cnet_id, course_ids):
+def student_classes_plot(request, cnet_id, course_ids):
     '''
-    This plot will display information about all the classes the user has 
-    uploaded to Whiteboard.
+    This plot will display information about all the classes the Student is 
+    included in on Whiteboard.  ALternatively, if the user selects only certain
+    classes that the student is in
     '''
-    test_names = ['CLASS 1', 'CLASS 2', cnet_id]
-    test_nums = [40, 50, 100]
+    test_names = ['Stud_cls_plt', 'CLASS 2', cnet_id]
+    test_nums = [100, 50, 100]
 
     # If we recieve course_ids, that means that the user has hand selected
     # the classes they want to retrieve information about.  Thus, the plot 
@@ -347,7 +355,7 @@ def user_classes_plot(request, cnet_id, course_ids):
     
     # print('demographics received user courses!!!', courses)
     response = HttpResponse(content_type='image/png')
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(6, 6))
 
 
 
@@ -368,7 +376,7 @@ def single_class_plot(request, course_id):
 
     plt.figure(figsize=(4, 4))
 
-    test_names = ['MAJOR 1', 'MAJOR 2', 'course id is: ' + str(course_id)]
+    test_names = ['MAJOR 1', '1_cls_plt', 'course id is: ' + str(course_id)]
     test_nums = [40, 50, 100]
 
     plt.pie(test_nums, labels=test_names)

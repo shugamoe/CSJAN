@@ -3,37 +3,69 @@
 
 {% block body %}
 
-
+<!-- Basic Info Section -->
 <h1>{{ student.full_name }}</h1>
+
 
     <l> {{ student.email }}</l> | 
     <l>Program of Study: {{ student.program }}</l>
+<!-- End of Basic Info Section -->
 
-<p> 
 
-Classes Taken: 
-{% for course in courses_in %}
+<!-- Plot of Student Classes -->
+<div style="clear:both;">
+{% if course_ids %}
+{{ course_ids }}
+<img src="{% url 'student_classes_plot' cnet_id=student.cnet_id 
+course_ids=course_ids %}"alt="Class Stats" /> 
+{% else %}
+<img src="{% url 'student_classes_plot' cnet_id=student.cnet_id course_ids='No_courses_selected' %}" 
+alt="Class Stats" />
+{% endif %}
+</div>
+<!-- End of Plot of Student Classes -->
+
+<!-- Classes Taken/Select -->
+<div style="clear:both;">
+<ul style="float:left;">
+<b>Classes Taken: </b>
+<form action="" method="get">
+{% csrf_token %}
+    {% for course in courses_in %}
+    <input type="checkbox" name="course{{ forloop.counter }}" id="course{{ 
+    forloop.counter }}" value="{{ course.id }}"/>
+    <label for="course{{ forloop.counter }}"><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">{{ course.name }}</a>
+    </label><br/>
+    {% endfor %}
+<input type="submit" value="View Plot of Selected Classes"/>
+</form>
+<!-- {% for course in courses_in %}
 
 <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
             {{ course.name }}</a></li>
 
-{% endfor %}
-</p>
+{% endfor %} -->
+</ul>
 
 
-<p>
 
-Files:
 
+<ul style="float:left;">
+
+<b>
+{% if files %}
+My Files:
+{% else %}
+You have no files
+{% endif %}
+</b>
 {% for file in files %}
-
 <li>{{ file.filename }}</li>
-
 {% endfor %}
 
-
-
-
+</ul>
+</div>
 
 
 {% endblock %}
+
