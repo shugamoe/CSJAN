@@ -1,7 +1,6 @@
 import urllib
 import requests
 import getpass
-import shutil
 import os
 
 url = 'https://chalk.uchicago.edu/bbcswebdav/pid-3030087-dt-content-rid-6454815_1/xid-6454815_1?target=blank'
@@ -14,7 +13,6 @@ def go():
     s = requests.session()
     s.get(url, auth = (username, password))
     r = s.get(url, stream = True, auth = (username, password))
-    with open(os.getcwd() + '/test.pdf', 'wb') as f:
+    with open(os.getcwd() + '/test', 'wb') as f:
         r.raw.decode_content = True
-        shutil.copyfileobj(r.raw, f)
-
+        f.write(r.content)

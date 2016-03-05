@@ -14,12 +14,12 @@ class Chalk_Page:
     def __init__(self, quarter, year): # dict
 
         self.url = 'https://chalk.uchicago.edu'
-        self.username = 'andyz422'
-        # self.password = dict['password']
+        self.username = ''
+        self.password = ''
         self.quarter = quarter # dict['quarter']
         self.year = year # dict['year']
         self.default_folder = '../../Classes'
-        self.browser, self.opener = self.login() 
+        self.browser = self.login() 
 
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
@@ -32,26 +32,21 @@ class Chalk_Page:
 
     def login(self):
 
-        username = input('enter username: ') # self.username
-        password = getpass.getpass('enter password: ') # self.password
+        self.username = input('enter username: ') # self.username
+        self.password = getpass.getpass('enter password: ') # self.password
         
         browser = webdriver.Firefox()
         browser.implicitly_wait(2)
 
         browser.get(self.url)
-        browser.find_element_by_name('user_id').send_keys(username)
-        browser.find_element_by_name('password').send_keys(password)
+        browser.find_element_by_name('user_id').send_keys(self.username)
+        browser.find_element_by_name('password').send_keys(self.password)
 
         login_form = browser.find_element_by_id('entry-login')
         login_form.submit() 
 
-        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-        password_mgr.add_password(None, self.url, username, password)
-        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
-        opener = urllib.request.build_opener(handler)
-        urllib.request.install_opener(opener)
 
-        return browser, opener
+        return browser
 
 
     def compile_courses(self): 
@@ -159,10 +154,10 @@ class Chalk_Page:
             elif item.text not in ['Home', 'Announcements', 'Send Email', \
                 'My Grades', 'Discussion Board', 'Discussions', \
                 'Library Course Reserves', 'Tools', 'Groups']:
-                item_name = item.text
 
                 component = local_dir.check_folder_name(item.text)
                 material_dict[component] = {}
+                local_dir.make_dirs(self.course_material_dict, self.default_folder)
                 item.find_element_by_tag_name('a').click()
                 # store item_url
 
@@ -183,9 +178,13 @@ class Chalk_Page:
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                    cookies = self.browser.get_cookies()
                                     
-                                    urllib.request.urlretrieve(file_url)
+                                    s = requests.session()
+                                    s.get(file_url, auth = (self.username, self.password))
+                                    r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                    with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, course[0][20:], component, unit_name), 'wb') as f:
+                                        r.raw.decode_content = True
+                                        f.write(r.content)
 
                                     
 
