@@ -1,0 +1,19 @@
+input, function "crawl_multiple_classes" from directory_crawler.py:
+
+		       instructors                         TAs                    Students
+[["hello_world 101", ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]]
+
+>output:
+
+{'hello_world 101':
+	{'students':
+		{'Andy Zhu':
+			{'e-mail': 'andyz422@uchicago.edu', 'program': 'College: Computational and Applied Mathematics', 'mult_entries': None, 'cnet_id': 'andyz422', 'last': 'Zhu', 'first': 'Andy'}},
+	 'TAs':
+		{'Julian McClellan':
+			{'e-mail': 'jmcclellan@uchicago.edu', 'program': 'College: Economics', 'mult_entries': None, 'cnet_id': 'jmcclellan', 'last': 'McClellan', 'first': 'Julian'}},
+	 'instructors':
+		{'Matthew Wachs':
+			{'faculty exchange': 'Ry 175-A', 'phone': '(773) 702-6497', 'mult_entries': None, 'title': 'Lecturer', 'e-mail': 'mwachs@uchicago.edu', 'last': 'Wachs', 'first': 'Matthew'},
+		 'Anne Rogers':
+			{'faculty exchange': 'Ry 162-B', 'phone': '(773) 349-2670', 'mult_entries': None, 'title': 'Associate Professor, Institute Senior Fellow', 'e-mail': 'amr@cs.uchicago.edu', 'last': 'Rogers', 'first': 'Anne'}}}}
