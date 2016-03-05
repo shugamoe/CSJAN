@@ -7,7 +7,7 @@ import getpass
 import folders as local_dir
 import os
 import urllib
-import pickle
+import requests
 
 class Chalk_Page:
     
@@ -50,7 +50,7 @@ class Chalk_Page:
         handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
         opener = urllib.request.build_opener(handler)
         urllib.request.install_opener(opener)
-        
+
         return browser, opener
 
 
@@ -183,12 +183,12 @@ class Chalk_Page:
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                    urllib.request.urlopen(self.url + file_url)
-                                    self.browser.refresh()
-                                    # urllib.request.urlretrieve(file_url, )
+                                    cookies = self.browser.get_cookies()
+                                    
+                                    urllib.request.urlretrieve(file_url)
 
+                                    
 
-                        
 
                         # elif 'document_on' in img.get_attribute('src')):
                         # download text for all
