@@ -202,8 +202,7 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     print(dictionary_for_julian)
             
 dummy_data = [["hello_world 101", ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]]
-crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
-    
+
     
     
     
