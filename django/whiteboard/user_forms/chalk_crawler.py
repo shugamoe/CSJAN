@@ -173,7 +173,7 @@ class Chalk_Page:
                             if img.get_attribute('class') == 'item_icon':
                                 if 'folder_on' in img.get_attribute('src'):
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
-                                    material_dict[component][folder_name] = self.gen_folder(unit)
+                                    material_dict[component][folder_name] = self.gen_folder(unit, '{:}/{:}/{:}'.format(material_dict, component, folder_name))
                                 
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
@@ -187,7 +187,7 @@ class Chalk_Page:
                                         f.write(r.content)  
 
                                 elif 'document_on' in img.get_attribute('src'):
-                                    if self.check_tag_exists_in_web_element(unit_name, 'a'):
+                                    if self.check_tag_exists_in_web_element(unit, 'a'):
                                         unit_name = unit.find_element_by_tag_name('a').text
                                         file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                         s = requests.session()
@@ -238,9 +238,9 @@ class Chalk_Page:
         return True 
 
 
-    def gen_folder(self, unit): 
+    def gen_folder(self, unit, path): 
         folder_dict = {}
-        unit.find_element_by_tag_name('a').click() # clicking 'Additional Practice problems'
+        unit.find_element_by_tag_name('a').click() 
         if self.check_id_exists('content_listContainer'):
             num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
             for unit_index in range(num_of_items):
@@ -250,13 +250,22 @@ class Chalk_Page:
                     if img.get_attribute('class') == 'item_icon':
                         if 'folder_on' in img.get_attribute('src'):
                             folder_dict[local_dir.check_folder_name(inner_unit.text)] = self.gen_folder(inner_unit)
-        self.browser.execute_script("window.history.go(-1)")
 
 
-                        # elif 'file_on' in img.get_attribute('src')):
-
+                        elif 'file_on' in img.get_attribute('src')):
+                            unit_name = inner_unit.find_element_by_tag_name('a').text
+                            file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
+                                    
+                            s = requests.session()
+                            s.get(file_url, auth = (self.username, self.password))
+                            r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                            with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, course[0][20:], component, unit_name), 'wb') as f:
+                                r.raw.decode_content = True
+                                f.write(r.content)  
                         # elif 'document_on' in img.get_attribute('src')):
                         # download text for all
+        self.browser.execute_script("window.history.go(-1)")
+
 
 
         return folder_dict
