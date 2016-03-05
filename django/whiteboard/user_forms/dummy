@@ -3,7 +3,7 @@ import requests
 import getpass
 import os
 
-url = 'https://chalk.uchicago.edu/bbcswebdav/pid-3030087-dt-content-rid-6454815_1/xid-6454815_1?target=blank'
+url = 'https://chalk.uchicago.edu/bbcswebdav/pid-3036956-dt-content-rid-6479904_1/xid-6479904_1'
 
 def go():    
 

@@ -187,14 +187,17 @@ class Chalk_Page:
                                         f.write(r.content)  
 
                                 elif 'document_on' in img.get_attribute('src'):
-                                    unit_name = unit.fine_element_by_tag_name('a').text
-                                    file_url = unit.find_element_by_tag_name('a').get_attribute('href')
+                                    if self.check_tag_exists_in_web_element(unit_name, 'a'):
+                                        unit_name = unit.find_element_by_tag_name('a').text
+                                        file_url = unit.find_element_by_tag_name('a').get_attribute('href')
+                                        s = requests.session()
+                                        s.get(file_url, auth = (self.username, self.password))
+                                        r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                        with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, course[0][20:], component, unit_name), 'wb') as f:
+                                            r.raw.decode_content = True
+                                            f.write(r.content)  
 
-                                    
-
-
-
-                            # download text for all
+                            # download text for link_on, download text for all
 
         self.course_list.append(course)
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
