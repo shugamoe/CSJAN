@@ -28,7 +28,6 @@ class Courses:
         self.file_list = []
 
         # self.access_courses(self.courses)
-        # local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
 
     def login(self):
@@ -130,10 +129,12 @@ class Courses:
                 self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(local_dir.check_folder_name(course))))
 
             elif item.text == 'Send Email':
+                list_of_tas = []
+                list_of_students = []
                 item.find_element_by_tag_name('a').click()
                 
                 self.browser.find_element_by_link_text('All Teaching Assistant Users').click()
-                list_of_tas = []
+                
                 if not self.check_id_exists('inlineReceipt_bad'):
                     list_of_tas = self.browser.find_element_by_id('stepcontent1').find_elements_by_tag_name('li')[0].text[3:].split('; ')
                 course_list.append(list_of_tas)
@@ -142,12 +143,11 @@ class Courses:
                 if self.check_link_text_exists('Select Users'):
                     self.browser.find_element_by_link_text('Select Users').click()
                     list_of_students_web_elements = self.browser.find_element_by_id('stepcontent1').find_element_by_name('USERS_AVAIL').find_elements_by_tag_name('option')
-                    list_of_students = []
                     for student_web_element in list_of_students_web_elements:
                         if student_web_element.text not in professor and student_web_element.text not in list_of_tas and 'PreviewUser' not in student_web_element.text:
                             list_of_students.append(student_web_element.text)
-                    course_list.append(list_of_students)
                     self.browser.execute_script("window.history.go(-1)")
+                course_list.append(list_of_students)
                 self.course_info.append(course_list)
 
 
@@ -177,30 +177,33 @@ class Courses:
                                     local_dir.make_dirs(self.course_material_dict, self.default_folder)
                                     self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course), component, folder_name), material_dict[component][folder_name])
                                 elif 'file_on' in img.get_attribute('src'):
-                                    
+                                    # self.download_file_or_doc(unit, local_dir.check_folder_name(course) + '/' + component)
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                     s = requests.session()
                                     s.get(file_url, auth = (self.username, self.password))
                                     r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                    print(r.headers.get('content-type'))
                                     with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course), component, unit_name), 'wb') as f:
                                         r.raw.decode_content = True
                                         f.write(r.content)  
 
                                 elif 'document_on' in img.get_attribute('src'):
                                     if self.check_tag_exists_in_web_element(unit, 'a'):
-                                        for download_file in unit.find_elements_by_tag_name('a'):       
+                                        for download_file in unit.find_elements_by_tag_name('a'): 
+                                            # self.download_file_or_doc(download_file, local_dir.check_folder_name(course) + '/' + component)      
                                             
                                             unit_name = download_file.text
                                             file_url = download_file.get_attribute('href')         
                                             s = requests.session()
                                             s.get(file_url, auth = (self.username, self.password))
                                             r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                            print(r.headers.get('content-type'))
                                             with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course), component, unit_name), 'wb') as f:
                                                 r.raw.decode_content = True
                                                 f.write(r.content)  
 
-                            # download text for link_on, download text for all
+                            # download link for link_on
 
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
 
@@ -225,7 +228,7 @@ class Courses:
 
 
                         elif 'file_on' in img.get_attribute('src'):
-                            
+                            # self.download_file_or_doc(inner_unit, path)
                             unit_name = inner_unit.find_element_by_tag_name('a').text
                             file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
                             s = requests.session()
@@ -239,7 +242,7 @@ class Courses:
                         elif 'document_on' in img.get_attribute('src'):
                             if self.check_tag_exists_in_web_element(inner_unit, 'a'):
                                 for download_file in inner_unit.find_elements_by_tag_name('a'):
-                                    
+                                    # self.download_file_or_doc(download_file, path)
                                     unit_name = download_file.text
                                     file_url = download_file.get_attribute('href')
                                     s = requests.session()
@@ -265,6 +268,16 @@ class Courses:
         with open(path + filename + '.txt', 'w') as f:
             f.write(text)
 
+
+    def download_file_or_doc(self, unit, path):
+        unit_name = unit.text
+        file_url = unit.get_attribute('href')
+        s = requests.session()
+        s.get(file_url, auth = (self.username, self.password))
+        r = s.get(file_url, stream = True, auth = (self.username, self.password))
+        with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
+            r.raw.decode_content = True
+            f.write(r.content)
     
     def check_id_exists(self, id_): 
         try:
