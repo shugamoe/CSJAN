@@ -26,7 +26,7 @@ class Courses:
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
 
-        # self.course_material_dict = {} 
+        self.course_material_dict = {} 
         # self.access_courses()
         # local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
@@ -34,7 +34,6 @@ class Courses:
     def login(self):
         
         browser = webdriver.Firefox()
-        browser.implicitly_wait(2)
 
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(self.username)
