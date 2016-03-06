@@ -23,7 +23,6 @@ class Session(models.Model):
 class Course(models.Model):
     sessions = models.ManyToManyField(Session) # Don't worry about this Andy.
     name = models.CharField(max_length = 200, blank = True)
-    downloaded = models.BooleanField(default=False)
     quarter = models.CharField(max_length = 42)
     dept = models.CharField(max_length = 4)
     year = models.IntegerField()

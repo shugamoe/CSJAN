@@ -36,12 +36,14 @@ def get_chalk_info(request):
             session_object = form.save()
             print(form.cleaned_data)
             # Replace with get_prelim_courses when crawlers are integrated.
-            courses_to_confirm = dummy_crawler(form.cleaned_data, 
+            courses_to_confirm = dummy_crawler(form.cleaned_data,
                 session_object)
+            courses_to_confirm = '***'.join(courses_to_confirm)
             # print('cnet id {}'.format(form.cleaned_data['cnet_id']))
-            url = reverse('select_downloads', kwargs=
+            url = reverse('select_downloads', kwargs = \
                 {'session_id': session_object.id, 
-                'cnet_id': form.cleaned_data['cnet_id']})
+                'cnet_id': form.cleaned_data['cnet_id'],
+                'courses_to_confirm': courses_to_confirm})
             return HttpResponseRedirect(url)
         else:
             print('form not valid')
@@ -60,13 +62,14 @@ def start(request):
     print('At start page')
     return render(request, 'user_forms/start.html')
 
+
 def view_stats(request):
     print('At view stats page')
     return render(request, 'user_forms/view_stats.html')
  
     
 
-def select_downloads(request, session_id, cnet_id):
+def select_downloads(request, session_id, cnet_id, courses_to_confirm):
     '''
     After the user has provided their chalk information, the Chalk crawler 
     retrieves a list of matching courses.  This view brings up a page where
@@ -85,17 +88,13 @@ def select_downloads(request, session_id, cnet_id):
                              'error_message': "You didn't choose any courses"})
         else:
             print('courses has stuff in it', courses)
-            for course in courses:
-                course_model = Course.objects.get(name = course)
-                course_model.downloaded = True
-                course_model.save()
 
-            # dl_specific_courses(courses, cnet_id, cnet_pw)
+            dl_specific_courses(courses, cnet_id, cnet_pw, session)
 
             return HttpResponseRedirect(reverse('post', \
                                             args = (session.id,)))
     else:
-        courses = Course.objects.filter(sessions__id = session_id)
+        courses = courses_to_confirm.split('***')
 
     return render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': courses})
@@ -142,12 +141,10 @@ def post(request, session_id):
 
     print(session.cnet_id, 'this is the CNET ID of the current user session')
     print(session.date, 'the date!')
-    prev_courses = Course.objects.filter(sessions__date__lt = session.date)\
-    .filter(downloaded = True).filter(sessions__cnet_id = session.cnet_id).distinct()
+    prev_courses = Course.objects.filter(sessions__date__lt = session.date).filter(sessions__cnet_id = session.cnet_id).distinct()
     
-    print('all courses here!!!', prev_courses)
     return render(request, 'user_forms/post.html',
-                    {'courses': session.course_set.filter(downloaded = True),
+                    {'courses': session.course_set.all(),
                       'prev_courses': prev_courses,
                       'repeat_user': session.repeat_user,
                       'cnet_id': session.cnet_id})
@@ -162,8 +159,7 @@ def dummy_crawler(cleaned_data, session_object):
 
     # print(cleaned_data['cnet_id'])
 
-    # These lines use some simple random stuff to "select" classes.  Remove
-    # once the crawlers are online.  
+    # These lines use some simple random stuff to "select" classes.  
     num = random.randrange(0,3)
     if num == 0:
         test_courses = TEST_COURSES_0
@@ -171,21 +167,6 @@ def dummy_crawler(cleaned_data, session_object):
         test_courses = TEST_COURSES_1
     elif num == 2: 
         test_courses = TEST_COURSES_2
-
-    for course in test_courses:
-        print('course name: ', course)
-        num_results = Course.objects.filter(name = course).count()
-        if num_results == 0:
-        # {TO DO} Add in more fields 
-            course_object = Course(name = course, 
-                                downloaded = False)
-            course_object.save()
-        else:
-            course_object = Course.objects.get(name = course)
-
-        print('downloaded?', course_object.downloaded)
-
-        course_object.sessions.add(session_object)
 
     # Should call actually web crawler from here to obtain list of courses.  
     # For now we will just use TEST_COURSES.  
@@ -197,7 +178,20 @@ def get_prelim_courses(credens_and_filters, session_object):
     This function calls the Chalk Crawler and asks it for a preliminary set of 
     courses for the user to confirm at the select_downloads section.
     '''
-    prelim_course_names = chalk_crawler.find_matching(credens_and_filters)
+    pass
+    
+
+    return prelim_course_names
+
+
+def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
+    '''
+    This function will call the Chalk Crawler and Directory Crawler after the
+    user has specified which specific courses they would like to download
+    '''
+
+
+    # prelim_course_names = chalk_crawler.find_matching(credens_and_filters)
     year = session_object.year
     quart_pat = r'(?<=\()([A-Z]{1}[a-z]+)'
     dept_pat = r'[A-Z]{4}'
@@ -222,17 +216,8 @@ def get_prelim_courses(credens_and_filters, session_object):
         # session by adding the session object to it.
         course_object.sessions.add(session_object)
 
-    return prelim_course_names
-
-
-def dl_specific_courses(course_list, cnet_id, cnet_pw):
-    '''
-    This function will call the Chalk Crawler and Directory Crawler after the
-    user has specified which specific courses they would like to download
-    '''
-
-    demo_info, course_dicts, file_dicts = chalk_crawler.dl_courses(course_list,
-        cnet_id, cnet_pw)
+    # demo_info, course_dicts, file_dicts = chalk_crawler.dl_courses(course_list,
+    #     cnet_id, cnet_pw)
 
 
     # Pass the course list to and credentials to Chalk crawler, then have it
@@ -307,6 +292,7 @@ class CourseDetail(DetailView):
 
         if self.request.method == 'GET':
             major = self.request.GET.get('major_filters')
+            print(major)
             if major:
                 context['filter_enabled'] = True
                 context['students'] = context['students'].filter(program = 
