@@ -25,6 +25,7 @@ class Chalk_Page:
         self.course_list = [] # list of lists: course_id, prof, tas, students
         self.all_courses, self.courses = self.compile_courses()
         self.course_material_dict = {}
+        
         self.access_courses()
 
         local_dir.make_dirs(self.course_material_dict, self.default_folder)  
@@ -91,10 +92,11 @@ class Chalk_Page:
 
         self.course_material_dict[self.username] = {}
 
-        for ind, course in enumerate(self.courses): 
+        for course in self.courses: 
             self.course_material_dict[self.username][local_dir.check_folder_name(course[20:])] = {}
             material_dict = self.course_material_dict[self.username][local_dir.check_folder_name(course[20:])]
-            self.build_course_dict(course, ind, material_dict) 
+            # prof_ind find index through partial match of text 
+            self.build_course_dict(course, prof_ind, material_dict) 
 
         return None
 
@@ -127,7 +129,10 @@ class Chalk_Page:
 
                 else:
                     content = self.browser.find_element_by_id('content')
-                    announcement_text = content.find_element_by_id('announcementList').text
+                    if self.check_id_exists('announcementList'):
+                        announcement_text = content.find_element_by_id('announcementList').text
+                    else:
+                        announcement_text = ''
                 self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:]))))
 
             elif item.text == 'Send Email':
@@ -137,7 +142,7 @@ class Chalk_Page:
                 list_of_tas = []
                 if not self.check_id_exists('inlineReceipt_bad'):
                     list_of_tas = self.browser.find_element_by_id('stepcontent1').find_elements_by_tag_name('li')[0].text[3:].split('; ')
-                    course.append(list_of_tas)
+                course.append(list_of_tas)
                 self.browser.execute_script("window.history.go(-1)")
                 
                 if self.check_link_text_exists('Select Users'):
@@ -165,20 +170,22 @@ class Chalk_Page:
                     continue
 
                 elif self.check_id_exists('content_listContainer'):
-                    num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
-                    for unit_index in range(num_of_items):
+                    num_of_units = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+                    for unit_index in range(num_of_units):
                         unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                         if self.check_tag_exists_in_web_element(unit, 'img'):
                             img = unit.find_element_by_tag_name('img')
                             if img.get_attribute('class') == 'item_icon':
                                 if 'folder_on' in img.get_attribute('src'):
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
-                                    material_dict[component][folder_name] = self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course[0][20:]), component, folder_name))
-                                
+                                    material_dict[component][folder_name] = {}
+                                    local_dir.make_dirs(self.course_material_dict, self.default_folder)
+                                    self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course[0][20:]), component, folder_name), material_dict[component][folder_name])
+
                                 elif 'file_on' in img.get_attribute('src'):
+                                    
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                    
                                     s = requests.session()
                                     s.get(file_url, auth = (self.username, self.password))
                                     r = s.get(file_url, stream = True, auth = (self.username, self.password))
@@ -189,8 +196,9 @@ class Chalk_Page:
                                 elif 'document_on' in img.get_attribute('src'):
                                     if self.check_tag_exists_in_web_element(unit, 'a'):
                                         for download_file in unit.find_elements_by_tag_name('a'):
+                                            
                                             unit_name = download_file.text
-                                            file_url = download_file.get_attribute('href')   
+                                            file_url = download_file.get_attribute('href')         
                                             s = requests.session()
                                             s.get(file_url, auth = (self.username, self.password))
                                             r = s.get(file_url, stream = True, auth = (self.username, self.password))
@@ -207,6 +215,66 @@ class Chalk_Page:
         return material_dict
 
 
+    def gen_folder(self, unit, path, folder_dict): 
+        unit.find_element_by_tag_name('a').click() 
+        if self.check_id_exists('content_listContainer'):
+            num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+            for unit_index in range(num_of_items):
+                inner_unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
+                if self.check_tag_exists_in_web_element(inner_unit, 'img'):
+                    img = inner_unit.find_element_by_tag_name('img')
+                    if img.get_attribute('class') == 'item_icon':
+                        if 'folder_on' in img.get_attribute('src'):
+                            folder_name = local_dir.check_folder_name(inner_unit.find_element_by_tag_name('a').text)
+                            folder_dict[folder_name] = {}
+                            local_dir.make_dirs(self.course_material_dict, self.default_folder)
+                            self.gen_folder(inner_unit, path + '/{:}'.format(folder_name), folder_dict[folder_name])
+
+
+                        elif 'file_on' in img.get_attribute('src'):
+                            
+                            unit_name = inner_unit.find_element_by_tag_name('a').text
+                            file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
+                            s = requests.session()
+                            s.get(file_url, auth = (self.username, self.password))
+                            r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                            with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
+                                r.raw.decode_content = True
+                                f.write(r.content)  
+                        
+
+                        elif 'document_on' in img.get_attribute('src'):
+                            if self.check_tag_exists_in_web_element(inner_unit, 'a'):
+                                for download_file in inner_unit.find_elements_by_tag_name('a'):
+                                    
+                                    unit_name = download_file.text
+                                    file_url = download_file.get_attribute('href')
+                                    s = requests.session()
+                                    s.get(file_url, auth = (self.username, self.password))
+                                    r = s.get(file_url, stream = True, auth = (self.username, self.password))
+                                    with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
+                                        r.raw.decode_content = True
+                                        f.write(r.content)  
+
+
+                        # download text for all
+        self.browser.execute_script("window.history.go(-1)")
+
+
+
+        return None
+
+
+    def download_text(self, filename, text, path):
+
+        if os.path.exists(path + filename + '.txt'):
+            print('File already exists. Updating file.')
+            os.remove(path + filename + '.txt')
+
+        with open(path + filename + '.txt', 'w') as f:
+            f.write(text)
+
+    
     def check_id_exists(self, id_): 
         try:
             self.browser.find_element_by_id(id_)
@@ -237,64 +305,6 @@ class Chalk_Page:
         except:
             return False
         return True 
-
-
-    def gen_folder(self, unit, path): 
-        folder_dict = {}
-        unit.find_element_by_tag_name('a').click() 
-        if self.check_id_exists('content_listContainer'):
-            num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
-            for unit_index in range(num_of_items):
-                inner_unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
-                if self.check_tag_exists_in_web_element(inner_unit, 'img'):
-                    img = inner_unit.find_element_by_tag_name('img')
-                    if img.get_attribute('class') == 'item_icon':
-                        if 'folder_on' in img.get_attribute('src'):
-                            folder_dict[local_dir.check_folder_name(inner_unit.text)] = self.gen_folder(inner_unit)
-
-
-                        elif 'file_on' in img.get_attribute('src'):
-                            unit_name = inner_unit.find_element_by_tag_name('a').text
-                            file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
-                            s = requests.session()
-                            s.get(file_url, auth = (self.username, self.password))
-                            r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                            with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
-                                r.raw.decode_content = True
-                                f.write(r.content)  
-                        
-
-                        elif 'document_on' in img.get_attribute('src'):
-                            if self.check_tag_exists_in_web_element(inner_unit, 'a'):
-                                for download_file in inner_unit.find_elements_by_tag_name('a'):
-                                    unit_name = download_file.text
-                                    file_url = download_file.get_attribute('href')
-                                    s = requests.session()
-                                    s.get(file_url, auth = (self.username, self.password))
-                                    r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                                    with open(self.default_folder + '/{:}/{:}/{:}'.format(self.username, path, unit_name), 'wb') as f:
-                                        r.raw.decode_content = True
-                                        f.write(r.content)  
-
-
-                        # download text for all
-        self.browser.execute_script("window.history.go(-1)")
-
-
-
-        return folder_dict
-
-
-    def download_text(self, filename, text, path):
-
-        if os.path.exists(path + filename + '.txt'):
-            print('File already exists. Updating file.')
-            os.remove(path + filename + '.txt')
-
-        with open(path + filename + '.txt', 'w') as f:
-            f.write(text)
-
-
 
 
 
