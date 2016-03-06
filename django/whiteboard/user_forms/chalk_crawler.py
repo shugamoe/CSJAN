@@ -23,18 +23,18 @@ class Courses:
         self.browser = self.login() 
         self.all_courses, self.courses = self.compile_courses()
 
-        self.all_courses_list = [] # all course ids
-        self.course_list = [] # list of lists: course_id, prof, tas, students
-
+        self.course_info = [] # list of lists: course_id, prof, tas, students
         self.course_material_dict = {} 
-        # self.access_courses()
+        self.file_list = []
+
+        # self.access_courses(self.courses)
         # local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
 
     def login(self):
         
         browser = webdriver.Firefox()
-
+        browser.implicitly_wait(2)
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(self.username)
         browser.find_element_by_name('password').send_keys(self.password)
@@ -84,28 +84,26 @@ class Courses:
         return all_courses, courses
 
 
-    def access_courses(self):
-
+    def access_courses(self, list_of_courses):
         self.course_material_dict[self.username] = {}
-
-        for course in self.courses: 
+        
+        for course in list_of_courses: 
+            course_list = [course]
             self.course_material_dict[self.username][local_dir.check_folder_name(course)] = {}
-            material_dict = self.course_material_dict[self.username][local_dir.check_folder_name(course[20:])]
+            material_dict = self.course_material_dict[self.username][local_dir.check_folder_name(course)]
             for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
-                if course[20:] in course_link.text:
+                if course in course_link.text:
                     professor = course_link.find_element_by_class_name('name').text
                     prof_cnt = professor.count(';')
-                    course = [course]
-                    course.append(professor.split('; ')[:prof_cnt])
-            self.build_course_dict(course, material_dict) 
+                    course_list.append(professor.split('; ')[:prof_cnt])
+            self.build_course_dict(self.course_info, material_dict, professor, course, course_list) 
 
         return None
 
 
-    def build_course_dict(self, course, material_dict):
+    def build_course_dict(self, course_info, material_dict, professor, course, course_list):
 
-        self.browser.find_element_by_link_text(first_key).click()
-
+        self.browser.find_element_by_partial_link_text(course).click()
         
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
@@ -129,7 +127,7 @@ class Courses:
                         announcement_text = content.find_element_by_id('announcementList').text
                     else:
                         announcement_text = ''
-                self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(local_dir.check_folder_name(first_key[20:]))))
+                self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(local_dir.check_folder_name(course))))
 
             elif item.text == 'Send Email':
                 item.find_element_by_tag_name('a').click()
@@ -138,7 +136,7 @@ class Courses:
                 list_of_tas = []
                 if not self.check_id_exists('inlineReceipt_bad'):
                     list_of_tas = self.browser.find_element_by_id('stepcontent1').find_elements_by_tag_name('li')[0].text[3:].split('; ')
-                course.append(list_of_tas)
+                course_list.append(list_of_tas)
                 self.browser.execute_script("window.history.go(-1)")
                 
                 if self.check_link_text_exists('Select Users'):
@@ -148,8 +146,9 @@ class Courses:
                     for student_web_element in list_of_students_web_elements:
                         if student_web_element.text not in professor and student_web_element.text not in list_of_tas and 'PreviewUser' not in student_web_element.text:
                             list_of_students.append(student_web_element.text)
-                    course.append(list_of_students)
+                    course_list.append(list_of_students)
                     self.browser.execute_script("window.history.go(-1)")
+                self.course_info.append(course_list)
 
 
             elif item.text not in ['Home', 'Announcements', 'Send Email', \
@@ -166,8 +165,8 @@ class Courses:
                     continue
 
                 elif self.check_id_exists('content_listContainer'):
-                    num_of_units = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
-                    for unit_index in range(num_of_units):
+                    num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+                    for unit_index in range(num_of_items):
                         unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                         if self.check_tag_exists_in_web_element(unit, 'img'):
                             img = unit.find_element_by_tag_name('img')
@@ -176,8 +175,7 @@ class Courses:
                                     folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = {}
                                     local_dir.make_dirs(self.course_material_dict, self.default_folder)
-                                    self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course[0][20:]), component, folder_name), material_dict[component][folder_name])
-
+                                    self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course), component, folder_name), material_dict[component][folder_name])
                                 elif 'file_on' in img.get_attribute('src'):
                                     
                                     unit_name = unit.find_element_by_tag_name('a').text
@@ -185,26 +183,25 @@ class Courses:
                                     s = requests.session()
                                     s.get(file_url, auth = (self.username, self.password))
                                     r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                                    with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course[0][20:]), component, unit_name), 'wb') as f:
+                                    with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course), component, unit_name), 'wb') as f:
                                         r.raw.decode_content = True
                                         f.write(r.content)  
 
                                 elif 'document_on' in img.get_attribute('src'):
                                     if self.check_tag_exists_in_web_element(unit, 'a'):
-                                        for download_file in unit.find_elements_by_tag_name('a'):
+                                        for download_file in unit.find_elements_by_tag_name('a'):       
                                             
                                             unit_name = download_file.text
                                             file_url = download_file.get_attribute('href')         
                                             s = requests.session()
                                             s.get(file_url, auth = (self.username, self.password))
                                             r = s.get(file_url, stream = True, auth = (self.username, self.password))
-                                            with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course[0][20:]), component, unit_name), 'wb') as f:
+                                            with open(self.default_folder + '/{:}/{:}/{:}/{:}'.format(self.username, local_dir.check_folder_name(course), component, unit_name), 'wb') as f:
                                                 r.raw.decode_content = True
                                                 f.write(r.content)  
 
                             # download text for link_on, download text for all
 
-        self.course_list.append(course)
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
 
   
@@ -255,8 +252,6 @@ class Courses:
 
                         # download text for all
         self.browser.execute_script("window.history.go(-1)")
-
-
 
         return None
 
