@@ -50,10 +50,14 @@ class Student(models.Model):
 
 class Instructor(models.Model):
     courses_taught = models.ManyToManyField(Course)
+    title = models.CharField(max_length=42)
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     email = models.CharField(max_length=100)
     duplicates = models.BooleanField(default=False)
+    faculty_exchange = models.CharField(max_length=10)
+    phone = models.CharField(max_length=15)
+
 
     def cnet_id(self):
         return re.search("^([\w-]*\w)", self.email).group()
@@ -66,6 +70,7 @@ class Assistant(models.Model):
     first_name = models.CharField(max_length=42)
     last_name = models.CharField(max_length=42)
     email = models.CharField(max_length=100)
+    cnet_id = models.CharField(max_length=42)
     program = models.CharField(max_length=50)
     duplicates = models.BooleanField(default=False)
 
@@ -83,6 +88,7 @@ class File(models.Model):
     description = models.TextField(blank = True)
     body = models.TextField(blank = True)
     path = models.CharField(max_length=300)
+    format = models.CharField(max_length=10)
 
     def file_name(self):
         # Extract the filename from the end of the path and return it
