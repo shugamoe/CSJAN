@@ -26,9 +26,9 @@ def crawl_directory(list_input, CNET, PASSWORD):
     LOGIN_PAGE = "https://directory.uchicago.edu/return_after_login"  
     
     #dictionary for pass to Julian
-    class_container = {"instructors": {},
-                       "TAs": {},
-                       "students": {}}
+    class_container = {"instructors": [],
+                       "TAs": [],
+                       "students": []}
     
     #prep data for crawl and eventual dictionary return
     if list_input[1] != []:
@@ -63,13 +63,13 @@ def crawl_directory(list_input, CNET, PASSWORD):
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
         table = page_soup.find("tbody")
         table_rows = table.find_all("tr")
-        instructor_dictionary = {"first":None,
-                                 "last":None,
-                                  "title":None,
-                                  "faculty exchange":None,
-                                  "phone":None,
-                                  "e-mail": None,
-                                  "mult_entries":None}
+        instructor_dictionary = { "first_name": None,
+                                  "last_name": None,
+                                  "title": None,
+                                  "faculty_exchange": None,
+                                  "phone": None,
+                                  "email": None,
+                                  "duplicates": None}
         
         for row in table_rows:
             #th are row titles, td are values unique to the person.
@@ -88,13 +88,13 @@ def crawl_directory(list_input, CNET, PASSWORD):
             if key == "Appointment(s):":
                 instructor_dictionary["title"] = value
             if key == "Faculty Exchange:":
-                instructor_dictionary["faculty exchange"] = value
+                instructor_dictionary["faculty_exchange"] = value
             if key == "Phone:":
                 instructor_dictionary["phone"] = value
             if key == "Email:":
-                instructor_dictionary["e-mail"] = value   
+                instructor_dictionary["email"] = value   
 
-        class_container["instructors"][query_name] = instructor_dictionary
+        class_container["instructors"].append(instructor_dictionary)
 
         #return to the directory search page.   
         browser.get(DIRECTORY)
@@ -112,12 +112,12 @@ def crawl_directory(list_input, CNET, PASSWORD):
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
         table = page_soup.find("tbody")
         table_rows = table.find_all("tr")
-        student_dictionary = { "first": None,
-                               "last": None,
+        student_dictionary = { "first_name": None,
+                               "last_name": None,
                                "program": None,
-                               "e-mail": None,
+                               "email": None,
                                "cnet_id": None,
-                               "mult_entries": None}
+                               "duplicates": None}
         
         
         for row in table_rows:
@@ -141,7 +141,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
             if key == "Primary Email:":
                 student_dictionary["e-mail"] = value 
 
-            class_container["TAs"][query_name] = student_dictionary
+        class_container["TAs"].append(student_dictionary)
 
         #return to the directory search page.   
         browser.get(DIRECTORY)
@@ -159,12 +159,12 @@ def crawl_directory(list_input, CNET, PASSWORD):
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
         table = page_soup.find("tbody")
         table_rows = table.find_all("tr")
-        student_dictionary = { "first": None,
-                               "last": None,
+        student_dictionary = { "first_name": None,
+                               "last_name": None,
                                "program": None,
-                               "e-mail": None,
+                               "email": None,
                                "cnet_id": None,
-                               "mult_entries": None}
+                               "duplicates": None}
         for row in table_rows:
             #th are row titles, td are values unique to the person.
             key = row.find("th")
@@ -186,7 +186,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
             if key == "Primary Email:":
                 student_dictionary["e-mail"] = value 
 
-        class_container["students"][query_name] = student_dictionary
+        class_container["students"].append(student_dictionary)
 
         #return to the directory search page.   
         browser.get(DIRECTORY)
@@ -202,6 +202,7 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     print(dictionary_for_julian)
             
 dummy_data = [["hello_world 101", ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]]
+crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
 
     
     
