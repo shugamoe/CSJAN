@@ -10,10 +10,11 @@ QUARTER_CHOICES = (('Fall', 'Fall'), ('Winter', 'Winter'), \
                                     ('Spring', 'Spring'), ('Summer', 'Summer'))
 
 class Session(models.Model):
-    cnet_id = models.CharField(max_length=42)
-    date = models.DateTimeField('date published', default=timezone.now)
-    quarter = models.CharField(max_length=42)
+    cnet_id = models.CharField(max_length = 42)
+    date = models.DateTimeField('date published', default = timezone.now)
     year = models.IntegerField(default=datetime.date.today().year)
+    people_only = models.BooleanField(default = False)
+    repeat_user = models.BooleanField(default = False)
 
     def __str__(self):
         return str(self.cnet_id)
@@ -21,10 +22,10 @@ class Session(models.Model):
 
 class Course(models.Model):
     sessions = models.ManyToManyField(Session) # Don't worry about this Andy.
-    name = models.CharField(max_length=200, blank=True)
+    name = models.CharField(max_length = 200, blank = True)
     downloaded = models.BooleanField(default=False)
-    quarter = models.CharField(max_length=42)
-    dept = models.CharField(max_length=4)
+    quarter = models.CharField(max_length = 42)
+    dept = models.CharField(max_length = 4)
     year = models.IntegerField()
 
     def __str__(self):
@@ -33,12 +34,12 @@ class Course(models.Model):
 
 class Student(models.Model):
     courses_in = models.ManyToManyField(Course)
-    first_name = models.CharField(max_length=42)
-    last_name = models.CharField(max_length=42)
-    email = models.CharField(max_length=100)
-    cnet_id = models.CharField(max_length=42)
-    program = models.CharField(max_length=50)
-    duplicates = models.BooleanField(default=False)
+    first_name = models.CharField(max_length = 42)
+    last_name = models.CharField(max_length = 42)
+    email = models.CharField(max_length = 100)
+    cnet_id = models.CharField(max_length = 42)
+    program = models.CharField(max_length = 50)
+    duplicates = models.BooleanField(default = False)
 
 
     def full_name(self):
@@ -50,13 +51,13 @@ class Student(models.Model):
 
 class Instructor(models.Model):
     courses_taught = models.ManyToManyField(Course)
-    title = models.CharField(max_length=42)
-    first_name = models.CharField(max_length=42)
-    last_name = models.CharField(max_length=42)
-    email = models.CharField(max_length=100)
-    duplicates = models.BooleanField(default=False)
-    faculty_exchange = models.CharField(max_length=10)
-    phone = models.CharField(max_length=15)
+    title = models.CharField(max_length = 42)
+    first_name = models.CharField(max_length = 42)
+    last_name = models.CharField(max_length = 42)
+    email = models.CharField(max_length = 100)
+    duplicates = models.BooleanField(default = False)
+    faculty_exchange = models.CharField(max_length = 10)
+    phone = models.CharField(max_length = 15)
 
 
     def cnet_id(self):
@@ -67,12 +68,12 @@ class Instructor(models.Model):
 
 class Assistant(models.Model):
     courses_taught = models.ManyToManyField(Course)
-    first_name = models.CharField(max_length=42)
-    last_name = models.CharField(max_length=42)
-    email = models.CharField(max_length=100)
-    cnet_id = models.CharField(max_length=42)
-    program = models.CharField(max_length=50)
-    duplicates = models.BooleanField(default=False)
+    first_name = models.CharField(max_length = 42)
+    last_name = models.CharField(max_length = 42)
+    email = models.CharField(max_length = 100)
+    cnet_id = models.CharField(max_length = 42)
+    program = models.CharField(max_length = 50)
+    duplicates = models.BooleanField(default = False)
 
     def cnet_id(self):
         return re.search("^([\w-]*\w)", self.email).group()
@@ -84,11 +85,11 @@ class Assistant(models.Model):
 class File(models.Model):
     owner = models.ForeignKey(Student)
     course = models.ForeignKey(Course)
-    heading = models.CharField(max_length=100, blank = True)
+    heading = models.CharField(max_length = 100, blank = True)
     description = models.TextField(blank = True)
     body = models.TextField(blank = True)
-    path = models.CharField(max_length=300)
-    format = models.CharField(max_length=10)
+    path = models.CharField(max_length = 300)
+    format = models.CharField(max_length = 10)
 
     def file_name(self):
         # Extract the filename from the end of the path and return it

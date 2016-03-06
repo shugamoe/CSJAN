@@ -1,3 +1,5 @@
+<!-- Course Detail -->
+
 {% extends 'user_forms/base.html' %}
 
 
@@ -5,6 +7,8 @@
 
 <!-- Course name header -->
 <h1>{{ course.name }}</h1>
+
+
 
 
 <!-- Instructors and TAs Section -->
@@ -44,12 +48,22 @@
 
 
 
+<!-- Filter Students by Major -->
+<form action="" method="get">
+    {% csrf_token %}
+    {{ major_filter_form.as_p }}
+    <input type="submit" value="Filter Students by Major"/>
+</form>
+<!-- End  -->
+
+
+
 <!-- Students in Class Section -->
 <ul style="float:left;">
 
 <b>
 {% if students %}
-Taken by:
+Students:
 {% else %}
 No Students found.  Chalk has likely cleared the data because the class is not
 recent enough.
@@ -59,9 +73,17 @@ recent enough.
 
 <li><a href="{% url 'view_student' student_id=student.id %}">
 {% if student.duplicates %}
-{{ student.cnet_id }}*</a></li>
+    {{ student.cnet_id }}*
+    {% if filter_enabled %}
+        | {{ student.program }}
+    {% endif %}
+    </a></li>
 {% else %}
-{{ student.cnet_id }}</a></li>
+{{ student.cnet_id }}
+    {% if filter_enabled %}
+    | {{ student.program }}
+    {% endif %}
+    </a></li>
 {% endif %}
 
 {% endfor %}
@@ -71,7 +93,6 @@ recent enough.
 
 <!-- Current User Files for Class Section -->
 <ul style="float:left;">
-<p>
 <b>
 {% if files %}
 My Files:
@@ -83,7 +104,15 @@ You have no files for this class
 
 <li>{{ file.file_name }}</li>
 {% endfor %}
-</p>
 </ul>
 <!-- End  -->
+
+
+
+
+
+
+
+
+
 {% endblock %}

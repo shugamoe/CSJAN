@@ -3,9 +3,10 @@
 
 {% block body %}
 
-<p>Congratulations {{ cnet_id }}!  You are now downloading:
+<p>Congratulations {{ cnet_id }}!  You have downloaded:
 {% for course in courses %}
-    <l>{{ course }}</l>
+    <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+            {{ course.name }}</a></li>
 {% endfor %}
 
 </p>
@@ -14,13 +15,15 @@
 <l><a href="{% url 'view_courses' cnet_id=cnet_id %}">View My Stats</a></l>
 
 
+{% if repeat_user %}
  <h2>Classes Previously Downloaded</h2>
  <ul>
-    {% for course in all_courses %}
+    {% for course in prev_courses %}
     <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
             {{ course.name }}</a></li>
     {% endfor %} 
 </ul>
+{% endif %}
 
 
 {% endblock %}

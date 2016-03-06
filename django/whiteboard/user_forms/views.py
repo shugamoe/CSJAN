@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
 
-from .forms import DownloadForm, CourseForm, SessionForm
+from .forms import SessionForm, FilterMajorForm
 from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
@@ -84,7 +84,7 @@ def select_downloads(request, session_id, cnet_id):
                             {'courses': session.course_set.all(),
                              'error_message': "You didn't choose any courses"})
         else:
-            print('courses has stuff in it')
+            print('courses has stuff in it', courses)
             for course in courses:
                 course_model = Course.objects.get(name = course)
                 course_model.downloaded = True
@@ -93,7 +93,7 @@ def select_downloads(request, session_id, cnet_id):
             # dl_specific_courses(courses, cnet_id, cnet_pw)
 
             return HttpResponseRedirect(reverse('post', \
-                                            args= (session.id,)))
+                                            args = (session.id,)))
     else:
         courses = Course.objects.filter(sessions__id = session_id)
 
@@ -130,13 +130,30 @@ def post(request, session_id):
     current session.
     '''
     session = get_object_or_404(Session, pk=session_id)
-    all_courses = Course.objects.filter(sessions__cnet_id = session.cnet_id)\
-    .filter(downloaded=True).distinct()
-    return render(request, 'user_forms/post.html',
-                    {'cnet_id': session.cnet_id,
-                      'courses': session.course_set.filter(downloaded=True),
-                      'all_courses': all_courses})
 
+    prev_user_sessions = Session.objects.filter(date__lt = session.date)\
+    .filter(cnet_id = session.cnet_id).count()
+
+    if prev_user_sessions > 0:
+        print('REPEAT USER DETECTED')
+        session.repeat_user = True
+        session.save()
+
+
+    print(session.cnet_id, 'this is the CNET ID of the current user session')
+    print(session.date, 'the date!')
+    prev_courses = Course.objects.filter(sessions__date__lt = session.date)\
+    .filter(downloaded = True).filter(sessions__cnet_id = session.cnet_id).distinct()
+    
+    print('all courses here!!!', prev_courses)
+    return render(request, 'user_forms/post.html',
+                    {'courses': session.course_set.filter(downloaded = True),
+                      'prev_courses': prev_courses,
+                      'repeat_user': session.repeat_user,
+                      'cnet_id': session.cnet_id})
+
+
+# sampledate__lt=datetime.date(2011, 1, 31)
 
 def dummy_crawler(cleaned_data, session_object):
     '''
@@ -156,6 +173,7 @@ def dummy_crawler(cleaned_data, session_object):
         test_courses = TEST_COURSES_2
 
     for course in test_courses:
+        print('course name: ', course)
         num_results = Course.objects.filter(name = course).count()
         if num_results == 0:
         # {TO DO} Add in more fields 
@@ -164,6 +182,8 @@ def dummy_crawler(cleaned_data, session_object):
             course_object.save()
         else:
             course_object = Course.objects.get(name = course)
+
+        print('downloaded?', course_object.downloaded)
 
         course_object.sessions.add(session_object)
 
@@ -177,7 +197,7 @@ def get_prelim_courses(credens_and_filters, session_object):
     This function calls the Chalk Crawler and asks it for a preliminary set of 
     courses for the user to confirm at the select_downloads section.
     '''
-    prelim_course_names = c_crawler.find_matching(credens_and_filters)
+    prelim_course_names = chalk_crawler.find_matching(credens_and_filters)
     year = session_object.year
     quart_pat = r'(?<=\()([A-Z]{1}[a-z]+)'
     dept_pat = r'[A-Z]{4}'
@@ -210,6 +230,10 @@ def dl_specific_courses(course_list, cnet_id, cnet_pw):
     This function will call the Chalk Crawler and Directory Crawler after the
     user has specified which specific courses they would like to download
     '''
+
+    demo_info, course_dicts, file_dicts = chalk_crawler.dl_courses(course_list,
+        cnet_id, cnet_pw)
+
 
     # Pass the course list to and credentials to Chalk crawler, then have it
     # return File dicts to make file models, and lists of teacher, student, and
@@ -262,12 +286,40 @@ class CourseDetail(DetailView):
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         course_id = self.kwargs['course_id']
+
+
+        # Retrieve a list of students in the class for the template
         context['students'] = Student.objects.filter(courses_in__id = course_id
-        )
+        ).order_by('program')
+
+
+        # See what majors those students have so we can create a form to let
+        # the user filter by major
+        major_tuples = context['students'].order_by().values_list('program').\
+        distinct()
+
+        # To a bit of list comprehension to give it to the form in a nicer 
+        # format.
+        majors_list = [x[0] for x in major_tuples]
+        context['major_filter_form'] = FilterMajorForm(**{'majors_list': 
+            majors_list})
+
+
+        if self.request.method == 'GET':
+            major = self.request.GET.get('major_filters')
+            if major:
+                context['filter_enabled'] = True
+                context['students'] = context['students'].filter(program = 
+                    major)
+            else:
+                context['filter_enabled'] = False
+        
         context['instructors'] = Instructor.objects.filter(courses_taught__id = 
         course_id)
         context['assistants'] = Assistant.objects.filter(courses_taught__id = 
         course_id)
+
+
 
 
         # This will retrieve the user's files.

@@ -7,9 +7,8 @@ class CourseInline(admin.TabularInline):
     extra = 4
 
 
-class SessionAdmin(admin.ModelAdmin):
-    # inlines = [CourseInline]             # quarter and year might not work.  
-    list_display = ('cnet_id', 'date', 'quarter', 'year')
+class SessionAdmin(admin.ModelAdmin): 
+    list_display = ('cnet_id', 'date', 'people_only', 'year')
     list_filter = ['date']
     # search_fields = ['username']
 
