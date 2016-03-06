@@ -7,12 +7,13 @@ from .forms import DownloadForm, CourseForm, SessionForm
 from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
-
+# For test plots
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 import random
+import re
 
 # import folders 
 # Create your views here.
@@ -85,14 +86,14 @@ def select_downloads(request, session_id, cnet_id):
         else:
             print('courses has stuff in it')
             for course in courses:
-                course_model = Course.objects.get(name=course)
+                course_model = Course.objects.get(name = course)
                 course_model.downloaded = True
                 course_model.save()
 
-            # dl_specific_courses(courses, (cnet_id, cnet_pw))
+            # dl_specific_courses(courses, cnet_id, cnet_pw)
 
             return HttpResponseRedirect(reverse('post', \
-                                            args=(session.id,)))
+                                            args= (session.id,)))
     else:
         courses = Course.objects.filter(sessions__id = session_id)
 
@@ -171,37 +172,45 @@ def dummy_crawler(cleaned_data, session_object):
 
     return test_courses
 
-def get_prelim_courses(credens_and_filters, sessions_object):
+def get_prelim_courses(credens_and_filters, session_object):
     '''
     This function calls the Chalk Crawler and asks it for a preliminary set of 
     courses for the user to confirm at the select_downloads section.
     '''
+    prelim_course_names = c_crawler.find_matching(credens_and_filters)
+    year = session_object.year
+    quart_pat = r'(?<=\()([A-Z]{1}[a-z]+)'
+    dept_pat = r'[A-Z]{4}'
 
-    # c_crawler.find_matching is a dummy function, replace with the 
-    # actual function later.
-    course_dicts = c_crawler.find_matching(credens_and_filters)
-
-    prelim_courses = []
-
-    for course_dict in course_dicts:
-        course_name = course_dict['name']
-        prelim_courses.append(course_name)
-
+    for course_name in course_name_list:
+        # Check if the course already exists, course_name is a unique 
+        # identifier in the form DEPT ##### (QUARTER ##) COURSE TITLE.
+        # If the course does not exist in the database already, then we add
+        # it in.
         num_results = Course.objects.filter(name = course_name)
         if num_results == 0:
+            dept = re.search(dept_pat, course_name).group()
+            quarter = re.search(quart_pat, course_name).group()
+            course_dict = {'quarter': quarter, 'year': year, 'dept': dept, 
+            'name': course_name}
             course_object = Course(**course_dict)
             course_object.save()
         else:
             course_object = Course.objects.get(name = course_name)
+        
+        # Either way we track that this course was utilized in the current
+        # session by adding the session object to it.
+        course_object.sessions.add(session_object)
 
-    return prelim_courses
+    return prelim_course_names
 
 
-def dl_specific_courses(course_list, credentials_tuple):
+def dl_specific_courses(course_list, cnet_id, cnet_pw):
     '''
     This function will call the Chalk Crawler and Directory Crawler after the
     user has specified which specific courses they would like to download
     '''
+
     # Pass the course list to and credentials to Chalk crawler, then have it
     # return File dicts to make file models, and lists of teacher, student, and
     # TA info for the Directory crawler.
