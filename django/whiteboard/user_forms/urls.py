@@ -7,7 +7,7 @@ from . import views # have to add this in, to have views.THING down there
 
 urlpatterns = [
     url(r'^session=(?P<session_id>[0-9]+)/cnet_id=(?P<cnet_id>[a-zA-Z0-9]+)/se'
-        'lect_downloads/$', 
+        r'lect_downloads/(?P<courses_to_confirm>.+)$', 
         views.select_downloads, name='select_downloads'),
 
     url(r'^session=(?P<session_id>[0-9]+)/post/$', views.post, name='post'),

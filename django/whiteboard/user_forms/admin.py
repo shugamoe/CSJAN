@@ -14,7 +14,7 @@ class SessionAdmin(admin.ModelAdmin):
 
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'downloaded')
+    list_display = ('name', 'dept')
 
 
 class StudentAdmin(admin.ModelAdmin):
