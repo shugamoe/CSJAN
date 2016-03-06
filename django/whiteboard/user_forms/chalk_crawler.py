@@ -9,32 +9,29 @@ import os
 import urllib
 import requests
 
-class Chalk_Page:
+class Courses:
     
     def __init__(self, quarter, year): # dict
 
         self.url = 'https://chalk.uchicago.edu'
-        self.username = ''
-        self.password = ''
         self.quarter = quarter # dict['quarter']
         self.year = year # dict['year']
+        self.username = input('enter username: ')
+        self.password = getpass.getpass('enter password: ')
         self.default_folder = '../../Classes'
+        
         self.browser = self.login() 
+        self.all_courses, self.courses = self.compile_courses()
 
         self.all_courses_list = [] # all course ids
         self.course_list = [] # list of lists: course_id, prof, tas, students
-        self.all_courses, self.courses = self.compile_courses()
-        self.course_material_dict = {}
-        
-        self.access_courses()
 
-        local_dir.make_dirs(self.course_material_dict, self.default_folder)  
+        # self.course_material_dict = {} 
+        # self.access_courses()
+        # local_dir.make_dirs(self.course_material_dict, self.default_folder)  
 
 
     def login(self):
-
-        self.username = input('enter username: ') # self.username
-        self.password = getpass.getpass('enter password: ') # self.password
         
         browser = webdriver.Firefox()
         browser.implicitly_wait(2)
@@ -64,7 +61,7 @@ class Chalk_Page:
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
 
-            all_courses.append(course_web_element.text)
+            all_courses.append(course_web_element.text[20:])
 
             for quarter in self.quarter:
                 if quarter.lower() == 'fall':
@@ -74,7 +71,7 @@ class Chalk_Page:
                     in course_web_element.text.lower(): 
 
                     if 'Unavailable' not in course_web_element.text:
-                        courses.append(course_web_element.text)
+                        courses.append(course_web_element.text[20:])
                         course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
                         course_name_box.click()
                         course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
@@ -93,20 +90,20 @@ class Chalk_Page:
         self.course_material_dict[self.username] = {}
 
         for course in self.courses: 
-            self.course_material_dict[self.username][local_dir.check_folder_name(course[20:])] = {}
+            self.course_material_dict[self.username][local_dir.check_folder_name(course)] = {}
             material_dict = self.course_material_dict[self.username][local_dir.check_folder_name(course[20:])]
-            # prof_ind find index through partial match of text 
-            self.build_course_dict(course, prof_ind, material_dict) 
+            for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
+                if course[20:] in course_link.text:
+                    professor = course_link.find_element_by_class_name('name').text
+                    prof_cnt = professor.count(';')
+                    course = [course]
+                    course.append(professor.split('; ')[:prof_cnt])
+            self.build_course_dict(course, material_dict) 
 
         return None
 
 
-    def build_course_dict(self, first_key, prof_ind, material_dict):
-        course = [first_key]
-        
-        professor = self.browser.find_elements_by_class_name('courseInformation')[prof_ind].text
-        prof_cnt = professor.count(';')
-        course.append(professor.replace('Instructor: ', '').split('; ')[:prof_cnt])
+    def build_course_dict(self, course, material_dict):
 
         self.browser.find_element_by_link_text(first_key).click()
 
