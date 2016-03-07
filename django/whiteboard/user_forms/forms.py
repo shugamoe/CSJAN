@@ -5,7 +5,7 @@ from datetime import datetime
 from .models import Session, Course, Student, Instructor, Assistant
 from django.utils.safestring import mark_safe
 
-QUARTER_CHOICES = (('Fall', 'Fall'), ('Winter', 'Winter'), \
+QUARTER_CHOICES = (('Autumn', 'Autumn'), ('Winter', 'Winter'), \
                                     ('Spring', 'Spring'), ('Summer', 'Summer'))
 TEST_CLASSES = ['Class 1', 'Class 2']
 
