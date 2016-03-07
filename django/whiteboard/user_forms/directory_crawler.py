@@ -3,12 +3,11 @@ from selenium import webdriver
 import getpass
 import html5lib
 
-def process_names(list_of_names):
+def process_student_names(list_of_names):
     '''given a list of names from chalk,
        return list of ("first" + " " + "last")'''
     
     formatted_names = []
-
     for name in list_of_names:
         name_split = name.split(", ")
         query_name = name_split[1] + " " + name_split[0]
@@ -31,15 +30,16 @@ def crawl_directory(list_input, CNET, PASSWORD):
                        "students": []}
     
     #prep data for crawl and eventual dictionary return
+    #instructor names already formatted
     if list_input[1] != []:
-        list_of_instructor_names = process_names(list_input[1])
+        list_of_instructor_names = list_input[1]
     if list_input[2] != []:
-        list_of_ta_names = process_names(list_input[2])
+        list_of_ta_names = process_student_names(list_input[2])
     if list_input[3] != []:
-        list_of_student_names = process_names(list_input[3])
+        list_of_student_names = process_student_names(list_input[3])
 
     #fire up the browser, visit the directory page and the login page
-    browser = webdriver.PhantomJS(executable_path="/home/CSJAN/django/whiteboard/user_forms/phantomjs/bin/phantomjs")
+    browser = webdriver.PhantomJS(executable_path="./phantomjs/bin/phantomjs")
     browser.get(DIRECTORY)
     browser.get(LOGIN_PAGE)
     browser.implicitly_wait(0.05) #give the login a bit to load
