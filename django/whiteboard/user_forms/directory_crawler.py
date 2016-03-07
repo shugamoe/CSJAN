@@ -39,8 +39,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
         list_of_student_names = process_names(list_input[3])
 
     #fire up the browser, visit the directory page and the login page
-    browser = webdriver.Firefox()
-    #delete all cookies... necessary?
+    browser = webdriver.PhantomJS(executable_path="/home/CSJAN/django/whiteboard/user_forms/phantomjs/bin/phantomjs")
     browser.get(DIRECTORY)
     browser.get(LOGIN_PAGE)
     browser.implicitly_wait(0.05) #give the login a bit to load
