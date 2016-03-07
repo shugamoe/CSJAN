@@ -35,13 +35,13 @@ def dl_specific_courses(list_of_courses, cnet_id, passwd):
 
 class Courses:
     
-    def __init__(self, quarter, year, dl = False): # dict
+    def __init__(self, quarter, year, cnet_id, cnet_pw, dl = False): # dict
 
         self.url = 'https://chalk.uchicago.edu'
         self.quarter = quarter # dict['quarter']
         self.year = year # dict['year']
-        self.username = input('enter username: ')
-        self.password = getpass.getpass('enter password: ')
+        self.username = cnet_id
+        self.password = cnet_pw
         self.default_folder = '../../Classes'
         
         self.browser = self.login() 
@@ -78,8 +78,6 @@ class Courses:
 
         all_courses = []
         courses = []
-
-        #Handle invalid logins        
         
         if self.quarter == []:
             self.quarter = ''
