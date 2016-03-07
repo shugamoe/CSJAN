@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import random
 import re
 from directory_crawler import crawl_multiple_classes as get_demog_dicts
+from chalk_crawler import get_courses, dl_specific_courses 
 
 # import folders 
 # Create your views here.
@@ -38,14 +39,16 @@ def get_chalk_info(request):
             print(form.cleaned_data)
             # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
             # crawlers are integrated.
-            courses_to_confirm = dummy_crawler(form.cleaned_data,
-                session_object)
+            courses_to_confirm = get_courses(form.cleaned_data)
+
+            # Clever trick I found on StackExchange to send information like
+            # pk's, and other information through the url.
             courses_to_confirm = '***'.join(courses_to_confirm)
-            # print('cnet id {}'.format(form.cleaned_data['cnet_id']))
             url = reverse('select_downloads', kwargs = \
                 {'session_id': session_object.id, 
                 'cnet_id': form.cleaned_data['cnet_id'],
                 'courses_to_confirm': courses_to_confirm})
+
             return HttpResponseRedirect(url)
         else:
             print('form not valid')
