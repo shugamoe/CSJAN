@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 import random
 import re
+from directory_crawler import crawl_multiple_classes as get_demog_dicts
 
 # import folders 
 # Create your views here.
@@ -35,7 +36,8 @@ def get_chalk_info(request):
         if form.is_valid():
             session_object = form.save()
             print(form.cleaned_data)
-            # Replace with get_prelim_courses when crawlers are integrated.
+            # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
+            # crawlers are integrated.
             courses_to_confirm = dummy_crawler(form.cleaned_data,
                 session_object)
             courses_to_confirm = '***'.join(courses_to_confirm)
@@ -173,16 +175,6 @@ def dummy_crawler(cleaned_data, session_object):
 
     return test_courses
 
-def get_prelim_courses(credens_and_filters, session_object):
-    '''
-    This function calls the Chalk Crawler and asks it for a preliminary set of 
-    courses for the user to confirm at the select_downloads section.
-    '''
-    pass
-    
-
-    return prelim_course_names
-
 
 def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
     '''
@@ -190,8 +182,6 @@ def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
     user has specified which specific courses they would like to download
     '''
 
-
-    # prelim_course_names = chalk_crawler.find_matching(credens_and_filters)
     year = session_object.year
     quart_pat = r'(?<=\()([A-Z]{1}[a-z]+)'
     dept_pat = r'[A-Z]{4}'
@@ -216,28 +206,76 @@ def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
         # session by adding the session object to it.
         course_object.sessions.add(session_object)
 
-    # demo_info, course_dicts, file_dicts = chalk_crawler.dl_courses(course_list,
-    #     cnet_id, cnet_pw)
 
 
-    # Pass the course list to and credentials to Chalk crawler, then have it
-    # return File dicts to make file models, and lists of teacher, student, and
-    # TA info for the Directory crawler.
-    #
-    # Take the lists, and send them to the directory crawler, which will return
-    # dicts to make Student, teacher, and TA models.  Do not make duplicates
-    # of the Student, teacher, and TA models.
-    # 
-    # c_crawler.dl_
-    # File models can be duplicated across cnet_ids but not within cnet_ids.
-    #
-    # 
-    # Remember after making each model instance to add the correct manytomany
-    # field or manytoone field.  (TA's, Students, and Instructors all have
-    # to have courses added to them.  File models have a Student foreignkey 
-    # "owner".)
+    demog_names, file_dicts = chalk_crawler.dl_courses(course_name_list, cnet_id,
+     cnet_pw)
 
-    pass
+    a_or_u_files(file_dicts, cnet_id)
+
+    demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
+
+    for course in demog_dicts.keys():
+        for stud_ta_or_instr in demog_dicts[course].keys():
+            if stud_ta_or_instr == 'students':
+                a_or_u_people(demog_dicts[course][stud_ta_or_instr], Student,
+                    course)
+            elif stud_ta_or_instr == 'instructors':
+                a_or_u_people(demog_dicts[course][stud_ta_or_instr], 
+                    Instructor, course)
+            elif stud_ta_or_instr == 'TAs':
+                a_or_u_people(demog_dicts[course][stud_ta_or_instr], 
+                    Assistant, course)
+
+    return None
+
+
+def a_or_u_files(file_dicts, cnet_id):
+    '''
+    This function takes in a list of file_dicts, where each element is a 
+    a dictionary that can be directly converted to an instance of the File 
+    class.
+
+    This function checks the information of each dict to see whether the 
+    database already has an instance of that 
+    '''
+
+    user = Student.objects.get(cnet_id = cnet_id)
+
+
+    for file_dict in file_dicts:
+        existing_instance, created = File.objects.get_or_create(path = 
+            file_dict['path'], defaults = file_dict)
+        if not created:
+            for attr, value in file_dict.iteritems():
+                setattr(existing_instance, attr, value)
+            existing_instance.save
+            existing_instance.owners.add(user)
+        else:
+            created.owners.add(user)
+
+    
+    return None
+
+
+def a_or_u_people(people_dicts, model_used, course_name):
+    '''
+    '''
+    # course_object.sessions.add(session_object)
+    course = Course.objects.get(name = course_name)
+
+    for ppl_dict in people_dicts:
+        existing_instance, created = model_used.objects.get_or_create(email = 
+            ppl_dict['email'], defaults = ppl_dict)
+        if not created:
+            for attr, value in file_dict.iteritems():
+                setattr(existing_instance, attr, value)
+            existing_instance.save
+            existing_instance.owners.add(course)
+        else:
+            created.add(course)
+
+    return model_used.objects.all()
 
 
 class CourseList(ListView):
@@ -300,9 +338,9 @@ class CourseDetail(DetailView):
             else:
                 context['filter_enabled'] = False
         
-        context['instructors'] = Instructor.objects.filter(courses_taught__id = 
+        context['instructors'] = Instructor.objects.filter(courses_in__id = 
         course_id)
-        context['assistants'] = Assistant.objects.filter(courses_taught__id = 
+        context['assistants'] = Assistant.objects.filter(courses_in__id = 
         course_id)
 
 
@@ -359,29 +397,6 @@ def get_courses_get(request):
     return courses
 
 
-
-
-from django.db.models.fields.related import ManyToManyField
-
-def to_dict(instance, ignore_m2m = False):
-    '''
-    This function is able to turn model instances into an easier form to digest
-    for any plotting that might be done.
-    '''
-    opts = instance._meta
-    data = {}
-    for f in opts.concrete_fields + opts.many_to_many:
-        if isinstance(f, ManyToManyField) and (not ignore_m2m):
-            if instance.pk is None:
-                data[f.name] = []
-            else:
-                data[f.name] = list(f.value_from_object(instance).values_list(\
-                    'pk', flat=True))
-        else:
-            data[f.name] = f.value_from_object(instance)
-    return data
-
-
 def student_classes_plot(request, cnet_id, course_ids):
     '''
     This plot will display information about all the classes the Student is 
@@ -433,3 +448,87 @@ def single_class_plot(request, course_id):
     plt.close()
 
     return response
+
+
+from django.db.models.fields.related import ManyToManyField
+
+def to_dict(instance, ignore_m2m = False):
+    '''
+    This function is able to turn model instances into an easier form to digest
+    for any plotting that might be done.
+    '''
+    opts = instance._meta
+    data = {}
+    for f in opts.concrete_fields + opts.many_to_many:
+        if isinstance(f, ManyToManyField) and (not ignore_m2m):
+            if instance.pk is None:
+                data[f.name] = []
+            else:
+                data[f.name] = list(f.value_from_object(instance).values_list(\
+                    'pk', flat=True))
+        else:
+            data[f.name] = f.value_from_object(instance)
+    return data
+
+
+
+
+
+
+
+
+
+
+
+# def scrub_duplicate_ias(course_demos):
+#     '''
+#     This function takes the raw demographic information from the Chalk crawler
+#     which is in the form:
+
+#     [['coursename0', [<list of Instructor Names>], [<list of Assistant names>],
+#      [<list of Student Names>]],
+#      .
+#      .
+#      .
+#      ]
+
+#     This function checks to see whether or not the database already contains
+#     an instance of either the Instructor, Assistant, or Student models that
+#     '''
+#     for course_demo in demo_info:
+#         course_demo[0] = course_name
+#         course_demo[1] = instructor_list
+#         course_demo[2] = assistant_list
+#         course_demo[3] = student_list
+
+#         for i_index, instr in enumerate(instructor_list):
+#             last_name, first_name = intr.split(', ')
+#             num_results = Instructor.objects.filter(courses_in__name = 
+#                 course_name).filter(first_name = first_name).filter(last_name =
+#                 last_name).count()
+#             if num_results >= 1:
+#                 print('Already have instructor {0} {1}'.format(first_name, 
+#                     last_name))
+#                 instructor_list.pop(i_index)
+
+#         for a_index, assistant in enumerate(assistant_list):
+#             last_name, first_name = intr.split(', ')
+#             num_results = Assistant.objects.filter(courses_in__name = 
+#                 course_name).filter(first_name = first_name).filter(last_name =
+#                 last_name).count()
+#             if num_results >= 1:
+#                 print('Already have assistant {0} {1}'.format(first_name,
+#                     last_name))
+#                 assistant_list.pop(a_index)
+
+#         for s_index, assistant in enumerate(student_list):
+#             last_name, first_name = intr.split(', ')
+#             num_results = Assistant.objects.filter(courses_in__name = 
+#                 course_name).filter(first_name = first_name).filter(last_name =
+#                 last_name).count()
+#             if num_results >= 1:
+#                 print('Already have student {0} {1}'.format(first_name,
+#                     last_name))
+#                 student_list.pop(a_index)
+
+#     return None

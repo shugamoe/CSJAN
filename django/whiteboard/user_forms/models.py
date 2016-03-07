@@ -49,7 +49,7 @@ class Student(models.Model):
 
 
 class Instructor(models.Model):
-    courses_taught = models.ManyToManyField(Course)
+    courses_in = models.ManyToManyField(Course)
     title = models.CharField(max_length = 42)
     first_name = models.CharField(max_length = 42)
     last_name = models.CharField(max_length = 42)
@@ -66,7 +66,7 @@ class Instructor(models.Model):
         return str(self.first_name + ' ' + self.last_name)
 
 class Assistant(models.Model):
-    courses_taught = models.ManyToManyField(Course)
+    courses_in = models.ManyToManyField(Course)
     first_name = models.CharField(max_length = 42)
     last_name = models.CharField(max_length = 42)
     email = models.CharField(max_length = 100)
@@ -103,6 +103,8 @@ class File(models.Model):
 
     def __str__(self):
         return str(self.file_name())
+
+
 
 
 
