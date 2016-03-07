@@ -64,7 +64,7 @@ class Courses:
     def login(self):
         
         browser = webdriver.Firefox()
-        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs')
+        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs', service_args = ['--ignore-ssl-errors=true'])
         browser.implicitly_wait(2)
 
         browser.get(self.url)
@@ -140,6 +140,7 @@ class Courses:
                     professor = course_link.find_element_by_class_name('name').text
                     prof_cnt = professor.count(';')
                     course_list.append(professor.split('; ')[:prof_cnt])
+
             self.build_course_dict(self.course_info, material_dict, professor, course, course_list) 
 
         return None
@@ -188,9 +189,12 @@ class Courses:
                 if self.check_link_text_exists('Select Users'):
                     self.browser.find_element_by_link_text('Select Users').click()
                     list_of_students_web_elements = self.browser.find_element_by_id('stepcontent1').find_element_by_name('USERS_AVAIL').find_elements_by_tag_name('option')
+                    prof_cnt = professor.count(';')
                     for student_web_element in list_of_students_web_elements:
-                        if student_web_element.text not in professor and student_web_element.text not in list_of_tas and 'PreviewUser' not in student_web_element.text:
-                            list_of_students.append(student_web_element.text)
+                        for professor in professor.split('; ')[:prof_cnt]:
+                            prof_str = professor.split(' ')[1] + ', ' + professor.split(' ')[0]
+                            if student_web_element.text not in prof_str and student_web_element.text not in list_of_tas and 'PreviewUser' not in student_web_element.text:
+                                list_of_students.append(student_web_element.text)
                     self.browser.execute_script("window.history.go(-1)")
                 course_list.append(list_of_students)
                 self.course_info.append(course_list)
