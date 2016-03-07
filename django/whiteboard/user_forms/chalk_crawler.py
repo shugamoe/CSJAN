@@ -3,7 +3,10 @@
 from selenium import webdriver
 import time
 import getpass
-from .folders import check_folder_name, make_dirs, convert_pdf
+try:
+    from .folders import check_folder_name, make_dirs, convert_pdf
+except:
+    from folders import check_folder_name, make_dirs, convert_pdf
 import os
 import urllib
 import requests
@@ -56,12 +59,14 @@ class Courses:
         # 'list of dicts, {'owner', 'course', 'heading', 'description', 'body', 
         # 'path', 'format'}; format is in the form of 'application/...'
         self.file_list = [] 
-
+        self.browser.close()
 
     def login(self):
         
         browser = webdriver.Firefox()
+        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs')
         browser.implicitly_wait(2)
+
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(self.username)
         browser.find_element_by_name('password').send_keys(self.password)
@@ -81,7 +86,6 @@ class Courses:
         if self.quarter == []:
             self.quarter = ''
 
-
         self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
@@ -90,7 +94,6 @@ class Courses:
 
             if self.quarter != '':
                 for quarter in self.quarter:
-                    print(course_web_element.text.lower())
 
                     if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
                         in course_web_element.text.lower(): 
@@ -223,7 +226,7 @@ class Courses:
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                     heading = unit.find_element_by_tag_name('h3').text
-                                    file_dict = {'owner': self.username, 'course': course, 'heading': heading, 'description': ''}
+                                    file_dict = {'course': course, 'heading': heading, 'description': ''}
                                     self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict)
                                     self.file_list.append(file_dict)
 
@@ -236,7 +239,7 @@ class Courses:
                                             description = ''
                                             for paragraph in unit.find_elements_by_tag_name('p'):
                                                 description += paragraph.text + '\n'
-                                            file_dict = {'owner': self.username, 'course': course, 'heading': heading, 'description': description}
+                                            file_dict = {'course': course, 'heading': heading, 'description': description}
                                             self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict)      
                                             self.file_list.append(file_dict)
 
@@ -269,7 +272,7 @@ class Courses:
                             unit_name = inner_unit.find_element_by_tag_name('a').text
                             file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
                             heading = inner_unit.find_element_by_tag_name('h3').text
-                            file_dict = {'owner': self.username, 'course': course, 'heading': heading, 'description': ''}
+                            file_dict = {'course': course, 'heading': heading, 'description': ''}
                             self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict)
                             self.file_list.append(file_dict)
                         
@@ -283,7 +286,7 @@ class Courses:
                                     description = ''
                                     for paragraph in inner_unit.find_elements_by_tag_name('p'):
                                         description += paragraph.text + '\n'
-                                    file_dict = {'owner': self.username, 'course': course, 'heading': heading, 'description': description}
+                                    file_dict = {'course': course, 'heading': heading, 'description': description}
                                     self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict)
                                     self.file_list.append(file_dict)
 
