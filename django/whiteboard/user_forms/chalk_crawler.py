@@ -1,5 +1,4 @@
 # Chalk_Crawler w/ Selenium
-# https://chalk.uchicago.edu/bbcswebdav/pid-3030087-dt-content-rid-6454815_1/courses/2016.01.80030000M2/Transaction%20Analysis%20and%20Financial%20Statement%20Design%20BLANK%20-%20Jan%205%202014%281%29.pdf
 
 from selenium import webdriver
 import time
