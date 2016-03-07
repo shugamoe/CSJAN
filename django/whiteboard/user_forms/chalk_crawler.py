@@ -3,7 +3,7 @@
 from selenium import webdriver
 import time
 import getpass
-import folders as local_dir
+from .folders import check_folder_name
 import os
 import urllib
 import requests
