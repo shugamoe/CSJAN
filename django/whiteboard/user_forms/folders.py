@@ -94,6 +94,8 @@ def convert_pdf(pdf_path):
   text = text.decode('utf-8')
   final_string = re.sub(r'\n|\x0c', r' ', text)
   
+  return final_string
+  
 
 def test():
   print('IMPORTED FUNCTION FROM OTHER FOLDER')
