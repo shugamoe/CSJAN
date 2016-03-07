@@ -95,7 +95,7 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
         else:
             print('courses has stuff in it', courses)
 
-            dl_specific_courses(courses, cnet_id, cnet_pw, session)
+            crawlers_link(courses, cnet_id, cnet_pw, session)
 
             return HttpResponseRedirect(reverse('post', \
                                             args = (session.id,)))
@@ -180,7 +180,7 @@ def dummy_crawler(cleaned_data, session_object):
     return test_courses
 
 
-def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
+def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
     '''
     This function will call the Chalk Crawler and Directory Crawler after the
     user has specified which specific courses they would like to download
@@ -212,7 +212,7 @@ def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
 
 
 
-    demog_names, file_dicts = chalk_crawler.dl_courses(course_name_list, cnet_id,
+    demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
      cnet_pw)
 
     a_or_u_files(file_dicts, cnet_id)
@@ -243,8 +243,8 @@ def a_or_u_files(file_dicts, cnet_id):
     This function checks the information of each dict to see whether the 
     database already has an instance of that 
     '''
-
     user = Student.objects.get(cnet_id = cnet_id)
+
 
 
     for file_dict in file_dicts:

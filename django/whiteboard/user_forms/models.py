@@ -33,12 +33,12 @@ class Course(models.Model):
 
 class Student(models.Model):
     courses_in = models.ManyToManyField(Course)
-    first_name = models.CharField(max_length = 42)
-    last_name = models.CharField(max_length = 42)
-    email = models.CharField(max_length = 100)
-    cnet_id = models.CharField(max_length = 42)
-    program = models.CharField(max_length = 50)
-    duplicates = models.BooleanField(default = False)
+    first_name = models.CharField(max_length = 42, blank = True)
+    last_name = models.CharField(max_length = 42, blank = True)
+    email = models.CharField(max_length = 100, blank = True)
+    cnet_id = models.CharField(max_length = 42, blank = True)
+    program = models.CharField(max_length = 50, blank = True)
+    duplicates = models.BooleanField(default = False, blank = True)
 
 
     def full_name(self):
