@@ -20,15 +20,13 @@ def create_object(input_dict):
 def get_courses(input_dict):
     
     a = create_object(input_dict)
-    if a.quarter == None and a.year == None:
-        return a.all_courses
 
     return a.courses
 
 
-def dl_specific_courses(list_of_courses):
+def dl_specific_courses(list_of_courses, cnet_id, passwd):
 
-    a = Courses(None, None, dl = True)
+    a = Courses([], [], cnet_id, passwd, dl = True)
     a.access_courses(list_of_courses)
 
     return a.course_info, a.file_list
@@ -48,11 +46,7 @@ class Courses:
         
         self.browser = self.login() 
 
-        if self.quarter == None and self.year == None:
-            if not dl:
-                self.all_courses, self.courses = self.compile_courses()
-
-        else:
+        if not dl:
             self.all_courses, self.courses = self.compile_courses()
 
 
@@ -87,10 +81,9 @@ class Courses:
 
         #Handle invalid logins        
         
-        if self.quarter == None:
+        if self.quarter == []:
             self.quarter = ''
-        if self.year == None:
-            self.year = ''
+
 
         self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
         for course_web_element in \
@@ -98,9 +91,9 @@ class Courses:
 
             all_courses.append(course_web_element.text[20:])
 
-            if self.quarter != None:
+            if self.quarter != '':
                 for quarter in self.quarter:
-                    if '({:} '.format(quarter.lower()) + '{:})'.format(self.year) \
+                    if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
                         in course_web_element.text.lower(): 
 
                         if 'Unavailable' not in course_web_element.text:
@@ -113,18 +106,17 @@ class Courses:
                             course_instructor_box.click()
 
             else:
-                for year in self.year:
-                    if '({:} '.format(quarter.lower()) + '{:})'.format(self.year) \
-                        in course_web_element.text.lower(): 
+                if '{:})'.format(str(self.year)[2:]) in \
+                    course_web_element.text.lower(): 
 
-                        if 'Unavailable' not in course_web_element.text:
-                            courses.append(course_web_element.text[20:])
-                            course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
-                            course_name_box.click()
-                            course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
-                            course_id_box.click()
-                            course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
-                            course_instructor_box.click()
+                    if 'Unavailable' not in course_web_element.text:
+                        courses.append(course_web_element.text[20:])
+                        course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
+                        course_name_box.click()
+                        course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
+                        course_id_box.click()
+                        course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
+                        course_instructor_box.click()
 
 
         course_form = self.browser.find_element_by_id('moduleEditForm')
