@@ -3,7 +3,7 @@
 from selenium import webdriver
 import time
 import getpass
-from .folders import check_folder_name
+from .folders import check_folder_name, make_dirs, convert_pdf
 import os
 import urllib
 import requests
@@ -130,8 +130,8 @@ class Courses:
         
         for course in list_of_courses: 
             course_list = [course]
-            self.course_material_dict[self.username][local_dir.check_folder_name(course)] = {}
-            material_dict = self.course_material_dict[self.username][local_dir.check_folder_name(course)]
+            self.course_material_dict[self.username][check_folder_name(course)] = {}
+            material_dict = self.course_material_dict[self.username][check_folder_name(course)]
             for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
                 if course in course_link.text:
                     professor = course_link.find_element_by_class_name('name').text
@@ -151,7 +151,7 @@ class Courses:
 
             if item.text == 'Announcements':
                 material_dict[item.text] = {}
-                local_dir.make_dirs(self.course_material_dict, self.default_folder)  
+                make_dirs(self.course_material_dict, self.default_folder)  
 
                 item.find_element_by_tag_name('a').click()              
                 if self.check_id_exists('content_listContainer'): 
@@ -168,7 +168,7 @@ class Courses:
                         announcement_text = content.find_element_by_id('announcementList').text
                     else:
                         announcement_text = ''
-                self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(local_dir.check_folder_name(course))))
+                self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(check_folder_name(course))))
 
             elif item.text == 'Send Email':
                 list_of_tas = []
@@ -197,9 +197,9 @@ class Courses:
                 'My Grades', 'Discussion Board', 'Discussions', \
                 'Library Course Reserves', 'Tools', 'Groups']:
 
-                component = local_dir.check_folder_name(item.text)
+                component = check_folder_name(item.text)
                 material_dict[component] = {}
-                local_dir.make_dirs(self.course_material_dict, self.default_folder)
+                make_dirs(self.course_material_dict, self.default_folder)
                 item.find_element_by_tag_name('a').click()
                 # store item_url
 
@@ -214,17 +214,17 @@ class Courses:
                             img = unit.find_element_by_tag_name('img')
                             if img.get_attribute('class') == 'item_icon':
                                 if 'folder_on' in img.get_attribute('src'):
-                                    folder_name = local_dir.check_folder_name(unit.find_element_by_tag_name('a').text)
+                                    folder_name = check_folder_name(unit.find_element_by_tag_name('a').text)
                                     material_dict[component][folder_name] = {}
-                                    local_dir.make_dirs(self.course_material_dict, self.default_folder)
-                                    self.gen_folder(unit, '{:}/{:}/{:}'.format(local_dir.check_folder_name(course), component, folder_name), material_dict[component][folder_name], course)
+                                    make_dirs(self.course_material_dict, self.default_folder)
+                                    self.gen_folder(unit, '{:}/{:}/{:}'.format(check_folder_name(course), component, folder_name), material_dict[component][folder_name], course)
                                 
                                 elif 'file_on' in img.get_attribute('src'):
                                     unit_name = unit.find_element_by_tag_name('a').text
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                     heading = unit.find_element_by_tag_name('h3').text
                                     file_dict = {'owner': self.username, 'course': course, 'heading': heading, 'description': ''}
-                                    self.download_file_or_doc(unit_name, file_url, unit, local_dir.check_folder_name(course) + '/' + component, file_dict)
+                                    self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict)
                                     self.file_list.append(file_dict)
 
                                 elif 'document_on' in img.get_attribute('src'):
@@ -237,7 +237,7 @@ class Courses:
                                             for paragraph in unit.find_elements_by_tag_name('p'):
                                                 description += paragraph.text + '\n'
                                             file_dict = {'owner': self.username, 'course': course, 'heading': heading, 'description': description}
-                                            self.download_file_or_doc(unit_name, file_url, download_file, local_dir.check_folder_name(course) + '/' + component, file_dict)      
+                                            self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict)      
                                             self.file_list.append(file_dict)
 
                             # download href for all links;
@@ -259,9 +259,9 @@ class Courses:
                     img = inner_unit.find_element_by_tag_name('img')
                     if img.get_attribute('class') == 'item_icon':
                         if 'folder_on' in img.get_attribute('src'):
-                            folder_name = local_dir.check_folder_name(inner_unit.find_element_by_tag_name('a').text)
+                            folder_name = check_folder_name(inner_unit.find_element_by_tag_name('a').text)
                             folder_dict[folder_name] = {}
-                            local_dir.make_dirs(self.course_material_dict, self.default_folder)
+                            make_dirs(self.course_material_dict, self.default_folder)
                             self.gen_folder(inner_unit, path + '/{:}'.format(folder_name), folder_dict[folder_name])
 
 
@@ -316,7 +316,7 @@ class Courses:
             r.raw.decode_content = True
             f.write(r.content)
         if 'pdf' in file_dict['path']:
-            file_dict['body'] = local_dir.convert_pdf(file_dict['path'])
+            file_dict['body'] = convert_pdf(file_dict['path'])
         elif 'txt' in file_dict['path']:
             file_dict['body'] = r.content
         else:
