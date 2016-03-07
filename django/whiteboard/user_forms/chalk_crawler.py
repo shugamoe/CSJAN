@@ -30,7 +30,7 @@ def dl_specific_courses(list_of_courses, cnet_id, passwd):
 
     a = Courses([], [], cnet_id, passwd, dl = True)
     a.access_courses(list_of_courses)
-
+    a.browser.close()
     return a.course_info, a.file_list
 
 
@@ -59,7 +59,7 @@ class Courses:
         # 'list of dicts, {'owner', 'course', 'heading', 'description', 'body', 
         # 'path', 'format'}; format is in the form of 'application/...'
         self.file_list = [] 
-        self.browser.close()
+   
 
     def login(self):
         
