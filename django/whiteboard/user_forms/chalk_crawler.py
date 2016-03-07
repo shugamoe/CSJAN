@@ -242,6 +242,11 @@ class Courses:
                                             file_dict = {'course': course, 'heading': heading, 'description': description}
                                             self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict)      
                                             self.file_list.append(file_dict)
+                    
+                    if material_dict[component] == {}:
+                        del material_dict[component]
+
+                    make_dirs(self.course_material_dict, self.default_folder)
 
                             # download href for all links;
                             # download text for all units 

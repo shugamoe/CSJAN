@@ -82,8 +82,8 @@ class Assistant(models.Model):
 
 
 class File(models.Model):
-    owner = models.ForeignKey(Student)
-    course = models.ForeignKey(Course)
+    owner = models.ForeignKey(Student, blank = True)
+    course = models.ForeignKey(Course, blank = True)
     heading = models.CharField(max_length = 100, blank = True)
     description = models.TextField(blank = True)
     body = models.TextField(blank = True)

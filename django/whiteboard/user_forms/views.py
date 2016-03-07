@@ -254,6 +254,7 @@ def a_or_u_files(file_dicts, cnet_id):
 
 
     for file_dict in file_dicts:
+        course = Course.objects.get(name = file_dict.pop('course'))
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
         if not created:
@@ -261,8 +262,10 @@ def a_or_u_files(file_dicts, cnet_id):
                 setattr(existing_instance, attr, value)
             existing_instance.save
             existing_instance.owners.add(user)
+            existing_instance.courses.add(course)
         else:
             created.owners.add(user)
+            created.owners.add(course)
 
     
     return None
