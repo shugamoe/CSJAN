@@ -14,8 +14,9 @@ import matplotlib.pyplot as plt
 
 import random
 import re
-from directory_crawler import crawl_multiple_classes as get_demog_dicts
-from chalk_crawler import get_courses, dl_specific_courses 
+from .chalk_crawler import get_courses, dl_specific_courses 
+from .directory_crawler import crawl_multiple_classes as get_demog_dicts
+
 
 # import folders 
 # Create your views here.
