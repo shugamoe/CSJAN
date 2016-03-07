@@ -195,7 +195,7 @@ def dl_specific_courses(course_name_list, cnet_id, cnet_pw, session_object):
         # identifier in the form DEPT ##### (QUARTER ##) COURSE TITLE.
         # If the course does not exist in the database already, then we add
         # it in.
-        num_results = Course.objects.filter(name = course_name)
+        num_results = Course.objects.filter(name = course_name).count()
         if num_results == 0:
             dept = re.search(dept_pat, course_name).group()
             quarter = re.search(quart_pat, course_name).group()
