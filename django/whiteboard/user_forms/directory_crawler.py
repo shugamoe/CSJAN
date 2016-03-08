@@ -3,7 +3,10 @@ from selenium import webdriver
 import getpass
 import html5lib
 import sys
-sys.path.append("/home/student/CSJAN/django/whiteboard/user_forms/phantomjs/bin/phantomjs")
+import os
+
+PHANTOMJS_PATH = os.path.abspath("phantomjs/bin/phantomjs")
+sys.path.append(PHANTOMJS_PATH)
 
 def process_student_names(list_of_names):
     '''given a list of names from chalk,
@@ -41,7 +44,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
         list_of_student_names = process_student_names(list_input[3])
 
     #fire up the browser, visit the directory page and the login page
-    browser = webdriver.PhantomJS(executable_path="/home/student/CSJAN/django/whiteboard/user_forms/phantomjs/bin/phantomjs")
+    browser = webdriver.PhantomJS(executable_path=PHANTOMJS)
     browser.get(DIRECTORY)
     browser.get(LOGIN_PAGE)
     browser.implicitly_wait(0.05) #give the login a bit to load
