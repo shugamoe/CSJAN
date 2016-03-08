@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
 
 from django.http import HttpResponse
@@ -45,6 +45,10 @@ urlpatterns = [
     # Assistant Detail Page
     url(r'^view_assistant(?P<assistant_id>[0-9]+)$', 
         views.AssistantDetail.as_view(), name = 'view_assistant'),
+
+
+    # Search PDFs
+    (r'^search/', include('haystack.urls')),
 
 
 
