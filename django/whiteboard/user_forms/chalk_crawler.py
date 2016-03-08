@@ -23,7 +23,7 @@ def get_courses(input_dict):
     
     a = create_object(input_dict)
 
-    return a.courses
+    return a.courses, a.all_courses
 
 
 def dl_specific_courses(list_of_courses, cnet_id, passwd):
@@ -63,8 +63,8 @@ class Courses:
 
     def login(self):
         
-        browser = webdriver.Firefox()
-        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs', service_args = ['--ignore-ssl-errors=true'])
+        # browser = webdriver.Firefox()
+        browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs', service_args = ['--ignore-ssl-errors=true'])
         browser.implicitly_wait(2)
 
         browser.get(self.url)
@@ -120,7 +120,6 @@ class Courses:
                         course_id_box.click()
                         course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
                         course_instructor_box.click()
-
 
         course_form = self.browser.find_element_by_id('moduleEditForm')
         course_form.submit()
