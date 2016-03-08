@@ -37,7 +37,6 @@ def get_chalk_info(request):
         form = SessionForm(request.POST)
         if form.is_valid():
             session_object = form.save()
-            print(form.cleaned_data)
             # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
             # crawlers are integrated.
             courses_to_confirm = get_courses(form.cleaned_data)
