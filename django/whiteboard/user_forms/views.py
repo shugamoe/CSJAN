@@ -297,7 +297,7 @@ class CourseList(ListView):
 
     def get_queryset(self):
         cnet_id = self.kwargs['cnet_id']
-        return Course.objects.filter(student__cnet_id=cnet_id)\
+        return Course.objects.filter(student__cnet_id = cnet_id)\
              .order_by('dept')
 
 
@@ -313,12 +313,16 @@ class CourseList(ListView):
         context['course_ids'] = course_ids
         return context 
 
+
 class CourseDetail(DetailView):
     model = Course
     pk_url_kwarg = 'course_id'
     context_object_name = 'course'
+ 
 
     def get_context_data(self, **kwargs):
+        major = self.request.GET.get('major_filters')
+        print('before context', major)
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         course_id = self.kwargs['course_id']
@@ -331,8 +335,8 @@ class CourseDetail(DetailView):
 
         # See what majors those students have so we can create a form to let
         # the user filter by major
-        major_tuples = context['students'].order_by().values_list('program').\
-        distinct()
+        major_tuples = Student.objects.filter(courses_in__id = course_id)\
+        .order_by().values_list('program'). distinct()
 
         # To a bit of list comprehension to give it to the form in a nicer 
         # format.
@@ -365,6 +369,37 @@ class CourseDetail(DetailView):
 
         return context
 
+
+class InstructorDetail(DetailView):
+    model = Instructor
+    pk_url_kwarg = 'instructor_id'
+    context_object_name = 'instructor'
+
+    def get_context_data(self, **kwargs):
+        instructor_id = self.kwargs['instructor_id']
+
+        context = super(InstructorDetail, self).get_context_data(**kwargs)
+        context['courses_in'] = Course.objects.filter(instructor__id = 
+            instructor_id)
+        context['cnet_id'] = Instructor.objects.get(id = instructor_id).cnet_id
+        return context
+
+
+class AssistantDetail(DetailView):
+    model = Assistant
+    pk_url_kwarg = 'assistant_id'
+    context_object_name = 'assistant'
+
+    def get_context_data(self, **kwargs):
+        assistant_id = self.kwargs['assistant_id']
+
+        context = super(AssistantDetail, self).get_context_data(**kwargs)
+        context['courses_in'] = Course.objects.filter(assistant__id = 
+            assistant_id)
+        context['cnet_id'] = Assistant.objects.get(id = assistant_id).cnet_id
+        return context
+
+
 class StudentDetail(DetailView):
     model = Student
     pk_url_kwarg = 'student_id'
@@ -383,6 +418,9 @@ class StudentDetail(DetailView):
         course_ids = '/'.join(course_ids)
         context['course_ids'] = course_ids
         return context
+
+
+
 
 
 def get_courses_post(request):

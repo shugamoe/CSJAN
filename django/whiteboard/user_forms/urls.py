@@ -32,7 +32,21 @@ urlpatterns = [
 
     
     url(r'^get_cnet_id/$', views.get_cnet_id, name='get_cnet_id'),
-    url(r'^view_student(?P<student_id>[a-zA-Z0-9]+)$', 
-        views.StudentDetail.as_view(), name='view_student'),
+
+    # Student Detail Page
+    url(r'^view_student(?P<student_id>[0-9]+)$', 
+        views.StudentDetail.as_view(), name = 'view_student'),
+
+    # Instructor Detail Page
+    url(r'^view_instructor(?P<instructor_id>[0-9]+)$', 
+        views.InstructorDetail.as_view(), name = 'view_instructor'),
+
+
+    # Assistant Detail Page
+    url(r'^view_assistant(?P<assistant_id>[0-9]+)$', 
+        views.AssistantDetail.as_view(), name = 'view_assistant'),
+
+
+
     url(r'^$', views.start, name='start'),
     ]
