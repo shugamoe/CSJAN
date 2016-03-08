@@ -318,11 +318,10 @@ class CourseDetail(DetailView):
     model = Course
     pk_url_kwarg = 'course_id'
     context_object_name = 'course'
- 
+
 
     def get_context_data(self, **kwargs):
-        major = self.request.GET.get('major_filters')
-        print('before context', major)
+
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         course_id = self.kwargs['course_id']
@@ -336,7 +335,7 @@ class CourseDetail(DetailView):
         # See what majors those students have so we can create a form to let
         # the user filter by major
         major_tuples = Student.objects.filter(courses_in__id = course_id)\
-        .order_by().values_list('program'). distinct()
+        .order_by().values_list('program').distinct()
 
         # To a bit of list comprehension to give it to the form in a nicer 
         # format.
@@ -346,12 +345,13 @@ class CourseDetail(DetailView):
 
 
         if self.request.method == 'GET':
-            major = self.request.GET.get('major_filters')
-            print(major)
-            if major:
+            form = FilterMajorForm(self.request.GET, **{'majors_list': majors_list})
+            if form.is_valid():
+                majors = form.cleaned_data['major_filters']
+            if majors:
                 context['filter_enabled'] = True
-                context['students'] = context['students'].filter(program = 
-                    major)
+                context['students'] = context['students'].filter(program__in = 
+                        majors).order_by('program')
             else:
                 context['filter_enabled'] = False
         
@@ -359,9 +359,6 @@ class CourseDetail(DetailView):
         course_id)
         context['assistants'] = Assistant.objects.filter(courses_in__id = 
         course_id)
-
-
-
 
         # This will retrieve the user's files.
         context['files'] = File.objects.filter(owner__cnet_id = 
