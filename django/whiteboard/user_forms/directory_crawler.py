@@ -81,8 +81,8 @@ def crawl_directory(list_input, CNET, PASSWORD):
  
             #get ready to fill out the dictionary.
             first, last = query_name.split(" ")
-            instructor_dictionary["first"] = first
-            instructor_dictionary["last"] = last                      
+            instructor_dictionary["first_name"] = first
+            instructor_dictionary["last_name"] = last                      
                   
             if key == "Appointment(s):":
                 instructor_dictionary["title"] = value
@@ -130,15 +130,15 @@ def crawl_directory(list_input, CNET, PASSWORD):
  
             #get ready to fill out the dictionary.
             first, last = query_name.split(" ")
-            student_dictionary["first"] = first
-            student_dictionary["last"] = last                      
+            student_dictionary["first_name"] = first
+            student_dictionary["last_name"] = last                      
                   
             if key == "Current Program Of Study:":
                 student_dictionary["program"] = value
             if key == "CNetID:":
                 student_dictionary["cnet_id"] = value
             if key == "Primary Email:":
-                student_dictionary["e-mail"] = value 
+                student_dictionary["email"] = value 
 
         class_container["TAs"].append(student_dictionary)
 
@@ -175,15 +175,15 @@ def crawl_directory(list_input, CNET, PASSWORD):
  
             #get ready to fill out the dictionary.
             first, last = query_name.split(" ")
-            student_dictionary["first"] = first
-            student_dictionary["last"] = last                      
+            student_dictionary["first_name"] = first
+            student_dictionary["last_name"] = last                      
                   
             if key == "Current Program Of Study:":
                 student_dictionary["program"] = value
             if key == "CNetID:":
                 student_dictionary["cnet_id"] = value
             if key == "Primary Email:":
-                student_dictionary["e-mail"] = value 
+                student_dictionary["email"] = value 
 
         class_container["students"].append(student_dictionary)
 
