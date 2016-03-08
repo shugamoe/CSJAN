@@ -431,6 +431,7 @@ def get_courses_post(request):
             courses.append(request.POST.get('course' + str(i)))
 
     return courses
+    
 
 def get_courses_get(request):
     '''
@@ -499,6 +500,7 @@ def single_class_plot(request, course_id):
 
 
 from django.db.models.fields.related import ManyToManyField
+
 
 def to_dict(instance, ignore_m2m = False):
     '''

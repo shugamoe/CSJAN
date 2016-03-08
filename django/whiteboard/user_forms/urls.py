@@ -5,11 +5,15 @@ from django.http import HttpResponse
 
 from . import views # have to add this in, to have views.THING down there
 
+def tmp(request):
+    from django.shortcuts import render
+    return render(request, 'search/search.html')
+
 urlpatterns = [
     url(r'^session=(?P<session_id>[0-9]+)/cnet_id=(?P<cnet_id>[a-zA-Z0-9]+)/se'
         r'lect_downloads/(?P<courses_to_confirm>.+)$', 
         views.select_downloads, name='select_downloads'),
-
+    
     url(r'^session=(?P<session_id>[0-9]+)/post/$', views.post, name='post'),
     url(r'^dl_info$', views.get_chalk_info, name='dl_query'),
     url(r'^view_stats$', views.view_stats, name='view_stats'),
@@ -48,9 +52,9 @@ urlpatterns = [
 
 
     # Search PDFs
-    (r'^search/', include('haystack.urls')),
+    url(r'^search/', include('haystack.urls')),
 
-
+    url(r'^tmp$', tmp ),
 
     url(r'^$', views.start, name='start'),
     ]
