@@ -5,7 +5,8 @@ import html5lib
 import sys
 import os
 
-PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
+PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
+print("absolute path", PHANTOMJS_PATH)
 
 def process_student_names(list_of_names):
     '''given a list of names from chalk,
@@ -57,6 +58,8 @@ def crawl_directory(list_input, CNET, PASSWORD):
 
     '''process the instructors'''  
     for query_name in list_of_instructor_names:
+
+        print("query name", query_name)
         
         #navigate to the search url and go to the first result.
         browser.find_element_by_name('name').send_keys(query_name)
@@ -247,8 +250,8 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
         dictionary_for_julian[course_identifier] = crawl_directory(list_input, CNET, PASSWORD)
     print(dictionary_for_julian)
             
-dummy_data = [["hello_world 101", ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]]
-crawl_multiple_classes(dummy_data, "anbonar", "Candycan3Child!")
+dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian"], ["Zhu, Andy"]]]
+crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
 
     
     
