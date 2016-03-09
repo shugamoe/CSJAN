@@ -1,11 +1,4 @@
-from .models import Course, Student
-
-# For test plots
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-
-def graph_class(course_id):
+def graph_class(course_id, response):
     program_dictionary = {}
 
     #search through courses in DB for course with ID matching input
