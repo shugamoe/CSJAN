@@ -213,7 +213,6 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
      cnet_pw)
 
     demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
-    a_or_u_files(file_dicts, cnet_id)
 
 
     for course in demog_dicts.keys():
@@ -227,6 +226,8 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
             elif stud_ta_or_instr == 'TAs':
                 a_or_u_people(demog_dicts[course][stud_ta_or_instr], 
                     Assistant, course)
+
+    a_or_u_files(file_dicts, cnet_id)
 
     return None
 
