@@ -275,7 +275,7 @@ def a_or_u_people(people_dicts, model_used, course_name):
         existing_instance, created = model_used.objects.get_or_create(email = 
             ppl_dict['email'], defaults = ppl_dict)
         if not created:
-            for attr, value in file_dict.iteritems():
+            for attr, value in ppl_dict.items():
                 setattr(existing_instance, attr, value)
             existing_instance.save
 
