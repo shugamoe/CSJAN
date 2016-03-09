@@ -16,6 +16,7 @@ import random
 import re
 from .chalk_crawler import get_courses, dl_specific_courses 
 from .directory_crawler import crawl_multiple_classes as get_demog_dicts
+from .graph_class import graph_class 
 
 
 # import folders 
