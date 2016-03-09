@@ -5,7 +5,11 @@ import html5lib
 import sys
 import os
 
-PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
+PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
+if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
+    PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
+
+
 print("absolute path", PHANTOMJS_PATH)
 
 def process_student_names(list_of_names):
@@ -248,12 +252,14 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     for list_input in list_of_list_inputs:
         course_identifier = list_input[0]
         dictionary_for_julian[course_identifier] = crawl_directory(list_input, CNET, PASSWORD)
+    print(dictionary_for_julian)
     return(dictionary_for_julian)
             
-dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian"], ["Zhu, Andy"]]]
+dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol"], ["Zhu, Andy"]]]
 
 
     
     
     
     
+crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
