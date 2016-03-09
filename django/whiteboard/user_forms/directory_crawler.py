@@ -214,7 +214,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
                                "last_name": "McClellan",
                                "program": "College: Economics",
                                "email": "jmcclellan@uchicago.edu",
-                               "cnet_id": None,
+                               "cnet_id": "jmcclellan",
                                "duplicates": duplicates}
         for row in table_rows:
             #th are row titles, td are values unique to the person.
@@ -253,4 +253,3 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     return(dictionary_for_julian)
             
 dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol", "Gitlin, Hannah"], ["Zhu, Andy"]]]
-crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
