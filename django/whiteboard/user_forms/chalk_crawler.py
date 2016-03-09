@@ -23,7 +23,7 @@ def create_object(input_dict):
 def get_courses(input_dict):
     
     a = create_object(input_dict)
-
+    a.browser.close()
     return a.courses
 
 
