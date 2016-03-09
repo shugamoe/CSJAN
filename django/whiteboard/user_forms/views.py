@@ -136,16 +136,14 @@ def post(request, session_id):
     prev_user_sessions = Session.objects.filter(date__lt = session.date)\
     .filter(cnet_id = session.cnet_id).count()
 
-    if prev_user_sessions > 0:
-        print('REPEAT USER DETECTED')
-        session.repeat_user = True
-        session.save()
-
-
     print(session.cnet_id, 'this is the CNET ID of the current user session')
     print(session.date, 'the date!')
     prev_courses = Course.objects.filter(sessions__date__lt = session.date).filter(sessions__cnet_id = session.cnet_id).distinct()
     
+    if len(prev_courses) > 0:
+        session.repeat_user = True
+        session.save()
+
     return render(request, 'user_forms/post.html',
                     {'courses': session.course_set.all(),
                       'prev_courses': prev_courses,
