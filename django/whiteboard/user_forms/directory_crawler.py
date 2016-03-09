@@ -62,8 +62,6 @@ def crawl_directory(list_input, CNET, PASSWORD):
 
     '''process the instructors'''  
     for query_name in list_of_instructor_names:
-
-        print("query name", query_name)
         
         #navigate to the search url and go to the first result.
         browser.find_element_by_name('name').send_keys(query_name)
@@ -155,7 +153,6 @@ def crawl_directory(list_input, CNET, PASSWORD):
                                "last_name": None,
                                "program": None,
                                "email": None,
-                               "cnet_id": None,
                                "duplicates": duplicates}
         
         
@@ -235,6 +232,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
             if key == "Current Program Of Study:":
                 student_dictionary["program"] = value
             if key == "CNetID:":
+                print("True")
                 student_dictionary["cnet_id"] = value
             if key == "Primary Email:":
                 student_dictionary["email"] = value 
@@ -256,3 +254,5 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     return(dictionary_for_julian)
             
 dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol", "Gitlin, Hannah"], ["Zhu, Andy"]]]
+
+crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
