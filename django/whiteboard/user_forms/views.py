@@ -467,14 +467,14 @@ def student_classes_plot(request, cnet_id, course_ids):
     return response
 
 
-def single_class_plot(request, course_id):
+def single_class_plot(request, course_id, threshold):
     '''
     This plot will display information pertaining to a single class.
     '''
 
     response = HttpResponse(content_type='image/png')
 
-    plt.figure(figsize=(4, 4))
+    plt.figure(figsize=(6, 6))
 
     program_dictionary = {}
 
@@ -489,8 +489,16 @@ def single_class_plot(request, course_id):
 
     pie_names = []
     pie_nums = []
+    formatted_dictionary = {"Other": 0}
 
     for key in program_dictionary:
+        value = program_dictionary[key]
+        if value >= 2:
+            formatted_dictionary[key] = value
+        else:
+            formatted_dictionary["Other"] += value
+
+    for key in formatted_dictionary:
         pie_names.append(key)
         pie_nums.append(program_dictionary[key])
 
