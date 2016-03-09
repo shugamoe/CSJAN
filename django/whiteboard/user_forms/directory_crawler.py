@@ -230,8 +230,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
             #get ready to fill out the dictionary.
             first, last = query_name.split(" ")
             student_dictionary["first_name"] = first
-            student_dictionary["last_name"] = last 
-            print("'" + key + "'", "'"+ value + "'")                     
+            student_dictionary["last_name"] = last                   
                   
             if key == "Current Program Of Study:":
                 student_dictionary["program"] = value
