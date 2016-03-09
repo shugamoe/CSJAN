@@ -234,7 +234,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
                 student_dictionary["program"] = value
             if key == "Primary Email:":
                 student_dictionary["email"] = value 
-                student_dictionary["cnet_id"] = re.search(r'^([a-z0-9]*[a-z0-9]?)', value)
+                student_dictionary["cnet_id"] = re.search(r'^([a-z0-9]*[a-z0-9]?)', value).group()
 
         class_container["students"].append(student_dictionary)
 
