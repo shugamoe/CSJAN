@@ -282,7 +282,7 @@ def a_or_u_people(people_dicts, model_used, course_name):
             existing_instance = model_used.objects.get(email = 
                 ppl_dict['email'])
             existing_instance.save
-            existing_instance.course_in.add(course)
+            existing_instance.courses_in.add(course)
 
     return model_used.objects.all()
 
