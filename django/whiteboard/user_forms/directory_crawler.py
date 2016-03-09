@@ -230,7 +230,8 @@ def crawl_directory(list_input, CNET, PASSWORD):
             #get ready to fill out the dictionary.
             first, last = query_name.split(" ")
             student_dictionary["first_name"] = first
-            student_dictionary["last_name"] = last                      
+            student_dictionary["last_name"] = last 
+            print("'" + key + "'", "'"+ value + "'")                     
                   
             if key == "Current Program Of Study:":
                 student_dictionary["program"] = value
@@ -255,5 +256,4 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     print(dictionary_for_julian)
     return(dictionary_for_julian)
             
-dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol"], ["Zhu, Andy"]]]
-
+dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol", "Gitlin, Hannah"], ["Zhu, Andy"]]]
