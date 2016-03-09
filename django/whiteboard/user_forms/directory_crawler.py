@@ -5,7 +5,7 @@ import html5lib
 import sys
 import os
 
-PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
+PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
 print("absolute path", PHANTOMJS_PATH)
 
 def process_student_names(list_of_names):
@@ -251,7 +251,7 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     print(dictionary_for_julian)
             
 dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian"], ["Zhu, Andy"]]]
-crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
+
 
     
     
