@@ -92,7 +92,7 @@ class File(models.Model):
 
     def file_name(self):
         # Extract the filename from the end of the path and return it
-        pattern = '([\w.-]+\.[\w]+)$'
+        pattern = r'(?<=/)([^/]*)$'
         filename = re.search(pattern, str(self.path))
 
         if filename != None:
