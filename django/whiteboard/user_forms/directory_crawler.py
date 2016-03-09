@@ -210,10 +210,10 @@ def crawl_directory(list_input, CNET, PASSWORD):
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
         table = page_soup.find("tbody")
         table_rows = table.find_all("tr")
-        student_dictionary = { "first_name": None,
-                               "last_name": None,
-                               "program": None,
-                               "email": None,
+        student_dictionary = { "first_name": "Julian",
+                               "last_name": "McClellan",
+                               "program": "College: Economics",
+                               "email": "jmcclellan@uchicago.edu",
                                "cnet_id": None,
                                "duplicates": duplicates}
         for row in table_rows:
