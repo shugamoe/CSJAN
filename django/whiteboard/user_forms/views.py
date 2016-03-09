@@ -250,11 +250,9 @@ def a_or_u_files(file_dicts, cnet_id):
     else:
         user = new_user
 
-
-
     for file_dict in file_dicts:
-        course = Course.objects.get(name = file_dict.pop('course'))
-        file_dict['course_id'] = course.id
+        course_id = Course.objects.get(name = file_dict.pop('course')).id
+        file_dict['course_id'] = course_id
         file_dict['owner_id'] = user.id
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
@@ -262,12 +260,7 @@ def a_or_u_files(file_dicts, cnet_id):
             for attr, value in file_dict.items():
                 setattr(existing_instance, attr, value)
             existing_instance.save
-            # existing_instance.owners.add(user)
-            # existing_instance.courses.add(course)
-            # created.owners.add(user)
-            # created.owners.add(course)
 
-    
     return None
 
 
@@ -275,18 +268,16 @@ def a_or_u_people(people_dicts, model_used, course_name):
     '''
     '''
     # course_object.sessions.add(session_object)
-    course = Course.objects.get(name = course_name)
+    course_id = Course.objects.get(name = course_name).id
 
     for ppl_dict in people_dicts:
+        ppl_dict['course_id'] = course_id
         existing_instance, created = model_used.objects.get_or_create(email = 
             ppl_dict['email'], defaults = ppl_dict)
         if not created:
             for attr, value in file_dict.iteritems():
                 setattr(existing_instance, attr, value)
             existing_instance.save
-            existing_instance.owners.add(course)
-        else:
-            created.add(course)
 
     return model_used.objects.all()
 
