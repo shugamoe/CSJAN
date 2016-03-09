@@ -257,9 +257,3 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
             
 dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol"], ["Zhu, Andy"]]]
 
-
-    
-    
-    
-    
-crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
