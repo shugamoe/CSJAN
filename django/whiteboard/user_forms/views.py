@@ -86,13 +86,11 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
         cnet_pw = request.POST.get('cnet_pw')
         courses = get_courses_post(request)
 
-        print('courses should be here: ', courses)
         if not courses:
             return render(request, 'user_forms/select_downloads.html', \
                             {'courses': session.course_set.all(),
                              'error_message': "You didn't choose any courses"})
         else:
-            print('courses has stuff in it', courses)
 
             crawlers_link(courses, cnet_id, cnet_pw, session)
 
@@ -248,7 +246,7 @@ def a_or_u_files(file_dicts, cnet_id):
     if not new_user:
         user = existing_user
     else:
-        user = new_user
+        user = Student.objects.get(cnet_id = cnet_id)
 
     for file_dict in file_dicts:
         course_id = Course.objects.get(name = file_dict.pop('course')).id
