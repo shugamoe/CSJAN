@@ -212,9 +212,9 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
      cnet_pw)
 
+    demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
     a_or_u_files(file_dicts, cnet_id)
 
-    demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
 
     for course in demog_dicts.keys():
         for stud_ta_or_instr in demog_dicts[course].keys():
