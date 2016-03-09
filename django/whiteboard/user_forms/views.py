@@ -240,13 +240,7 @@ def a_or_u_files(file_dicts, cnet_id):
     This function checks the information of each dict to see whether the 
     database already has an instance of that 
     '''
-    existing_user, new_user = Student.objects.get_or_create(cnet_id = cnet_id,
-        defaults = {'cnet_id': cnet_id})
-
-    if not new_user:
-        user = existing_user
-    else:
-        user = Student.objects.get(cnet_id = cnet_id)
+    user = Student.objects.get(cnet_id = cnet_id)
 
     for file_dict in file_dicts:
         course_id = Course.objects.get(name = file_dict.pop('course')).id
