@@ -5,8 +5,8 @@ import html5lib
 import sys
 import os
 
-PHANTOMJS_PATH = os.path.abspath("phantomjs/bin/phantomjs")
-sys.path.append(PHANTOMJS_PATH)
+PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
+print(PHANTOMJS_PATH, "PATH!!!!!!!!!!!!!!!!!!!")
 
 def process_student_names(list_of_names):
     '''given a list of names from chalk,
@@ -44,7 +44,8 @@ def crawl_directory(list_input, CNET, PASSWORD):
         list_of_student_names = process_student_names(list_input[3])
 
     #fire up the browser, visit the directory page and the login page
-    browser = webdriver.PhantomJS(executable_path=PHANTOMJS)
+    sys.path.append(PHANTOMJS_PATH)
+    browser = webdriver.PhantomJS(executable_path=PHANTOMJS_PATH)
     browser.get(DIRECTORY)
     browser.get(LOGIN_PAGE)
     browser.implicitly_wait(0.05) #give the login a bit to load
