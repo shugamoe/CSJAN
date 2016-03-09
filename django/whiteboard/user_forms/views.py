@@ -268,16 +268,21 @@ def a_or_u_people(people_dicts, model_used, course_name):
     '''
     '''
     # course_object.sessions.add(session_object)
-    course_id = Course.objects.get(name = course_name).id
+    course = Course.objects.get(name = course_name)
 
     for ppl_dict in people_dicts:
-        ppl_dict['course_id'] = course_id
         existing_instance, created = model_used.objects.get_or_create(email = 
             ppl_dict['email'], defaults = ppl_dict)
         if not created:
             for attr, value in ppl_dict.items():
                 setattr(existing_instance, attr, value)
             existing_instance.save
+            existing_instance.courses_in.add(course)
+        else:
+            existing_instance = model_used.objects.get(email = 
+                ppl_dict['email'])
+            existing_instance.save
+            existing_instance.course_in.add(course)
 
     return model_used.objects.all()
 
