@@ -6,7 +6,6 @@ import sys
 import os
 
 PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
-print(PHANTOMJS_PATH, "PATH!!!!!!!!!!!!!!!!!!!")
 
 def process_student_names(list_of_names):
     '''given a list of names from chalk,
@@ -62,7 +61,21 @@ def crawl_directory(list_input, CNET, PASSWORD):
         #navigate to the search url and go to the first result.
         browser.find_element_by_name('name').send_keys(query_name)
         browser.find_element_by_class_name('icon-search').click()
-        browser.find_element_by_link_text(query_name).click()
+        results = browser.find_elements_by_link_text(query_name)
+
+        #if no directory results are found, print such and move on.
+        if len(results) == 0:
+            print(query_name, " not found in directory.")
+            continue
+        #if more than one result is found, click the first one.
+        elif len(results) > 1:
+            duplicates = True
+            browser.find_element_by_link_text(query_name).click()
+            print("Multiple search matches for the name", query_name)
+        #if there is only one result, click on it and continue ans usual.
+        else:
+            duplicates = False
+            browser.find_element_by_link_text(query_name).click()
         
         #parse the table
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
@@ -74,7 +87,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
                                   "faculty_exchange": None,
                                   "phone": None,
                                   "email": None,
-                                  "duplicates": None}
+                                  "duplicates": duplicates}
         
         for row in table_rows:
             #th are row titles, td are values unique to the person.
@@ -111,7 +124,21 @@ def crawl_directory(list_input, CNET, PASSWORD):
         #navigate to the search url and go to the first result.
         browser.find_element_by_name('name').send_keys(query_name)
         browser.find_element_by_class_name('icon-search').click()
-        browser.find_element_by_link_text(query_name).click()
+        results = browser.find_elements_by_link_text(query_name)
+
+        #if no directory results are found, print such and move on.
+        if len(results) == 0:
+            print(query_name, " not found in directory.")
+            continue
+        #if more than one result is found, click the first one.
+        elif len(results) > 1:
+            duplicates = True
+            browser.find_element_by_link_text(query_name).click()
+            print("Multiple search matches for the name", query_name)
+        #if there is only one result, click on it and continue ans usual.
+        else:
+            duplicates = False
+            browser.find_element_by_link_text(query_name).click()
         
         #parse the table
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
@@ -122,7 +149,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
                                "program": None,
                                "email": None,
                                "cnet_id": None,
-                               "duplicates": None}
+                               "duplicates": duplicates}
         
         
         for row in table_rows:
@@ -155,10 +182,24 @@ def crawl_directory(list_input, CNET, PASSWORD):
     '''process the students'''  
     for query_name in list_of_student_names:
         
-        #navigate to the search url and go to the first result.
+          #navigate to the search url and go to the first result.
         browser.find_element_by_name('name').send_keys(query_name)
         browser.find_element_by_class_name('icon-search').click()
-        browser.find_element_by_link_text(query_name).click()
+        results = browser.find_elements_by_link_text(query_name)
+
+        #if no directory results are found, print such and move on.
+        if len(results) == 0:
+            print(query_name, " not found in directory.")
+            continue
+        #if more than one result is found, click the first one.
+        elif len(results) > 1:
+            duplicates = True
+            browser.find_element_by_link_text(query_name).click()
+            print("Multiple search matches for the name", query_name)
+        #if there is only one result, click on it and continue ans usual.
+        else:
+            duplicates = False
+            browser.find_element_by_link_text(query_name).click()
         
         #parse the table
         page_soup = BeautifulSoup(browser.page_source, "html5lib")
@@ -169,7 +210,7 @@ def crawl_directory(list_input, CNET, PASSWORD):
                                "program": None,
                                "email": None,
                                "cnet_id": None,
-                               "duplicates": None}
+                               "duplicates": duplicates}
         for row in table_rows:
             #th are row titles, td are values unique to the person.
             key = row.find("th")
@@ -207,7 +248,7 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
     print(dictionary_for_julian)
             
 dummy_data = [["hello_world 101", ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]]
-
+crawl_multiple_classes(dummy_data, "anbonar", "Candycan3Child!")
 
     
     
