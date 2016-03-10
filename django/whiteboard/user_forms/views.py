@@ -16,6 +16,7 @@ import random
 import re
 from .chalk_crawler import get_courses, dl_specific_courses 
 from .directory_crawler import crawl_multiple_classes as get_demog_dicts
+from .graph_class import graph_class 
 
 
 # import folders 
@@ -86,13 +87,11 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
         cnet_pw = request.POST.get('cnet_pw')
         courses = get_courses_post(request)
 
-        print('courses should be here: ', courses)
         if not courses:
             return render(request, 'user_forms/select_downloads.html', \
                             {'courses': session.course_set.all(),
                              'error_message': "You didn't choose any courses"})
         else:
-            print('courses has stuff in it', courses)
 
             crawlers_link(courses, cnet_id, cnet_pw, session)
 
@@ -138,16 +137,14 @@ def post(request, session_id):
     prev_user_sessions = Session.objects.filter(date__lt = session.date)\
     .filter(cnet_id = session.cnet_id).count()
 
-    if prev_user_sessions > 0:
-        print('REPEAT USER DETECTED')
-        session.repeat_user = True
-        session.save()
-
-
     print(session.cnet_id, 'this is the CNET ID of the current user session')
     print(session.date, 'the date!')
     prev_courses = Course.objects.filter(sessions__date__lt = session.date).filter(sessions__cnet_id = session.cnet_id).distinct()
     
+    if len(prev_courses) > 0:
+        session.repeat_user = True
+        session.save()
+
     return render(request, 'user_forms/post.html',
                     {'courses': session.course_set.all(),
                       'prev_courses': prev_courses,
@@ -214,9 +211,8 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
      cnet_pw)
 
-    a_or_u_files(file_dicts, cnet_id)
-
     demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
+
 
     for course in demog_dicts.keys():
         for stud_ta_or_instr in demog_dicts[course].keys():
@@ -230,6 +226,8 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
                 a_or_u_people(demog_dicts[course][stud_ta_or_instr], 
                     Assistant, course)
 
+    a_or_u_files(file_dicts, cnet_id)
+
     return None
 
 
@@ -242,19 +240,11 @@ def a_or_u_files(file_dicts, cnet_id):
     This function checks the information of each dict to see whether the 
     database already has an instance of that 
     '''
-    existing_user, new_user = Student.objects.get_or_create(cnet_id = cnet_id,
-        defaults = {'cnet_id': cnet_id})
-
-    if not new_user:
-        user = existing_user
-    else:
-        user = new_user
-
-
+    user = Student.objects.get(cnet_id = cnet_id)
 
     for file_dict in file_dicts:
-        course = Course.objects.get(name = file_dict.pop('course'))
-        file_dict['course_id'] = course.id
+        course_id = Course.objects.get(name = file_dict.pop('course')).id
+        file_dict['course_id'] = course_id
         file_dict['owner_id'] = user.id
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
@@ -262,12 +252,7 @@ def a_or_u_files(file_dicts, cnet_id):
             for attr, value in file_dict.items():
                 setattr(existing_instance, attr, value)
             existing_instance.save
-            # existing_instance.owners.add(user)
-            # existing_instance.courses.add(course)
-            # created.owners.add(user)
-            # created.owners.add(course)
 
-    
     return None
 
 
@@ -281,12 +266,15 @@ def a_or_u_people(people_dicts, model_used, course_name):
         existing_instance, created = model_used.objects.get_or_create(email = 
             ppl_dict['email'], defaults = ppl_dict)
         if not created:
-            for attr, value in file_dict.iteritems():
+            for attr, value in ppl_dict.items():
                 setattr(existing_instance, attr, value)
             existing_instance.save
-            existing_instance.owners.add(course)
+            existing_instance.courses_in.add(course)
         else:
-            created.add(course)
+            existing_instance = model_used.objects.get(email = 
+                ppl_dict['email'])
+            existing_instance.save
+            existing_instance.courses_in.add(course)
 
     return model_used.objects.all()
 
@@ -297,7 +285,7 @@ class CourseList(ListView):
 
     def get_queryset(self):
         cnet_id = self.kwargs['cnet_id']
-        return Course.objects.filter(student__cnet_id=cnet_id)\
+        return Course.objects.filter(student__cnet_id = cnet_id)\
              .order_by('dept')
 
 
@@ -313,12 +301,15 @@ class CourseList(ListView):
         context['course_ids'] = course_ids
         return context 
 
+
 class CourseDetail(DetailView):
     model = Course
     pk_url_kwarg = 'course_id'
     context_object_name = 'course'
 
+
     def get_context_data(self, **kwargs):
+
         # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         course_id = self.kwargs['course_id']
@@ -331,8 +322,8 @@ class CourseDetail(DetailView):
 
         # See what majors those students have so we can create a form to let
         # the user filter by major
-        major_tuples = context['students'].order_by().values_list('program').\
-        distinct()
+        major_tuples = Student.objects.filter(courses_in__id = course_id)\
+        .order_by().values_list('program').distinct()
 
         # To a bit of list comprehension to give it to the form in a nicer 
         # format.
@@ -342,12 +333,13 @@ class CourseDetail(DetailView):
 
 
         if self.request.method == 'GET':
-            major = self.request.GET.get('major_filters')
-            print(major)
-            if major:
+            form = FilterMajorForm(self.request.GET, **{'majors_list': majors_list})
+            if form.is_valid():
+                majors = form.cleaned_data['major_filters']
+            if majors:
                 context['filter_enabled'] = True
-                context['students'] = context['students'].filter(program = 
-                    major)
+                context['students'] = context['students'].filter(program__in = 
+                        majors).order_by('program')
             else:
                 context['filter_enabled'] = False
         
@@ -356,14 +348,42 @@ class CourseDetail(DetailView):
         context['assistants'] = Assistant.objects.filter(courses_in__id = 
         course_id)
 
-
-
-
         # This will retrieve the user's files.
         context['files'] = File.objects.filter(owner__cnet_id = 
         self.kwargs['cnet_id'])
 
         return context
+
+
+class InstructorDetail(DetailView):
+    model = Instructor
+    pk_url_kwarg = 'instructor_id'
+    context_object_name = 'instructor'
+
+    def get_context_data(self, **kwargs):
+        instructor_id = self.kwargs['instructor_id']
+
+        context = super(InstructorDetail, self).get_context_data(**kwargs)
+        context['courses_in'] = Course.objects.filter(instructor__id = 
+            instructor_id)
+        context['cnet_id'] = Instructor.objects.get(id = instructor_id).cnet_id
+        return context
+
+
+class AssistantDetail(DetailView):
+    model = Assistant
+    pk_url_kwarg = 'assistant_id'
+    context_object_name = 'assistant'
+
+    def get_context_data(self, **kwargs):
+        assistant_id = self.kwargs['assistant_id']
+
+        context = super(AssistantDetail, self).get_context_data(**kwargs)
+        context['courses_in'] = Course.objects.filter(assistant__id = 
+            assistant_id)
+        context['cnet_id'] = Assistant.objects.get(id = assistant_id).cnet_id
+        return context
+
 
 class StudentDetail(DetailView):
     model = Student
@@ -385,6 +405,9 @@ class StudentDetail(DetailView):
         return context
 
 
+
+
+
 def get_courses_post(request):
     '''
     This function is used to extract courses selected from a dynamic form 
@@ -396,6 +419,7 @@ def get_courses_post(request):
             courses.append(request.POST.get('course' + str(i)))
 
     return courses
+    
 
 def get_courses_get(request):
     '''
@@ -448,15 +472,40 @@ def single_class_plot(request, course_id):
     This plot will display information pertaining to a single class.
     '''
 
-
     response = HttpResponse(content_type='image/png')
 
-    plt.figure(figsize=(4, 4))
+    plt.figure(figsize=(6, 6))
 
-    test_names = ['MAJOR 1', '1_cls_plt', 'course id is: ' + str(course_id)]
-    test_nums = [40, 50, 100]
+    program_dictionary = {}
 
-    plt.pie(test_nums, labels=test_names)
+    #if a course is found, filter students that are in the class.
+    list_of_students = Student.objects.filter(courses_in__id=course_id)
+    for student in list_of_students:
+    #compile the majors of the students, count them.
+        if student.program not in program_dictionary:
+            program_dictionary[student.program] = 0
+        else:
+            program_dictionary[student.program] += 1
+
+    pie_names = []
+    pie_nums = []
+    formatted_dictionary = {"Other": 0}
+
+    for key in program_dictionary:
+        value = program_dictionary[key]
+        if value >= 4:
+            formatted_dictionary[key] = value
+        else:
+            formatted_dictionary["Other"] += value
+
+    assert len(formatted_dictionary.keys()) >= 2
+
+    for key in formatted_dictionary:
+        pie_names.append(key)
+        pie_nums.append(formatted_dictionary[key])
+
+    print('STUFF!!!', pie_nums, pie_names)
+    plt.pie(pie_nums, labels=pie_names)
     plt.savefig(response)
     plt.close()
 
@@ -464,6 +513,7 @@ def single_class_plot(request, course_id):
 
 
 from django.db.models.fields.related import ManyToManyField
+
 
 def to_dict(instance, ignore_m2m = False):
     '''

@@ -10,17 +10,19 @@
 
 
 
-
 <!-- Instructors and TAs Section -->
 
 <!-- There will always be a course instructor -->
 <ul style="float:left;">
 <p><b>Taught by:</b></p> 
 {% for instructor in instructors %}
+<li><a href="{% url 'view_instructor' instructor_id=instructor.id %}">
 {% if instructor.duplicates %}
-<l>{{ instructor.full_name }}*</l>
+    {{ instructor.full_name }}*
+    </a></li>
 {% else %}
-<l>{{ instructor.full_name }}</l>
+    {{ instructor.full_name }}
+    </a></li>
 {% endif %}
 {% endfor %}
 </ul>
@@ -30,10 +32,13 @@
 <ul style="float:left;">
 <p><b>TAs:</b></p>
 {% for assistant in assistants %}
+<li><a href="{% url 'view_assistant' assistant_id=assistant.id %}">
 {% if assistant.duplicates %}
-<l>{{ assistant.full_name }}*</l>
+    {{ assistant.full_name }}*
+    </a></li>
 {% else %}
-<l>{{ assistant.full_name }}</l>
+    {{ assistant.full_name }}
+    </a></li>
 {% endif %}
 {% endfor %}
 </ul>

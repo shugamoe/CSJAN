@@ -1,0 +1,31 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+<!-- Basic Info Section -->
+<h1>{{ instructor.full_name }}</h1>
+
+    
+    <p> {{ instructor.email }}</p> 
+    <p>Title: {{ instructor.title }}</p> 
+    <p>Faculty Exchage: {{ instructor.faculty_exchange }}</p> 
+    <p>Phone: {{ instructor.phone }}</p>
+
+
+<!-- Classes Taken/Select -->
+<div style="clear:both;">
+<ul style="float:left;">
+<b>Classes Taught: </b>
+    {% for course in courses_in %}
+<li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+    {{ course.name }}</a></li>
+    {% endfor %}
+</form>
+</ul>
+<!-- End  -->
+
+{% endblock %}
+
+
+

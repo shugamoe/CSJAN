@@ -60,7 +60,7 @@ class Instructor(models.Model):
 
 
     def cnet_id(self):
-        return re.search("^([\w-]*\w)", self.email).group()
+        return re.search(r'^([a-z0-9]*[a-z0-9]?)', self.email).group()
     
     def full_name(self):
         return str(self.first_name + ' ' + self.last_name)
@@ -75,7 +75,7 @@ class Assistant(models.Model):
     duplicates = models.BooleanField(default = False)
 
     def cnet_id(self):
-        return re.search("^([\w-]*\w)", self.email).group()
+        return re.search(r'^([a-z0-9]*[a-z0-9]?)', self.email).group()
 
     def full_name(self):
         return str(self.first_name + ' ' + self.last_name)
@@ -92,7 +92,7 @@ class File(models.Model):
 
     def file_name(self):
         # Extract the filename from the end of the path and return it
-        pattern = '([\w.-]+\.[\w]+)$'
+        pattern = r'(?<=/)([^/]*)$'
         filename = re.search(pattern, str(self.path))
 
         if filename != None:

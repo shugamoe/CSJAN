@@ -11,6 +11,7 @@ except:
 import os
 import urllib
 import requests
+import datetime
 
 
 def create_object(input_dict):
@@ -23,7 +24,11 @@ def create_object(input_dict):
 def get_courses(input_dict):
     
     a = create_object(input_dict)
+<<<<<<< HEAD
 
+=======
+    a.browser.close()
+>>>>>>> abcfd496f99635ad9e7c6060215352921e1bc933
     return a.courses
 
 
@@ -57,7 +62,7 @@ class Courses:
         self.course_info = [] # list of lists: course_id, prof, tas, students
         self.course_material_dict = {}
 
-        # 'list of dicts, {'owner', 'course', 'heading', 'description', 'body', 
+        # 'list of dicts, {course', 'heading', 'description', 'body', 
         # 'path', 'format'}; format is in the form of 'application/...'
         self.file_list = [] 
    
@@ -65,7 +70,11 @@ class Courses:
     def login(self):
         
         browser = webdriver.Firefox()
+<<<<<<< HEAD
         # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs')
+=======
+        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs', service_args = ['--ignore-ssl-errors=true'])
+>>>>>>> abcfd496f99635ad9e7c6060215352921e1bc933
         browser.implicitly_wait(2)
 
         browser.get(self.url)
@@ -235,7 +244,6 @@ class Courses:
                                     heading = unit.find_element_by_tag_name('h3').text
                                     file_dict = {'course': course, 'heading': heading, 'description': ''}
                                     self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict)
-                                    self.file_list.append(file_dict)
 
                                 elif 'document_on' in img.get_attribute('src'):
                                     if self.check_tag_exists_in_web_element(unit, 'a'):
@@ -248,7 +256,6 @@ class Courses:
                                                 description += paragraph.text + '\n'
                                             file_dict = {'course': course, 'heading': heading, 'description': description}
                                             self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict)      
-                                            self.file_list.append(file_dict)
                     
                     if material_dict[component] == {}:
                         del material_dict[component]
@@ -286,7 +293,6 @@ class Courses:
                             heading = inner_unit.find_element_by_tag_name('h3').text
                             file_dict = {'course': course, 'heading': heading, 'description': ''}
                             self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict)
-                            self.file_list.append(file_dict)
                         
 
                         elif 'document_on' in img.get_attribute('src'):
@@ -300,7 +306,6 @@ class Courses:
                                         description += paragraph.text + '\n'
                                     file_dict = {'course': course, 'heading': heading, 'description': description}
                                     self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict)
-                                    self.file_list.append(file_dict)
 
 
                         # download text for all
@@ -324,8 +329,19 @@ class Courses:
         s = requests.session()
         s.get(file_url, auth = (self.username, self.password))
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
+
         file_dict['format'] = r.headers.get('content-type')
-        destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
+        destination = '{:}/{:}/{:}'.format(self.default_folder, self.username, path)
+        # os.chdir(destination)
+        # if os.path.isfile(unit_name):
+        #     print('file already exists')
+        #     local_last_mod_date = time.ctime(os.path.getmtime(unit_name))
+        #     print(local_last_mod_date)
+        #     dl_last_mod_date = r.headers.get('last-modified')
+        #     print(dl_last_mod_date)
+
+        destination += '/{:}'.format(unit_name)       
+
         file_dict['path'] = os.path.abspath(destination)
         with open(destination, 'wb') as f:  
             r.raw.decode_content = True
@@ -336,6 +352,8 @@ class Courses:
             file_dict['body'] = r.content
         else:
             file_dict['body'] = ''
+        
+        self.file_list.append(file_dict)
         
     
 
