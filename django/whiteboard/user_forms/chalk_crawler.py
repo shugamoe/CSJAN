@@ -1,16 +1,15 @@
-# Chalk_Crawler w/ Selenium 
-# PhantomJS, updates
+# Chalk_Crawler - Andy Zhu
+# updates
 
 from selenium import webdriver
-import time
-import getpass
 try:
     from .folders import check_folder_name, make_dirs, convert_pdf
 except:
     from folders import check_folder_name, make_dirs, convert_pdf
 import os
-import urllib
 import requests
+import time
+import datetime
 
 
 def create_object(input_dict):
@@ -65,15 +64,13 @@ class Courses:
     def login(self):
         
         # browser = webdriver.Firefox()
-        browser = webdriver.PhantomJS(executable_path=os.path.abspath("./user_forms/phantomjs/bin/phantomjs"))
+        browser = webdriver.PhantomJS(executable_path=os.path.abspath("./phantomjs/bin/phantomjs"), service_args=['--ignore-ssl-errors=true'])
         browser.implicitly_wait(2)
 
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(self.username)
         browser.find_element_by_name('password').send_keys(self.password)
-
-        login_form = browser.find_element_by_id('entry-login')
-        login_form.submit() 
+        browser.find_element_by_id('entry-login').click()
 
 
         return browser
@@ -87,10 +84,11 @@ class Courses:
         if self.quarter == []:
             self.quarter = ''
 
-        try:
-            self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
-        except:
+        # Accounting for invalid logins
+        if 'Welcome' not in self.browser.title:
             return None, None
+
+        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
 
@@ -315,7 +313,7 @@ class Courses:
 
         if os.path.exists('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename)):
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove(path + filename + '.txt')
+            os.remove('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename))
 
         with open('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename), 'w') as f:
             f.write(text)
@@ -323,9 +321,12 @@ class Courses:
 
     def download_file_or_doc(self, unit_name, file_url, unit, path, file_dict, text_file):
         
+
         s = requests.session()
         s.get(file_url, auth = (self.username, self.password))
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
+            
+        # if need to update:
         file_dict['format'] = r.headers.get('content-type')
         destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
         file_dict['path'] = os.path.abspath(destination)
@@ -340,11 +341,25 @@ class Courses:
         elif 'txt' in file_dict['format']:
             file_dict['body'] = r.content
         else:
-            file_dict['body'] = ''
+             file_dict['body'] = ''
+        # end if
+        print(str(r.headers['last-modified']).split(' '), str(time.ctime(os.path.getmtime(file_dict['path'])).split(' ')))
         if file_dict['heading'] not in text_file:
             return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n' 
 
-        return text_file      
+        return text_file  
+
+
+    def need_to_update(self, r, file_dict):
+        months = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+        dl_file_mod_date = str(r.headers['last-modified']).split(' ') # ['Mon,', '04', 'Jan', '2016', '21:17:09', 'GMT'] 
+        dl_file_mod_time = dl_file_mod_date[4].split(':')
+        dl_file_mod_date = datetime(dl_file_mod_date[3], months[dl_file_mod_date[2]], dl_file_mod_date[1], dl_file_mod_time[0], dl_file_mod_time[1], dl_file_mod_time[2]) 
+
+        local_file_mod_date = str(time.ctime(os.path.getmtime(file_dict['path']))).split(' ') # ['Thu', 'Mar', '10', '17:23:59', '2016'] (local timezone) 
+        local_file_mod_time = local_file_mod_date[3].split(':')
+        local_file_mod_date = datetime(local_file_mod_date[4], months[local_file_mod_date[1]], local_file_mod_date[2], local_file_mod_time[0], local_file_mod_time[1], local_file_mod_time[2])
+
     
 
     def check_id_exists(self, id_): 
