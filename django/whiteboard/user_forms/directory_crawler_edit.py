@@ -168,7 +168,7 @@ def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
 		dictionary_for_julian[course_identifier] = crawl_directory(list_input, CNET, PASSWORD)
 		num_queries = len(list_input[1]) + len(list_input[2]) + len(list_input[3])
 	print(dictionary_for_julian)
-	return(dictionary_for_julian, num_queries)
+	return(dictionary_for_julian)
 
 dummy_data = [["hello_world 101", ["Anne Rogers", "Matthew Wachs"], ["McClellan, Julian", "Park, Hansol", "Gitlin, Hannah"], ["Zhu, Andy"]]]
-crawl_multiple_classes(dummy_data, "anbonar", "Candycan3child!")
+
