@@ -1,5 +1,5 @@
 # Chalk_Crawler w/ Selenium 
-# PhantomJS, download text (line 220), pdf, updates
+# PhantomJS, updates
 
 from selenium import webdriver
 import time
@@ -64,8 +64,8 @@ class Courses:
 
     def login(self):
         
-        browser = webdriver.Firefox()
-        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs')
+        # browser = webdriver.Firefox()
+        browser = webdriver.PhantomJS(executable_path=os.path.abspath("./user_forms/phantomjs/bin/phantomjs"))
         browser.implicitly_wait(2)
 
         browser.get(self.url)
@@ -206,7 +206,7 @@ class Courses:
             elif item.text not in ['Home', 'Announcements', 'Send Email', \
                 'My Grades', 'Discussion Board', 'Discussions', \
                 'Library Course Reserves', 'Tools', 'Groups']:
-
+                item_name = item.text
                 component = check_folder_name(item.text)
                 material_dict[component] = {}
                 make_dirs(self.course_material_dict, self.default_folder)
@@ -234,7 +234,7 @@ class Courses:
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                     heading = unit.find_element_by_tag_name('h3').text
                                     file_dict = {'course': course, 'heading': heading, 'description': ''}
-                                    self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
+                                    text_file = self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
                                     self.file_list.append(file_dict)
 
                                 elif 'document_on' in img.get_attribute('src'):
@@ -247,9 +247,10 @@ class Courses:
                                             for paragraph in unit.find_elements_by_tag_name('p'):
                                                 description += paragraph.text + '\n'
                                             file_dict = {'course': course, 'heading': heading, 'description': description}
-                                            self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
+                                            text_file = self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
                                             self.file_list.append(file_dict)
-                    self.download_text('descriptions', text_file, '{:}/{:}/{:}/{:}/'.format(self.default_folder, self.username, str(check_folder_name(course)), self.username, str(check_folder_name(item.text)))) 
+                    if text_file != '':
+                        self.download_text('descriptions', text_file, '{:}/{:}/{:}/{:}/'.format(self.default_folder, self.username, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
 
                     if material_dict[component] == {}:
                         del material_dict[component]
@@ -267,6 +268,7 @@ class Courses:
         unit.find_element_by_tag_name('a').click() 
         if self.check_id_exists('content_listContainer'):
             num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+            text_file = ''
             for unit_index in range(num_of_items):
                 inner_unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                 if self.check_tag_exists_in_web_element(inner_unit, 'img'):
@@ -284,7 +286,7 @@ class Courses:
                             file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
                             heading = inner_unit.find_element_by_tag_name('h3').text
                             file_dict = {'course': course, 'heading': heading, 'description': ''}
-                            self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict, text_file)
+                            text_file = self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict, text_file)
                             self.file_list.append(file_dict)
                         
 
@@ -298,10 +300,11 @@ class Courses:
                                     for paragraph in inner_unit.find_elements_by_tag_name('p'):
                                         description += paragraph.text + '\n'
                                     file_dict = {'course': course, 'heading': heading, 'description': description}
-                                    self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict, text_file)
+                                    text_file = self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict, text_file)
                                     self.file_list.append(file_dict)
 
-            self.download_text('descriptions', text_file, path) 
+            if text_file != '':
+                self.download_text('descriptions', text_file, path) 
 
         self.browser.execute_script("window.history.go(-1)")
 
@@ -310,11 +313,11 @@ class Courses:
 
     def download_text(self, filename, text, path):
 
-        if os.path.exists(path + filename + '.txt'):
-            print('File already exists. Updating file.')
+        if os.path.exists('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename)):
+            print('{:}'.format(filename) + ' already exists. Updating file.')
             os.remove(path + filename + '.txt')
 
-        with open(path + filename + '.txt', 'w') as f:
+        with open('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename), 'w') as f:
             f.write(text)
 
 
@@ -329,15 +332,19 @@ class Courses:
         with open(destination, 'wb') as f:  
             r.raw.decode_content = True
             f.write(r.content)
-        print(file_dict['path'])
         if 'pdf' in file_dict['format']:
-            file_dict['body'] = convert_pdf(file_dict['path'])           
+            try:
+                file_dict['body'] = convert_pdf(file_dict['path'])  
+            except:
+                file_dict['body'] = ''         
         elif 'txt' in file_dict['format']:
             file_dict['body'] = r.content
         else:
             file_dict['body'] = ''
-        
-        text_file += file_dict['heading'] + '\n' + file_dict['description'] + '\n\n'       
+        if file_dict['heading'] not in text_file:
+            return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n' 
+
+        return text_file      
     
 
     def check_id_exists(self, id_): 
