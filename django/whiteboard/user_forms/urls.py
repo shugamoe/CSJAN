@@ -51,10 +51,12 @@ urlpatterns = [
         views.AssistantDetail.as_view(), name = 'view_assistant'),
 
 
-    # Search PDFs
+    # Search PDFs Test
     url(r'^search/', include('haystack.urls')),
 
-    url(r'^tmp$', tmp ),
+    url(r'^search/(?P<cnet_id>[a-zA-Z0-9]+)/(?P<course_id>[0-9]+)/$', 
+        views.search, name = 'search_single_class_files'
+         ),
 
     url(r'^$', views.start, name='start'),
     ]

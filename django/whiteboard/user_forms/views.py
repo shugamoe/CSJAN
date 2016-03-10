@@ -3,11 +3,11 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
 
-from .forms import SessionForm, FilterMajorForm
+from .forms import SessionForm, FilterMajorForm, ClassFilesSearchForm
 from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
-# For test plots
+# Special mpl imports from Django workshop code.
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -17,6 +17,10 @@ import re
 from .chalk_crawler import get_courses, dl_specific_courses 
 from .directory_crawler import crawl_multiple_classes as get_demog_dicts
 from .graph_class import graph_class 
+
+from django.core.management import call_command
+from haystack.generic_views import SearchView
+from haystack.forms import SearchForm
 
 
 # import folders 
@@ -228,6 +232,11 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
 
     a_or_u_files(file_dicts, cnet_id)
 
+
+    # This command ensures that the search indexes for Haystack are updated.
+    # (So you can search the latest files.)
+    call_command('rebuild_index')
+
     return None
 
 
@@ -352,6 +361,8 @@ class CourseDetail(DetailView):
         context['files'] = File.objects.filter(owner__cnet_id = 
         self.kwargs['cnet_id'])
 
+        context['cnet_id'] = self.kwargs['cnet_id']
+
         return context
 
 
@@ -404,7 +415,35 @@ class StudentDetail(DetailView):
         context['course_ids'] = course_ids
         return context
 
+class SearchClassFilesView(SearchView):
+    template_name = 'user_forms/search_class_files.html'
+    form_class = SearchForm
 
+
+    def __call__(self, request, cnet_id, course_id):
+        self.cnet_id = cnet_id
+        self.course_id = course_id
+        return super(MySearchView, self).__call__(request)
+
+    def get_queryset(self):
+        queryset = super(SearchClassFilesView, self).get_queryset()
+        cnet_id = self.kwargs['cnet_id']
+        course_id = self.kwargs['course_id']
+        # further filter queryset based on some set of criteria
+        return queryset.filter(course__id = course_id).filter(
+            owner__cnet_id = cnet_id)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(SearchClassFilesView, self).get_context_data(*args, 
+            **kwargs)
+        # do something
+        return context
+
+
+def search(request, cnet_id, course_id):
+    form = ClassFilesSearchForm(request.GET)
+    searchresults = form.search()
+    return render(request, 'user_forms/search_class_files.html', {'form' : form})
 
 
 
