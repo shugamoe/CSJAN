@@ -1,5 +1,5 @@
 # Chalk_Crawler w/ Selenium 
-# PhantomJS, download text (line 220), updates
+# PhantomJS, download text (line 220), pdf, updates
 
 from selenium import webdriver
 import time
@@ -87,9 +87,10 @@ class Courses:
         if self.quarter == []:
             self.quarter = ''
 
-        if not self.check_xpath_exists('//*[@title="Manage Chalk Course List Module Settings"]'):
+        try:
+            self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
+        except:
             return None, None
-        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
 
@@ -210,7 +211,6 @@ class Courses:
                 material_dict[component] = {}
                 make_dirs(self.course_material_dict, self.default_folder)
                 item.find_element_by_tag_name('a').click()
-                # store item_url
 
                 if self.check_xpath_exists('//*div[@class = "noItems container-empty"]'):
                     continue
@@ -234,7 +234,7 @@ class Courses:
                                     file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                     heading = unit.find_element_by_tag_name('h3').text
                                     file_dict = {'course': course, 'heading': heading, 'description': ''}
-                                    self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict)
+                                    self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
                                     self.file_list.append(file_dict)
 
                                 elif 'document_on' in img.get_attribute('src'):
@@ -247,16 +247,15 @@ class Courses:
                                             for paragraph in unit.find_elements_by_tag_name('p'):
                                                 description += paragraph.text + '\n'
                                             file_dict = {'course': course, 'heading': heading, 'description': description}
-                                            self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict)      
+                                            self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
                                             self.file_list.append(file_dict)
-                    
+                    self.download_text('descriptions', text_file, '{:}/{:}/{:}/{:}/'.format(self.default_folder, self.username, str(check_folder_name(course)), self.username, str(check_folder_name(item.text)))) 
+
                     if material_dict[component] == {}:
                         del material_dict[component]
 
                     make_dirs(self.course_material_dict, self.default_folder)
 
-                            # download href for all links;
-                            # download text for all units 
 
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
 
@@ -285,7 +284,7 @@ class Courses:
                             file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
                             heading = inner_unit.find_element_by_tag_name('h3').text
                             file_dict = {'course': course, 'heading': heading, 'description': ''}
-                            self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict)
+                            self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict, text_file)
                             self.file_list.append(file_dict)
                         
 
@@ -299,11 +298,11 @@ class Courses:
                                     for paragraph in inner_unit.find_elements_by_tag_name('p'):
                                         description += paragraph.text + '\n'
                                     file_dict = {'course': course, 'heading': heading, 'description': description}
-                                    self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict)
+                                    self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict, text_file)
                                     self.file_list.append(file_dict)
 
+            self.download_text('descriptions', text_file, path) 
 
-                        # download text for all
         self.browser.execute_script("window.history.go(-1)")
 
         return None
@@ -319,7 +318,7 @@ class Courses:
             f.write(text)
 
 
-    def download_file_or_doc(self, unit_name, file_url, unit, path, file_dict):
+    def download_file_or_doc(self, unit_name, file_url, unit, path, file_dict, text_file):
         
         s = requests.session()
         s.get(file_url, auth = (self.username, self.password))
@@ -330,13 +329,15 @@ class Courses:
         with open(destination, 'wb') as f:  
             r.raw.decode_content = True
             f.write(r.content)
+        print(file_dict['path'])
         if 'pdf' in file_dict['format']:
-            file_dict['body'] = convert_pdf(file_dict['path'])
+            file_dict['body'] = convert_pdf(file_dict['path'])           
         elif 'txt' in file_dict['format']:
             file_dict['body'] = r.content
         else:
             file_dict['body'] = ''
         
+        text_file += file_dict['heading'] + '\n' + file_dict['description'] + '\n\n'       
     
 
     def check_id_exists(self, id_): 
