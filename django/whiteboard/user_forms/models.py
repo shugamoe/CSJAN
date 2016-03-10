@@ -102,7 +102,7 @@ class File(models.Model):
             return str(self.path)
 
     def __str__(self):
-        return str(self.file_name())
+        return str(self.file_name)
 
 
 

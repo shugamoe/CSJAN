@@ -4,6 +4,8 @@ from django.forms import ModelForm
 from datetime import datetime
 from .models import Session, Course, Student, Instructor, Assistant
 from django.utils.safestring import mark_safe
+from django import forms
+from haystack.forms import SearchForm
 
 QUARTER_CHOICES = (('Autumn', 'Autumn'), ('Winter', 'Winter'), \
                                     ('Spring', 'Spring'), ('Summer', 'Summer'))
@@ -45,6 +47,24 @@ class FilterMajorForm(forms.Form):
         self.fields['major_filters'] = forms.MultipleChoiceField(label = label,
          choices = major_choices, required = False)
 
+
+class ClassFilesSearchForm(SearchForm):
+    keyword = forms.CharField(required=True)
+
+    def search(self):
+        # First, store the SearchQuerySet received from other processing.
+        sqs = super(ClassFilesSearchForm, self).search()
+        if not self.is_valid():
+            return self.no_query_found()
+
+        # Check to see if a start_date was chosen.
+        if self.cleaned_data['keyword']:
+            kw = self.cleaned_data['keyword']
+            from django.db.models import Q
+            sqs = sqs.filter(Q(heading__contains = kw) | 
+                Q(description__contains = kw) | Q(body__contains = kw))
+
+        return sqs
 
 
 
