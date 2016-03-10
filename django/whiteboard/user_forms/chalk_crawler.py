@@ -1,4 +1,5 @@
-# Chalk_Crawler w/ Selenium
+# Chalk_Crawler w/ Selenium 
+# PhantomJS, download text (line 220), updates
 
 from selenium import webdriver
 import time
@@ -23,7 +24,7 @@ def get_courses(input_dict):
     
     a = create_object(input_dict)
 
-    return a.courses, a.all_courses
+    return a.courses
 
 
 def dl_specific_courses(list_of_courses, cnet_id, passwd):
@@ -63,8 +64,8 @@ class Courses:
 
     def login(self):
         
-        # browser = webdriver.Firefox()
-        browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs', service_args = ['--ignore-ssl-errors=true'])
+        browser = webdriver.Firefox()
+        # browser = webdriver.PhantomJS(executable_path='/home/student/Desktop/phantomjs/bin/phantomjs')
         browser.implicitly_wait(2)
 
         browser.get(self.url)
@@ -86,6 +87,8 @@ class Courses:
         if self.quarter == []:
             self.quarter = ''
 
+        if not self.check_xpath_exists('//*[@title="Manage Chalk Course List Module Settings"]'):
+            return None, None
         self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
@@ -214,6 +217,7 @@ class Courses:
 
                 elif self.check_id_exists('content_listContainer'):
                     num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+                    text_file = ''
                     for unit_index in range(num_of_items):
                         unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                         if self.check_tag_exists_in_web_element(unit, 'img'):
@@ -326,9 +330,9 @@ class Courses:
         with open(destination, 'wb') as f:  
             r.raw.decode_content = True
             f.write(r.content)
-        if 'pdf' in file_dict['path']:
+        if 'pdf' in file_dict['format']:
             file_dict['body'] = convert_pdf(file_dict['path'])
-        elif 'txt' in file_dict['path']:
+        elif 'txt' in file_dict['format']:
             file_dict['body'] = r.content
         else:
             file_dict['body'] = ''
