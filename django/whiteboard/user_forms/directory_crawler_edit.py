@@ -32,7 +32,9 @@ def process_student_names(list_of_names):
 def lookup_list(browser, list_of_names, names_type, CNET):
 	# names_type is either "s" for student, "i" for instructor, "a" for TA
 
+	not_searched = []
 	list_of_dictionaries = []
+
 	for query_name in list_of_names:
 
 		#enter the query name and return the results
@@ -43,6 +45,7 @@ def lookup_list(browser, list_of_names, names_type, CNET):
 		#if no directory results are found, print such and move on.
 		if len(results) == 0:
 			print(query_name, "not found in directory.")
+			not_searched.append(query_name)
 			continue
 		#if more than one result is found, click the first one.
 		elif len(results) > 1:
@@ -120,6 +123,7 @@ def lookup_list(browser, list_of_names, names_type, CNET):
 		#save, then return for more searchin'
 		list_of_dictionaries.append(user_dictionary)
 		browser.get(DIRECTORY)
+
 	return(list_of_dictionaries)
 
 def crawl_directory(list_input, CNET, PASSWORD):
