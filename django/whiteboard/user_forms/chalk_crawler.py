@@ -11,6 +11,10 @@ import requests
 import time
 import datetime
 
+PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
+if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
+    PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
+
 
 def create_object(input_dict):
     
@@ -64,7 +68,7 @@ class Courses:
     def login(self):
         
         # browser = webdriver.Firefox()
-        browser = webdriver.PhantomJS(executable_path=os.path.abspath("./phantomjs/bin/phantomjs"), service_args=['--ignore-ssl-errors=true'])
+        browser = webdriver.PhantomJS(executable_path=PHANTOMJS_PATH, service_args=['--ignore-ssl-errors=true'])
         browser.implicitly_wait(2)
 
         browser.get(self.url)

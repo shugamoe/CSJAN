@@ -267,6 +267,9 @@ def a_or_u_files(file_dicts, cnet_id):
 
 def a_or_u_people(people_dicts, model_used, course_name):
     '''
+    This function takes in a list of dictionaries that can be used to create
+    or update instances of the model_used.  The course_name is used to link 
+    these instances to the course that they are a part of.
     '''
     # course_object.sessions.add(session_object)
     course = Course.objects.get(name = course_name)
@@ -342,7 +345,8 @@ class CourseDetail(DetailView):
 
 
         if self.request.method == 'GET':
-            form = FilterMajorForm(self.request.GET, **{'majors_list': majors_list})
+            form = FilterMajorForm(self.request.GET, **{'majors_list': 
+                majors_list})
             if form.is_valid():
                 majors = form.cleaned_data['major_filters']
             if majors:
@@ -358,9 +362,7 @@ class CourseDetail(DetailView):
         course_id)
 
         # This will retrieve the user's files.
-        context['files'] = File.objects.filter(owner__cnet_id = 
-        self.kwargs['cnet_id'])
-
+        context['files'] = File.objects.filter(course__id = course_id)
         context['cnet_id'] = self.kwargs['cnet_id']
 
         return context
