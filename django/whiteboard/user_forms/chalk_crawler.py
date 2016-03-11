@@ -70,7 +70,7 @@ class Courses:
         
         # browser = webdriver.Firefox()
         browser = webdriver.PhantomJS(executable_path=os.path.abspath(PHANTOMJS_PATH))
-
+        browser.set_window_size(1100, 660)
         browser.implicitly_wait(2)
 
         browser.get(self.url)
@@ -101,10 +101,9 @@ class Courses:
 
             if self.quarter != '':
                 for quarter in self.quarter:
-
                     if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
                     in course_web_element.text.lower() or \
-                    '({:} '.format(quarter.lower()[:2]) + \
+                    '({:} '.format(quarter.lower()[:3]) + \
                     '{:})'.format(self.year)[2:] in \
                     course_web_element.text.lower(): 
 
@@ -131,9 +130,8 @@ class Courses:
                         course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
                         course_instructor_box.click()
 
-        course_form = self.browser.find_element_by_id('moduleEditForm')
-        course_form.submit()
-
+        submit_button = self.browser.find_element_by_name('top_Submit')
+        submit_button.click()
         return all_courses, courses
 
 
@@ -145,6 +143,7 @@ class Courses:
             self.course_material_dict[self.username][check_folder_name(course)] = {}
             material_dict = self.course_material_dict[self.username][check_folder_name(course)]
             for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
+                print(course_link.text)
                 if course in course_link.text:
                     professor = course_link.find_element_by_class_name('name').text
                     prof_cnt = professor.count(';')
@@ -350,11 +349,11 @@ class Courses:
                 file_dict['body'] = r.content
             else:
                  file_dict['body'] = ''
+            
+            if file_dict['heading'] not in text_file:
+                return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n'
         else:
             del file_dict
-            
-        if file_dict['heading'] not in text_file:
-            return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n' 
 
         return text_file  
 
