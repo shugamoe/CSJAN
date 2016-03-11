@@ -348,7 +348,6 @@ class Courses:
         else:
              file_dict['body'] = ''
         # end if
-        print(str(r.headers['last-modified']).split(' '), str(time.ctime(os.path.getmtime(file_dict['path'])).split(' ')))
         if file_dict['heading'] not in text_file:
             return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n' 
 
