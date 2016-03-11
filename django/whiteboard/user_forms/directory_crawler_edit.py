@@ -113,7 +113,7 @@ def lookup_list(browser, list_of_names, names_type):
 			if key == "Phone:":
 				user_dictionary["phone"] = value
 
-			if user_dictionary["email"] = None:
+			if user_dictionary["email"] == None:
 				user_dictionary["email"] = user_dictionary["cnet_id"] + "@uchicago.edu"
 
 		#save, then return for more searchin'
