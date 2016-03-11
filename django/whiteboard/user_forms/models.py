@@ -9,7 +9,11 @@ import re
 QUARTER_CHOICES = (('Fall', 'Fall'), ('Winter', 'Winter'), \
                                     ('Spring', 'Spring'), ('Summer', 'Summer'))
 
+
 class Session(models.Model):
+    '''
+    Track the current download session of the user.
+    '''
     cnet_id = models.CharField(max_length = 42)
     date = models.DateTimeField('date published', default = timezone.now)
     year = models.IntegerField(default=datetime.date.today().year)
@@ -65,6 +69,7 @@ class Instructor(models.Model):
     def full_name(self):
         return str(self.first_name + ' ' + self.last_name)
 
+
 class Assistant(models.Model):
     courses_in = models.ManyToManyField(Course)
     first_name = models.CharField(max_length = 42)
@@ -82,13 +87,18 @@ class Assistant(models.Model):
 
 
 class File(models.Model):
-    owner = models.ForeignKey(Student, blank = True)
     course = models.ForeignKey(Course, blank = True)
     heading = models.CharField(max_length = 100, blank = True)
     description = models.TextField(blank = True)
     body = models.TextField(blank = True)
     path = models.CharField(max_length = 300)
-    format = models.CharField(max_length = 10)
+    format = models.CharField(max_length = 100)
+
+    # This is a string equivalent of course.id.  This is included because the 
+    # library I used for search functionality has trouble narrowing its 
+    # 'SearchQuerySet' by foreig key information.  SO i simply clone that 
+    # information here.
+    classpk = models.CharField(max_length = 300)
 
     def file_name(self):
         # Extract the filename from the end of the path and return it
@@ -100,10 +110,6 @@ class File(models.Model):
             return filename
         else:
             return str(self.path)
-
-    def __str__(self):
-        return str(self.file_name)
-
 
 
 

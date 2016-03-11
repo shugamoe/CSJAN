@@ -1,3 +1,4 @@
-{{ object.file_name }}
-{{ object.owner.full_name }}
+{{ object.classpk }}
+{{ object.heading }}
 {{ object.body }}
+{{ object.description }}
