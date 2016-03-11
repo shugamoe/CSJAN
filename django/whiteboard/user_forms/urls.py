@@ -55,7 +55,7 @@ urlpatterns = [
     url(r'^search/', include('haystack.urls')),
 
     url(r'^search/(?P<cnet_id>[a-zA-Z0-9]+)/(?P<course_id>[0-9]+)/$', 
-        views.search, name = 'search_single_class_files'
+        views.SearchClassFilesView.as_view(), name = 'search_single_class_files'
          ),
 
     url(r'^$', views.start, name='start'),

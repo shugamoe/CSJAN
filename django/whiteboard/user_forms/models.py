@@ -90,6 +90,8 @@ class File(models.Model):
     path = models.CharField(max_length = 300)
     format = models.CharField(max_length = 10)
 
+    course_pk = models.IntegerField()
+
     def file_name(self):
         # Extract the filename from the end of the path and return it
         pattern = r'(?<=/)([^/]*)$'
@@ -100,10 +102,6 @@ class File(models.Model):
             return filename
         else:
             return str(self.path)
-
-    def __str__(self):
-        return str(self.file_name)
-
 
 
 

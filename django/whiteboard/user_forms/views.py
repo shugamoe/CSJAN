@@ -254,6 +254,7 @@ def a_or_u_files(file_dicts, cnet_id):
     for file_dict in file_dicts:
         course_id = Course.objects.get(name = file_dict.pop('course')).id
         file_dict['course_id'] = course_id
+        file_dict['course_pk'] = course_id
         file_dict['owner_id'] = user.id
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
@@ -420,18 +421,14 @@ class SearchClassFilesView(SearchView):
     form_class = SearchForm
 
 
-    def __call__(self, request, cnet_id, course_id):
-        self.cnet_id = cnet_id
-        self.course_id = course_id
-        return super(MySearchView, self).__call__(request)
-
     def get_queryset(self):
         queryset = super(SearchClassFilesView, self).get_queryset()
+        print(queryset.count(), 'BEFORE FILTERING')
         cnet_id = self.kwargs['cnet_id']
         course_id = self.kwargs['course_id']
-        # further filter queryset based on some set of criteria
-        return queryset.filter(course__id = course_id).filter(
-            owner__cnet_id = cnet_id)
+        sqs = queryset.filter(course_id = course_id)
+        print(sqs.count(), 'AFTER FILTERING')
+        return queryset.filter(course_id = course_id)
 
     def get_context_data(self, *args, **kwargs):
         context = super(SearchClassFilesView, self).get_context_data(*args, 
@@ -439,11 +436,6 @@ class SearchClassFilesView(SearchView):
         # do something
         return context
 
-
-def search(request, cnet_id, course_id):
-    form = ClassFilesSearchForm(request.GET)
-    searchresults = form.search()
-    return render(request, 'user_forms/search_class_files.html', {'form' : form})
 
 
 
@@ -549,88 +541,3 @@ def single_class_plot(request, course_id):
     plt.close()
 
     return response
-
-
-from django.db.models.fields.related import ManyToManyField
-
-
-def to_dict(instance, ignore_m2m = False):
-    '''
-    This function is able to turn model instances into an easier form to digest
-    for any plotting that might be done.
-    '''
-    opts = instance._meta
-    data = {}
-    for f in opts.concrete_fields + opts.many_to_many:
-        if isinstance(f, ManyToManyField) and (not ignore_m2m):
-            if instance.pk is None:
-                data[f.name] = []
-            else:
-                data[f.name] = list(f.value_from_object(instance).values_list(\
-                    'pk', flat=True))
-        else:
-            data[f.name] = f.value_from_object(instance)
-    return data
-
-
-
-
-
-
-
-
-
-
-
-# def scrub_duplicate_ias(course_demos):
-#     '''
-#     This function takes the raw demographic information from the Chalk crawler
-#     which is in the form:
-
-#     [['coursename0', [<list of Instructor Names>], [<list of Assistant names>],
-#      [<list of Student Names>]],
-#      .
-#      .
-#      .
-#      ]
-
-#     This function checks to see whether or not the database already contains
-#     an instance of either the Instructor, Assistant, or Student models that
-#     '''
-#     for course_demo in demo_info:
-#         course_demo[0] = course_name
-#         course_demo[1] = instructor_list
-#         course_demo[2] = assistant_list
-#         course_demo[3] = student_list
-
-#         for i_index, instr in enumerate(instructor_list):
-#             last_name, first_name = intr.split(', ')
-#             num_results = Instructor.objects.filter(courses_in__name = 
-#                 course_name).filter(first_name = first_name).filter(last_name =
-#                 last_name).count()
-#             if num_results >= 1:
-#                 print('Already have instructor {0} {1}'.format(first_name, 
-#                     last_name))
-#                 instructor_list.pop(i_index)
-
-#         for a_index, assistant in enumerate(assistant_list):
-#             last_name, first_name = intr.split(', ')
-#             num_results = Assistant.objects.filter(courses_in__name = 
-#                 course_name).filter(first_name = first_name).filter(last_name =
-#                 last_name).count()
-#             if num_results >= 1:
-#                 print('Already have assistant {0} {1}'.format(first_name,
-#                     last_name))
-#                 assistant_list.pop(a_index)
-
-#         for s_index, assistant in enumerate(student_list):
-#             last_name, first_name = intr.split(', ')
-#             num_results = Assistant.objects.filter(courses_in__name = 
-#                 course_name).filter(first_name = first_name).filter(last_name =
-#                 last_name).count()
-#             if num_results >= 1:
-#                 print('Already have student {0} {1}'.format(first_name,
-#                     last_name))
-#                 student_list.pop(a_index)
-
-#     return None
