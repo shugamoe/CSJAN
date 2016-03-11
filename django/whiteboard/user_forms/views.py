@@ -46,7 +46,7 @@ def get_chalk_info(request):
         Otherwise if there is a valid POST request it returns a response 
         redirect to 'select_downloads' url.
     '''
-    print('Obataining Chalk Credentials and Filters')
+    print('Obtaining Chalk Credentials and Filters')
     if request.method == 'POST':
         form = SessionForm(request.POST)
         if form.is_valid():
@@ -141,7 +141,7 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
 
             # All file downloading and demographic information collection is 
             # is done within the crawlers_link function.
-            crawlers_link(courses, cnet_id, cnet_pw, session)
+            crawlers_link(request, courses, cnet_id, cnet_pw, session)
             return HttpResponseRedirect(reverse('post', \
                                             args = (session.id,)))
     else:
@@ -229,7 +229,7 @@ def dummy_crawler(cleaned_data, session_object):
     return test_courses
 
 
-def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
+def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     '''
     This function will call the Chalk Crawler and Directory Crawler after the
     user has specified which specific courses they would like to download
@@ -276,6 +276,11 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
      cnet_pw)
 
+    if (demog_names == None) and (file_dicts == None): # Invalid credentials
+        render(request, 'user_forms/select_downloads.html', \
+                                                {'courses': course_name_list,
+                                                {'error_message': 'Invalid'
+                                                'CNET ID or Password'}})
     demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
 
     # Depending on whether the demog_dicts correspond to instructors, TAs, or
