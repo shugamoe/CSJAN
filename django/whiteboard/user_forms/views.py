@@ -23,7 +23,7 @@ from haystack.generic_views import SearchView
 from haystack.forms import SearchForm
 import subprocess
 import os
-
+from django.core.exceptions import ObjectDoesNotExist
 
 # import folders 
 # Create your views here.
@@ -171,6 +171,13 @@ def get_cnet_id(request):
             return render(request, 'user_forms/get_cnet_id.html', \
             {'error_message': "You didn't enter a CNET ID"})
         else:
+            # Quickly check to see if a student with that CNET ID exists.
+            test = Student.objects.filter(cnet_id = cnet_id).count()
+            print('test', test)
+            if test == 0: # Return error if no info for CNET ID exists.
+                return render(request, 'user_forms/get_cnet_id.html',
+                    {'does_not_exist': True, 'wrong_cnet': cnet_id})
+            
             return HttpResponseRedirect(reverse('view_courses', kwargs = 
                 {'cnet_id': cnet_id}))
     else:
@@ -399,6 +406,7 @@ class CourseList(ListView):
         cnet_id = self.kwargs['cnet_id']
         context['cnet_id'] = cnet_id
         context['student_id'] = Student.objects.get(cnet_id = cnet_id).id
+
         course_ids = get_courses_get(self.request)
         course_ids = '/'.join(course_ids)
         context['course_ids'] = course_ids
