@@ -39,7 +39,7 @@ def get_chalk_info(request):
     the Chalk Crawler to obtain a preliminary list of classes.
 
     Inputs:
-        request: a request object.
+        request: a REQUEST object.
 
     Ouputs:
         Renders dl_query.html if an invalid POST request or no POST request.  
@@ -59,7 +59,7 @@ def get_chalk_info(request):
             else:
                 # Clever trick I found on StackExchange to send information like
                 # pk's, and other information through the url.
-                #    
+                # This also appears elsewhere.   
                 # http://stackoverflow.com/questions/249110/django-arbitrary-number-of-unnamed-urls-py-parameters
             courses_to_confirm = '***'.join(courses_to_confirm)
             url = reverse('select_downloads', kwargs = \
@@ -83,7 +83,7 @@ def start(request):
     downloading classes from Chalk or viewing stats.
 
     Inputs:
-        request: a request object.
+        request: a REQUEST object.
 
     Outputs:
         Renders start.html.
@@ -98,7 +98,7 @@ def browse_classes(request):
     downloading classes from Chalk or viewing stats.
 
     Inputs:
-        request: a request object.
+        request: a REQUEST object.
 
     Outputs:
         Renders browse_classes.html.
@@ -117,7 +117,7 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
     downloading files.
 
     Inputs:
-        request: a request object 
+        request: a REQUEST object 
         session_id: the unique session id (pk) [int] 
         cnet_id: the current user's CNET ID [str]
         courses_to_confirm: a concatenated string of unique course names for the 
@@ -158,7 +158,7 @@ def get_cnet_id(request):
     retrieve all of the classes associated with that CNET_ID.
 
     Inputs:
-        request: a request object
+        request: a REQUEST object
     Outputs:
         renders get_cnet_id.html to start (with an error message) if the user 
         submits with no CNET ID.  Otherwise if a CNET_ID is entered it redirects
@@ -185,14 +185,15 @@ def post(request, session_id):
     current session.
 
     Inputs:
-        request: a request object
+        request: a REQUEST object
         session_id: the unique session id (pk) [int]
     Outputs:
 
     '''
     session = get_object_or_404(Session, pk=session_id)
 
-    prev_courses = Course.objects.filter(sessions__date__lt = session.date).filter(sessions__cnet_id = session.cnet_id).distinct()
+    prev_courses = Course.objects.filter(sessions__date__lt = 
+        session.date).filter(sessions__cnet_id = session.cnet_id).distinct()
     
     if len(prev_courses) > 0:
         session.repeat_user = True
@@ -308,7 +309,7 @@ def a_or_u_files(file_dicts):
     for that instance if it already exists.
 
     Inputs:
-        file_dicts: dictionaries that can be either used to update or create 
+        file_dicts: dictionaries that can be used either to update or create 
                     instances of File models.
     '''
     user = Student.objects.get(cnet_id = cnet_id)
@@ -324,6 +325,9 @@ def a_or_u_files(file_dicts):
         # information as the foreignkey for later use.  
         # (See SearchClassFilesView)
         file_dict['classpk'] = str(course_id)
+
+        # Add/Update idea from http://stackoverflow.com/questions/14115318/create-django-model-or-update-if-exists
+        # Also used in a_or_u_people()
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
         if not created:
@@ -336,9 +340,25 @@ def a_or_u_files(file_dicts):
 
 def a_or_u_people(people_dicts, model_used, course_name):
     '''
+    This function takes in a list of people_dicts, where each element is a 
+    a dictionary that can be directly converted to an instance of the model_used
+    class.
+
+    This function checks the information of each dict to see whether the 
+    database already has an instance of that file and updates the information 
+    for that instance if it already exists.
+
+    Inputs:
+        people_dicts: dictionaries that can be used either to update or create 
+                      instances of model_used.
+        model_used: The model to be used in the function.  Either Instructor,
+                    Assistant, or Student.
+        course_name: The name of the course that the people are in. [str]
+
+    Returns:
+        None
     '''
-    # course_object.sessions.add(session_object)
-    course = Course.objects.get(name = course_name)
+    course_object = Course.objects.get(name = course_name)
 
     for ppl_dict in people_dicts:
         existing_instance, created = model_used.objects.get_or_create(email = 
@@ -347,22 +367,27 @@ def a_or_u_people(people_dicts, model_used, course_name):
             for attr, value in ppl_dict.items():
                 setattr(existing_instance, attr, value)
             existing_instance.save
-            existing_instance.courses_in.add(course)
+            existing_instance.courses_in.add(course_object)
         else:
             existing_instance = model_used.objects.get(email = 
                 ppl_dict['email'])
             existing_instance.save
-            existing_instance.courses_in.add(course)
+            existing_instance.courses_in.add(course_object)
 
     return model_used.objects.all()
 
 
 class CourseList(ListView):
+    '''
+    A generic ListView for the user to view all courses that they are in.
+    '''
     model = Course
     context_object_name = 'course_list'
 
     def get_queryset(self):
         cnet_id = self.kwargs['cnet_id']
+
+        # Only want to view courses that the user is in.
         return Course.objects.filter(student__cnet_id = cnet_id)\
              .order_by('dept')
 
@@ -381,14 +406,15 @@ class CourseList(ListView):
 
 
 class CourseDetail(DetailView):
+    '''
+    A generic DetailView for the user to view a specific course
+    '''
     model = Course
     pk_url_kwarg = 'course_id'
     context_object_name = 'course'
 
 
     def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
         context = super(CourseDetail, self).get_context_data(**kwargs)
         course_id = self.kwargs['course_id']
 
@@ -409,11 +435,14 @@ class CourseDetail(DetailView):
         context['major_filter_form'] = FilterMajorForm(**{'majors_list': 
             majors_list})
 
-
+        # Handle the filter by major form.
         if self.request.method == 'GET':
-            form = FilterMajorForm(self.request.GET, **{'majors_list': majors_list})
+            form = FilterMajorForm(self.request.GET, 
+                **{'majors_list': majors_list})
             if form.is_valid():
                 majors = form.cleaned_data['major_filters']
+            else: 
+                context['form_error'] = 'You must select one or more majors!'
             if majors:
                 context['filter_enabled'] = True
                 context['students'] = context['students'].filter(program__in = 
@@ -426,23 +455,22 @@ class CourseDetail(DetailView):
         context['assistants'] = Assistant.objects.filter(courses_in__id = 
         course_id)
 
-        # This will retrieve the user's files.
-        context['files'] = File.objects.filter(owner__cnet_id = 
-        self.kwargs['cnet_id'])
-
-        context['cnet_id'] = self.kwargs['cnet_id']
+        # Retrieve all files for this class.
+        context['files'] = File.objects.filter(course__id = course_id)
 
         return context
 
 
 class InstructorDetail(DetailView):
+    '''
+    A generic DetailView for the user to view an Instructor's information.
+    '''
     model = Instructor
     pk_url_kwarg = 'instructor_id'
     context_object_name = 'instructor'
 
     def get_context_data(self, **kwargs):
         instructor_id = self.kwargs['instructor_id']
-
         context = super(InstructorDetail, self).get_context_data(**kwargs)
         context['courses_in'] = Course.objects.filter(instructor__id = 
             instructor_id)
@@ -451,6 +479,9 @@ class InstructorDetail(DetailView):
 
 
 class AssistantDetail(DetailView):
+    '''
+    A generic DetailView for the user to view a TA's information
+    '''
     model = Assistant
     pk_url_kwarg = 'assistant_id'
     context_object_name = 'assistant'
@@ -466,6 +497,9 @@ class AssistantDetail(DetailView):
 
 
 class StudentDetail(DetailView):
+    '''
+    A generic DetailView for the user to view a Student's information.
+    '''
     model = Student
     pk_url_kwarg = 'student_id'
     context_object_name = 'student'
@@ -478,24 +512,27 @@ class StudentDetail(DetailView):
             
         context['cnet_id'] = Student.objects.get(id = student_id).cnet_id
 
-
         course_ids = get_courses_get(self.request)
         course_ids = '/'.join(course_ids)
         context['course_ids'] = course_ids
         return context
 
 class SearchClassFilesView(SearchView):
+    '''
+    This is a SearchView to enable the user to search the files for a specific 
+    class.
+    '''
     template_name = 'user_forms/search_class_files.html'
     form_class = SearchForm
 
 
     def get_queryset(self):
         queryset = super(SearchClassFilesView, self).get_queryset()
-        print(queryset.count(), 'BEFORE FILTERING')
-        cnet_id = self.kwargs['cnet_id']
         course_id = self.kwargs['course_id']
+
+        # Ensure that we are only searching through files pertaining to a 
+        # certain course.
         sqs = queryset.filter(classpk = str(course_id))
-        print(sqs.count(), 'AFTER FILTERING')
         return sqs
 
     def get_context_data(self, *args, **kwargs):
@@ -514,7 +551,7 @@ def view_file(request, file_id, course_id, query = None):
     interface then information about the query is also displayed.
 
     Inputs:
-        request: a request object
+        request: a REQUEST object
         file_id: The unique file id (pk)
         query: a string of the query the user has entered. None by default.
 
@@ -533,8 +570,8 @@ def view_file(request, file_id, course_id, query = None):
     os.system('gnome-open' + ' ' + "'" + str(file_path) + "'")
 
     return render(request, 'user_forms/view_file.html', {'course_name': 
-        course_name, 'file_name':file_name, 'heading': file_heading
-        , 'description': file_description, 'query': query})
+        course_name, 'file_name':file_name, 'heading': file_heading,
+         'description': file_description, 'query': query})
 
 
 def get_courses_post(request):
@@ -565,9 +602,20 @@ def get_courses_get(request):
 
 def student_classes_plot(request, cnet_id, course_ids):
     '''
-    This plot will display information about all the classes the Student is 
-    included in on Whiteboard.  ALternatively, if the user selects only certain
-    classes that the student is in
+    This function will return a plot containing information about all the 
+    classes the Student is included in on Whiteboard.  Alternatively, if the
+    user selects only certain classes that the student is in, this function
+    will return a plot containing information about those specific classes only.
+
+    [Modified from Gustav's Django workshop code.]
+
+    Inputs:
+        request: a REQUEST object
+        cnet_id: the user's CNET ID [str]
+        course_ids: a concatenated string of course id numbers.
+
+    Ouputs:
+        response: an image/png HttpResponse
     '''
     test_names = ['Stud_cls_plt', 'CLASS 2', cnet_id]
     test_nums = [100, 50, 100]
@@ -587,8 +635,6 @@ def student_classes_plot(request, cnet_id, course_ids):
     response = HttpResponse(content_type='image/png')
     plt.figure(figsize=(6, 6))
 
-
-
     plt.pie(test_nums, labels=test_names)
     plt.savefig(response)
     plt.close()
@@ -598,7 +644,17 @@ def student_classes_plot(request, cnet_id, course_ids):
 
 def single_class_plot(request, course_id):
     '''
-    This plot will display information pertaining to a single class.
+    This function will return a pie plot containing the major breakdown within
+    each class.
+
+    [Modified from Gustav's Django workshop code.]
+
+    Inputs:
+        request: a REQUEST object
+        course_id: the unique id for a course (pk) [str]
+
+    Outputs:
+        response: an image/png HttpResponse
     '''
 
     response = HttpResponse(content_type='image/png')

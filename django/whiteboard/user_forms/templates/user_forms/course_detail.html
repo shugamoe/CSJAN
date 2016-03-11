@@ -59,6 +59,9 @@
     {{ major_filter_form.as_p }}
     <input type="submit" value="Filter Students by Major"/>
 </form>
+{% if form_error %}
+{{ form_error }}
+{% endif %}
 <!-- End  -->
 
 
@@ -78,11 +81,11 @@ recent enough.
 
 <li><a href="{% url 'view_student' student_id=student.id %}">
 {% if student.duplicates %}
-    {{ student.cnet_id }}*
+    {{ student.full_name }}*
+    </a></li>
     {% if filter_enabled %}
         | {{ student.program }}
     {% endif %}
-    </a></li>
 {% else %}
 {{ student.cnet_id }}
     {% if filter_enabled %}
@@ -97,7 +100,7 @@ recent enough.
 
 <!-- Search Files -->
 <ul style="float:left;">
-<li><a href="{% url 'search_single_class_files' cnet_id=cnet_id course_id=course.id %}">
+<li><a href="{% url 'search_single_class_files' course_id=course.id %}">
     Search Files in Class
     </a></li>
 </ul>
