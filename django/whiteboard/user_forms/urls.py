@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^single_class_plot(?P<course_id>[0-9]+)$', views.single_class_plot,
         name='single_class_plot'),
 
-    
+    # Obtain uers's CNET ID
     url(r'^get_cnet_id/$', views.get_cnet_id, name='get_cnet_id'),
 
     # Student Detail Page
@@ -47,7 +47,7 @@ urlpatterns = [
         views.AssistantDetail.as_view(), name = 'view_assistant'),
 
     # Search pdfs and txt files for single class
-    url(r'^search/(?P<cnet_id>[a-zA-Z0-9]+)/(?P<course_id>[0-9]+)/$', 
+    url(r'^search/(?P<course_id>[0-9]+)/$', 
         views.SearchClassFilesView.as_view(), name = 'search_single_class_files'
          ),
 

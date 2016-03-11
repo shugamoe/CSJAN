@@ -42,25 +42,3 @@ alt="Class Stats" />
 </ul>
 <!-- End  -->
 
-
-
-
-<ul style="float:left;">
-
-<b>
-{% if files %}
-My Files:
-{% else %}
-You have no files
-{% endif %}
-</b>
-{% for file in files %}
-<li>{{ file.file_name }}</li>
-{% endfor %}
-
-</ul>
-</div>
-
-
-{% endblock %}
-

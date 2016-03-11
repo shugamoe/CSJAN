@@ -81,17 +81,15 @@ recent enough.
 
 <li><a href="{% url 'view_student' student_id=student.id %}">
 {% if student.duplicates %}
-    {{ student.full_name }}*
-    </a></li>
+    {{ student.full_name }}*</a></li>
     {% if filter_enabled %}
-        | {{ student.program }}
+        ^ {{ student.program }}
     {% endif %}
 {% else %}
-{{ student.cnet_id }}
+{{ student.full_name }}</a></li>
     {% if filter_enabled %}
-    | {{ student.program }}
+    ^ {{ student.program }}
     {% endif %}
-    </a></li>
 {% endif %}
 
 {% endfor %}
@@ -116,17 +114,11 @@ You have no files for this class
 </b>
 {% for file in files %}
 
-<li>{{ file.file_name }}</li>
+<li><a href="{% url 'view_file' file_id=file.id course_id=course.id query='NOT FROM SEARCH' %}">{{ file.file_name }}</a></li>
+
 {% endfor %}
 </ul>
 <!-- End  -->
-
-
-
-
-
-
-
 
 
 {% endblock %}

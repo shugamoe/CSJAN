@@ -54,18 +54,18 @@ def get_chalk_info(request):
             # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
             # crawlers are integrated.
             courses_to_confirm = get_courses(form.cleaned_data)
-            if courses_to_confirm = None: # Invalid CNET ID OR PW
+            if courses_to_confirm == None: # Invalid CNET ID OR PW
                 error_message = 'Invalid CNET ID or Password'
             else:
                 # Clever trick I found on StackExchange to send information like
                 # pk's, and other information through the url.
                 # This also appears elsewhere.   
                 # http://stackoverflow.com/questions/249110/django-arbitrary-number-of-unnamed-urls-py-parameters
-            courses_to_confirm = '***'.join(courses_to_confirm)
-            url = reverse('select_downloads', kwargs = \
-                {'session_id': session_object.id, 
-                'cnet_id': form.cleaned_data['cnet_id'],
-                'courses_to_confirm': courses_to_confirm})
+                courses_to_confirm = '***'.join(courses_to_confirm)
+                url = reverse('select_downloads', kwargs = \
+                    {'session_id': session_object.id, 
+                    'cnet_id': form.cleaned_data['cnet_id'],
+                    'courses_to_confirm': courses_to_confirm})
             return HttpResponseRedirect(url)     
         else:
             error_message = 'Remember to enter a CNET ID and Password'
@@ -421,7 +421,7 @@ class CourseDetail(DetailView):
 
         # Retrieve a list of students in the class for the template
         context['students'] = Student.objects.filter(courses_in__id = course_id
-        ).order_by('program')
+        ).order_by('first_name')
 
 
         # See what majors those students have so we can create a form to let
@@ -544,7 +544,7 @@ class SearchClassFilesView(SearchView):
         context['course_name'] = Course.objects.get(id = course_id).name
         return context
 
-def view_file(request, file_id, course_id, query = None):
+def view_file(request, file_id, course_id, query):
     '''
     This view deploys when the user views a file.  The webpage rendered displays
     information about the file.  If the user is viewing the file from the search
@@ -553,7 +553,7 @@ def view_file(request, file_id, course_id, query = None):
     Inputs:
         request: a REQUEST object
         file_id: The unique file id (pk)
-        query: a string of the query the user has entered. None by default.
+        query: a string of the query the user has entered.
 
     Outputs:
         Renders view_file.html with appropriate information and opens
@@ -569,6 +569,9 @@ def view_file(request, file_id, course_id, query = None):
     # Open the file the user is viewing.
     os.system('gnome-open' + ' ' + "'" + str(file_path) + "'")
 
+    if query == 'NOT FROM SEARCH':
+        query = None
+
     return render(request, 'user_forms/view_file.html', {'course_name': 
         course_name, 'file_name':file_name, 'heading': file_heading,
          'description': file_description, 'query': query})
@@ -583,7 +586,6 @@ def get_courses_post(request):
     for i in range(1, len(request.POST) + 1):
         if request.POST.get('course' + str(i)):
             courses.append(request.POST.get('course' + str(i)))
-
     return courses
     
 
@@ -596,7 +598,6 @@ def get_courses_get(request):
     for i in range(1, len(request.GET) + 1):
         if request.GET.get('course' + str(i)):
             courses.append(request.GET.get('course' + str(i)))
-    print('get courses are:', courses)
     return courses
 
 
@@ -631,7 +632,6 @@ def student_classes_plot(request, cnet_id, course_ids):
     else:
         courses = Course.objects.filter(student__cnet_id = cnet_id)
     
-    # print('demographics received user courses!!!', courses)
     response = HttpResponse(content_type='image/png')
     plt.figure(figsize=(6, 6))
 
@@ -656,17 +656,16 @@ def single_class_plot(request, course_id):
     Outputs:
         response: an image/png HttpResponse
     '''
-
     response = HttpResponse(content_type='image/png')
 
     plt.figure(figsize=(6, 6))
 
     program_dictionary = {}
 
-    #if a course is found, filter students that are in the class.
+    # If a course is found, filter students that are in the class.
     list_of_students = Student.objects.filter(courses_in__id=course_id)
     for student in list_of_students:
-    #compile the majors of the students, count them.
+    # Compile the majors of the students, count them.
         if student.program not in program_dictionary:
             program_dictionary[student.program] = 0
         else:
@@ -689,7 +688,6 @@ def single_class_plot(request, course_id):
         pie_names.append(key)
         pie_nums.append(formatted_dictionary[key])
 
-    print('STUFF!!!', pie_nums, pie_names)
     plt.pie(pie_nums, labels=pie_names)
     plt.savefig(response)
     plt.close()
