@@ -1,0 +1,35 @@
+{% extends 'user_forms/base.html' %}
+
+{% block body %}
+<h1>{{ course_name }}</h1>
+<p>Now viewing <b>"{{ file_name }}"</b><p>
+<p>File matched the query: <i>{{ query }}</i></p>
+
+
+
+{% if heading or description %}
+The file contained the following information from Chalk:
+<ul>
+{% if heading %}
+<l>
+</p>
+<b>{{ heading }}</b></p>
+</l>
+{% endif %}
+
+{% if description %}
+<l>
+</p>
+{{ description }}</p>
+</l>
+{% endif %}
+</ul>
+{% endif %}
+
+
+<p>   </p>
+<p>If you wish to edit the file remember to save another copy outside
+    of the Classes Directory.</p>
+
+
+{% endblock %}
