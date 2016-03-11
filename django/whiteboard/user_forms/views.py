@@ -628,9 +628,15 @@ def student_classes_plot(request, cnet_id, course_ids):
     if course_ids != 'No_courses_selected':
         course_ids = course_ids.split('/')
         course_ids = [int(course_id) for course_id in course_ids]
+        # If the student has selected  one class, then we # simply return the 
+        # single_class_plot.
+        if len(course_ids) == 1:
+            return single_class_plot(request, course_ids[0])
         test_names[0] = 'Override CNET_ID'
     else:
         courses = Course.objects.filter(student__cnet_id = cnet_id)
+        if len(courses) == 1:
+            return single_class_plot(request, courses[0].id)
     
     response = HttpResponse(content_type='image/png')
     plt.figure(figsize=(6, 6))
