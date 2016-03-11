@@ -274,7 +274,7 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     # of the file model in the database (to allow for search functionality and
     # opening of the file from the database.)
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
-     cnet_pw)
+     cnet_pw, session.people_only)
 
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
