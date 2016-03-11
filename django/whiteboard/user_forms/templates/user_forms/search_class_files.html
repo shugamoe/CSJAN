@@ -2,8 +2,10 @@
 
 {% block body %}
     <h2>Search Files in {{ course_name }}</h2>
-    <p>Enter Keywords to search the file headings and descriptions from Chalk
-        as well as the contents of the file (txt and non OCR pdfs only).</p>
+    <p>Enter Keywords to search the file <b>headings</b> and <b>descriptions</b> from Chalk
+        as well as the text <b>contents</b> of the file (txt and scannable pdfs only).</p>
+        {% load staticfiles %}
+<img src="{% static "user_forms/heading_description.png" %}" alt=""/>
     <form method="get" action=".">
         <table>
             {{ form.as_table }}

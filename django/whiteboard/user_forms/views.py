@@ -436,9 +436,9 @@ class SearchClassFilesView(SearchView):
         context = super(SearchClassFilesView, self).get_context_data(*args, 
             **kwargs)
         # do something
-
-        context['course_id'] = self.kwargs['course_id']
-        print("context is:", context)
+        course_id = self.kwargs['course_id']
+        context['course_id'] = course_id
+        context['course_name'] = Course.objects.get(id = course_id).name
         return context
 
 def view_file(request, file_id, course_id, query):
