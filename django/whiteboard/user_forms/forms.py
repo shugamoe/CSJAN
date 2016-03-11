@@ -28,7 +28,7 @@ class SessionForm(ModelForm):
 
     class Meta:
         model = Session
-        fields = ['cnet_id','cnet_pw', 'quarter', 'year']
+        fields = ['cnet_id','cnet_pw', 'quarter', 'year', 'people_only']
 
 
 # Dynamic form for filtering the list of students on the individual course 
