@@ -102,8 +102,11 @@ class Courses:
             if self.quarter != '':
                 for quarter in self.quarter:
 
-                    if '({:} '.format(quarter.lower()[:2]) + '{:})'.format(self.year)[2:] \
-                        in course_web_element.text.lower(): 
+                    if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
+                    in course_web_element.text.lower() or \
+                    '({:} '.format(quarter.lower()[:2]) + \
+                    '{:})'.format(self.year)[2:] in \
+                    course_web_element.text.lower(): 
 
 
                         if 'Unavailable' not in course_web_element.text:
