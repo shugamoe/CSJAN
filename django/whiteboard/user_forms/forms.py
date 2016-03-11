@@ -22,6 +22,9 @@ class SessionForm(ModelForm):
                           initial=datetime.now().year, required = False)
     cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
     cnet_id = forms.CharField(label='CNET ID')
+    people_only = forms.BooleanField(label='Retrieve Demographic Information'\
+        ' Only',
+        required=False)
 
     class Meta:
         model = Session
