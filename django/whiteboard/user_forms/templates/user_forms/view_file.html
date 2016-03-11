@@ -3,7 +3,9 @@
 {% block body %}
 <h1>{{ course_name }}</h1>
 <p>Now viewing <b>"{{ file_name }}"</b><p>
+{% if query %}
 <p>File matched the query: <i>{{ query }}</i></p>
+{% endif %}
 
 
 

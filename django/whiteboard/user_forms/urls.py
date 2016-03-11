@@ -12,7 +12,7 @@ urlpatterns = [
     
     url(r'^session=(?P<session_id>[0-9]+)/post/$', views.post, name='post'),
     url(r'^dl_info$', views.get_chalk_info, name='dl_query'),
-    url(r'^view_stats$', views.view_stats, name='view_stats'),
+    url(r'^browse_classes$', views.browse_classes, name='browse_classes'),
 
     # List of all courses a user is in or has downloaded
     url(r'^view_courses/(?P<cnet_id>[a-zA-Z0-9]+)$', views.CourseList.as_view()

@@ -30,16 +30,23 @@ import os
 
 TEST_COURSES_0 = ['STAT 244', 'ENGL 169']
 TEST_COURSES_1 = ['CMSC 122', 'MATH 195']
-TEST_COURSES_2 = ['SEXY 101', 'FUCK 504']
+TEST_COURSES_2 = ['PORK 101', 'BEEF 504']
 
 
 def get_chalk_info(request):
     '''
-    This view is written to obtain user credentials and class filters for 
-    Chalk.
+    This view deploys to obtain user credentials and class filters for 
+    the Chalk Crawler to obtain a preliminary list of classes.
+
+    Inputs:
+        request: a request object.
+
+    Ouputs:
+        Renders dl_query.html if an invalid POST request or no POST request.  
+        Otherwise if there is a valid POST request it returns a response 
+        redirect to 'select_downloads' url.
     '''
-    print('get_chalk_info view')
-    print()
+    print('Obataining Chalk Credentials and Filters')
     if request.method == 'POST':
         form = SessionForm(request.POST)
         if form.is_valid():
@@ -47,21 +54,25 @@ def get_chalk_info(request):
             # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
             # crawlers are integrated.
             courses_to_confirm = get_courses(form.cleaned_data)
-
-            # Clever trick I found on StackExchange to send information like
-            # pk's, and other information through the url.
+            if courses_to_confirm = None: # Invalid CNET ID OR PW
+                error_message = 'Invalid CNET ID or Password'
+            else:
+                # Clever trick I found on StackExchange to send information like
+                # pk's, and other information through the url.
+                #    
+                # http://stackoverflow.com/questions/249110/django-arbitrary-number-of-unnamed-urls-py-parameters
             courses_to_confirm = '***'.join(courses_to_confirm)
             url = reverse('select_downloads', kwargs = \
                 {'session_id': session_object.id, 
                 'cnet_id': form.cleaned_data['cnet_id'],
                 'courses_to_confirm': courses_to_confirm})
-
-            return HttpResponseRedirect(url)
+            return HttpResponseRedirect(url)     
         else:
-            print('form not valid')
-            form = SessionForm()
+            error_message = 'Remember to enter a CNET ID and Password'
     else:
-        form = SessionForm()
+        error_message = None
+
+    form = SessionForm()
 
     return render(request, 'user_forms/dl_query.html', {'form': form})
 
@@ -70,14 +81,30 @@ def start(request):
     '''
     This view simply renders the start page, where the user can choose between
     downloading classes from Chalk or viewing stats.
+
+    Inputs:
+        request: a request object.
+
+    Outputs:
+        Renders start.html.
     '''
-    print('At start page')
+    print('Start page')
     return render(request, 'user_forms/start.html')
 
 
-def view_stats(request):
+def browse_classes(request):
+    '''
+    This view simply renders the start page, where the user can choose between
+    downloading classes from Chalk or viewing stats.
+
+    Inputs:
+        request: a request object.
+
+    Outputs:
+        Renders browse_classes.html.
+    '''
     print('At view stats page')
-    return render(request, 'user_forms/view_stats.html')
+    return render(request, 'user_forms/browse_classes.html')
  
     
 
@@ -85,26 +112,40 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
     '''
     After the user has provided their chalk information, the Chalk crawler 
     retrieves a list of matching courses.  This view brings up a page where
-    the user can confirm which classes they want from these matching courses.
+    the user can confirm which classes they want from these matching courses and
+    reenter their CNET password to begin collecting demographic information and
+    downloading files.
+
+    Inputs:
+        request: a request object 
+        session_id: the unique session id (pk) [int] 
+        cnet_id: the current user's CNET ID [str]
+        courses_to_confirm: a concatenated string of unique course names for the 
+                            viewer to select
+    Outputs:
+        Renders select_downloads.html to begin with.  If there is an invalid 
+        post request the same render is returned with an error message.  A
+        successful POST request this view redirects to 'post' url.
     '''
+    print('Select downloads (classes to download)')
     session = get_object_or_404(Session, pk=session_id)
     
     if request.method == 'POST':
         cnet_pw = request.POST.get('cnet_pw')
         courses = get_courses_post(request)
-
-        if not courses:
+        if not courses: # Invalid post request, return error message.
             return render(request, 'user_forms/select_downloads.html', \
                             {'courses': session.course_set.all(),
                              'error_message': "You didn't choose any courses"})
-        else:
+        else: # Successful post request.
 
+            # All file downloading and demographic information collection is 
+            # is done within the crawlers_link function.
             crawlers_link(courses, cnet_id, cnet_pw, session)
-
             return HttpResponseRedirect(reverse('post', \
                                             args = (session.id,)))
     else:
-        courses = courses_to_confirm.split('***')
+        courses = courses_to_confirm.split('***') # Unpack course names
 
     return render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': courses})
@@ -112,16 +153,21 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
 
 def get_cnet_id(request):
     '''
-    This view is called when the user wishes to view their statistics.  The 
-    user enters their CNET ID so that the website can retrieve all of the 
-    classes associated with that CNET_ID.
+    This view is called when the user (with an unknown CNET ID) wishes to browse
+    their classes.  The user enters their CNET ID so that the website can 
+    retrieve all of the classes associated with that CNET_ID.
+
+    Inputs:
+        request: a request object
+    Outputs:
+        renders get_cnet_id.html to start (with an error message) if the user 
+        submits with no CNET ID.  Otherwise if a CNET_ID is entered it redirects
+        to 'view_courses' url.
     '''
-    print('getting cnet id')
+    print('Get CNET ID')
     if request.method == 'POST':
         cnet_id = request.POST.get('cnet_id')
-        print('CNET ID is {}'.format(cnet_id))
-
-        if not cnet_id:
+        if not cnet_id: # User didn't enter a CNET ID
             return render(request, 'user_forms/get_cnet_id.html', \
             {'error_message': "You didn't enter a CNET ID"})
         else:
@@ -137,14 +183,15 @@ def post(request, session_id):
     download.  The view will retrieve all courses downloaded by the user in
     previous sessions as well as display courses selected for download in the
     current session.
+
+    Inputs:
+        request: a request object
+        session_id: the unique session id (pk) [int]
+    Outputs:
+
     '''
     session = get_object_or_404(Session, pk=session_id)
 
-    prev_user_sessions = Session.objects.filter(date__lt = session.date)\
-    .filter(cnet_id = session.cnet_id).count()
-
-    print(session.cnet_id, 'this is the CNET ID of the current user session')
-    print(session.date, 'the date!')
     prev_courses = Course.objects.filter(sessions__date__lt = session.date).filter(sessions__cnet_id = session.cnet_id).distinct()
     
     if len(prev_courses) > 0:
@@ -158,15 +205,10 @@ def post(request, session_id):
                       'cnet_id': session.cnet_id})
 
 
-# sampledate__lt=datetime.date(2011, 1, 31)
-
 def dummy_crawler(cleaned_data, session_object):
     '''
-    Will function as the connector to Andy and Bonar's crawlers.
+    Dummy function while crawlers are being completed.
     '''
-
-    # print(cleaned_data['cnet_id'])
-
     # These lines use some simple random stuff to "select" classes.  
     num = random.randrange(0,3)
     if num == 0:
@@ -176,9 +218,6 @@ def dummy_crawler(cleaned_data, session_object):
     elif num == 2: 
         test_courses = TEST_COURSES_2
 
-    # Should call actually web crawler from here to obtain list of courses.  
-    # For now we will just use TEST_COURSES.  
-
     return test_courses
 
 
@@ -186,8 +225,16 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
     '''
     This function will call the Chalk Crawler and Directory Crawler after the
     user has specified which specific courses they would like to download
-    '''
 
+    Inputs:
+        course_name_list: a list of unique course names to gather info on.
+        cnet_id: the user's CNET ID [str]
+        cnet_pw: the user's CNET Password [str]
+        session_object: an instance of the Session model, the user's current
+                        session
+    Returns:
+        None
+    '''
     year = session_object.year
     quart_pat = r'(?<=\()([A-Z]{1}[a-z]+)'
     dept_pat = r'[A-Z]{4}'
@@ -212,14 +259,20 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
         # session by adding the session object to it.
         course_object.sessions.add(session_object)
 
-
-
+    # Utilize the chalk crawler to  obtain demog_names: a list of first and
+    # last names of instructors, TAs, and students (may not exist if the class
+    # is too far in the past).  Chalk crawler also obtains file_dicts for each
+    # file downloaded.  These dicts are used to update or create instances 
+    # of the file model in the database (to allow for search functionality and
+    # opening of the file from the database.)
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
      cnet_pw)
 
     demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
 
-
+    # Depending on whether the demog_dicts correspond to instructors, TAs, or
+    # students, we call the a_or_u_people function with the appropriate model
+    # type of Instructor, Assistant, and Student respectively.
     for course in demog_dicts.keys():
         for stud_ta_or_instr in demog_dicts[course].keys():
             if stud_ta_or_instr == 'students':
@@ -232,7 +285,9 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
                 a_or_u_people(demog_dicts[course][stud_ta_or_instr], 
                     Assistant, course)
 
-    a_or_u_files(file_dicts, cnet_id)
+    # Add or update instances of the File model in the database from information
+    # returned by the Chalk Crawler.
+    a_or_u_files(file_dicts)
 
 
     # This command ensures that the search indexes for Haystack are updated.
@@ -242,22 +297,33 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
     return None
 
 
-def a_or_u_files(file_dicts, cnet_id):
+def a_or_u_files(file_dicts):
     '''
     This function takes in a list of file_dicts, where each element is a 
     a dictionary that can be directly converted to an instance of the File 
     class.
 
     This function checks the information of each dict to see whether the 
-    database already has an instance of that 
+    database already has an instance of that file and updates the information 
+    for that instance if it already exists.
+
+    Inputs:
+        file_dicts: dictionaries that can be either used to update or create 
+                    instances of File models.
     '''
     user = Student.objects.get(cnet_id = cnet_id)
 
     for file_dict in file_dicts:
         course_id = Course.objects.get(name = file_dict.pop('course')).id
+
+        # Foreign key.
         file_dict['course_id'] = course_id
+
+        # The search engine library I have has trouble narrowing down querysets
+        # using foreign keys so I simply made an attribute that records the same
+        # information as the foreignkey for later use.  
+        # (See SearchClassFilesView)
         file_dict['classpk'] = str(course_id)
-        file_dict['owner_id'] = user.id
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
         if not created:
@@ -441,8 +507,20 @@ class SearchClassFilesView(SearchView):
         context['course_name'] = Course.objects.get(id = course_id).name
         return context
 
-def view_file(request, file_id, course_id, query):
+def view_file(request, file_id, course_id, query = None):
     '''
+    This view deploys when the user views a file.  The webpage rendered displays
+    information about the file.  If the user is viewing the file from the search
+    interface then information about the query is also displayed.
+
+    Inputs:
+        request: a request object
+        file_id: The unique file id (pk)
+        query: a string of the query the user has entered. None by default.
+
+    Outputs:
+        Renders view_file.html with appropriate information and opens
+        the file for the user in a separate window.
     '''
     course_name = Course.objects.get(id = course_id)
     file_object = File.objects.get(id = file_id)
@@ -451,6 +529,7 @@ def view_file(request, file_id, course_id, query):
     file_heading = file_object.heading
     file_description = file_object.description
 
+    # Open the file the user is viewing.
     os.system('gnome-open' + ' ' + "'" + str(file_path) + "'")
 
     return render(request, 'user_forms/view_file.html', {'course_name': 
