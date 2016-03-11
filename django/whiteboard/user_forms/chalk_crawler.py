@@ -102,7 +102,7 @@ class Courses:
             if self.quarter != '':
                 for quarter in self.quarter:
 
-                    if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
+                    if '({:} '.format(quarter.lower()[:2]) + '{:})'.format(self.year)[2:] \
                         in course_web_element.text.lower(): 
 
 
@@ -331,23 +331,23 @@ class Courses:
         s.get(file_url, auth = (self.username, self.password))
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
             
-        # if need to update:
-        file_dict['format'] = r.headers.get('content-type')
-        destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
-        file_dict['path'] = os.path.abspath(destination)
-        with open(destination, 'wb') as f:  
-            r.raw.decode_content = True
-            f.write(r.content)
-        if 'pdf' in file_dict['format']:
-            try:
-                file_dict['body'] = convert_pdf(file_dict['path'])  
-            except:
-                file_dict['body'] = ''         
-        elif 'txt' in file_dict['format']:
-            file_dict['body'] = r.content
-        else:
-             file_dict['body'] = ''
-        # end if
+        if self.need_to_update(r, file_dict):
+            file_dict['format'] = r.headers.get('content-type')
+            destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
+            file_dict['path'] = os.path.abspath(destination)
+            with open(destination, 'wb') as f:  
+                r.raw.decode_content = True
+                f.write(r.content)
+            if 'pdf' in file_dict['format']:
+                try:
+                    file_dict['body'] = convert_pdf(file_dict['path'])  
+                except:
+                    file_dict['body'] = ''         
+            elif 'txt' in file_dict['format']:
+                file_dict['body'] = r.content
+            else:
+                 file_dict['body'] = ''
+
         if file_dict['heading'] not in text_file:
             return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n' 
 
@@ -364,10 +364,12 @@ class Courses:
         local_file_mod_time = local_file_mod_date[3].split(':')
         local_file_mod_date = datetime(local_file_mod_date[4], months[local_file_mod_date[1]], local_file_mod_date[2], local_file_mod_time[0], local_file_mod_time[1], local_file_mod_time[2])
 
+        if dl_file_mod_date > local_file_mod_time:
+            return True
 
+        return False
 
     
-
     def check_id_exists(self, id_): 
         try:
             self.browser.find_element_by_id(id_)
