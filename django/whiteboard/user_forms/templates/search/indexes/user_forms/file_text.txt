@@ -1,3 +1,7 @@
 {{ object.file_name }}
-{{ object.owner.full_name }}
+{{ object.heading }}
+{{ object.owner.cnet_id }}
+{{ object.course.id}}
 {{ object.body }}
+{{ object.description}}
+{{ object.path }}

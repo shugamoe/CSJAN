@@ -48,25 +48,6 @@ class FilterMajorForm(forms.Form):
          choices = major_choices, required = False)
 
 
-class ClassFilesSearchForm(SearchForm):
-    keyword = forms.CharField(required=True)
-
-    def search(self):
-        # First, store the SearchQuerySet received from other processing.
-        sqs = super(ClassFilesSearchForm, self).search()
-        if not self.is_valid():
-            return self.no_query_found()
-
-        # Check to see if a start_date was chosen.
-        if self.cleaned_data['keyword']:
-            kw = self.cleaned_data['keyword']
-            from django.db.models import Q
-            sqs = sqs.filter(Q(heading__contains = kw) | 
-                Q(description__contains = kw) | Q(body__contains = kw))
-
-        return sqs
-
-
 
 
 

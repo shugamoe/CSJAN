@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
 
-from .forms import SessionForm, FilterMajorForm, ClassFilesSearchForm
+from .forms import SessionForm, FilterMajorForm
 from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
@@ -235,7 +235,7 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
 
     # This command ensures that the search indexes for Haystack are updated.
     # (So you can search the latest files.)
-    call_command('rebuild_index')
+    call_command('update_index')
 
     return None
 
@@ -420,31 +420,22 @@ class SearchClassFilesView(SearchView):
     form_class = SearchForm
 
 
-    def __call__(self, request, cnet_id, course_id):
-        self.cnet_id = cnet_id
-        self.course_id = course_id
-        return super(MySearchView, self).__call__(request)
-
     def get_queryset(self):
         queryset = super(SearchClassFilesView, self).get_queryset()
+        print('initial queryset has', queryset.count(), 'results')
         cnet_id = self.kwargs['cnet_id']
         course_id = self.kwargs['course_id']
         # further filter queryset based on some set of criteria
-        return queryset.filter(course__id = course_id).filter(
-            owner__cnet_id = cnet_id)
+
+        self.sqs = queryset.filter(course__id = course_id)
+        print(self.sqs.count(), '(num_results)')
+        return self.sqs
 
     def get_context_data(self, *args, **kwargs):
         context = super(SearchClassFilesView, self).get_context_data(*args, 
             **kwargs)
         # do something
         return context
-
-
-def search(request, cnet_id, course_id):
-    form = ClassFilesSearchForm(request.GET)
-    searchresults = form.search()
-    return render(request, 'user_forms/search_class_files.html', {'form' : form})
-
 
 
 def get_courses_post(request):

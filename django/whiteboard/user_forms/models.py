@@ -45,7 +45,7 @@ class Student(models.Model):
         return str(self.first_name + ' '  + self.last_name)
 
     def __str__(self):
-        return '{}'.format(self.cnet_id)
+        return str(self.cnet_id)
 
 
 class Instructor(models.Model):
@@ -102,7 +102,7 @@ class File(models.Model):
             return str(self.path)
 
     def __str__(self):
-        return str(self.file_name)
+        return str(self.heading)
 
 
 
