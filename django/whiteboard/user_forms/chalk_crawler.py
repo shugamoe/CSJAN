@@ -350,7 +350,9 @@ class Courses:
                 file_dict['body'] = r.content
             else:
                  file_dict['body'] = ''
-
+        else:
+            del file_dict
+            
         if file_dict['heading'] not in text_file:
             return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n' 
 
