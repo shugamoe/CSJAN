@@ -4,6 +4,13 @@
 {% block body %}
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% if does_not_exist %}
+<p>'{{ wrong_cnet }}' does not exist in the 
+database.  Either you mistyped your CNET ID or Whiteboard does not have any 
+classes yet for '{{ wrong_cnet }}'. To download classes for your CNET ID 
+<a href="{% url 'dl_query' %}">click here.</a></p>
+{% endif %}
+
 
 <form action="" method="post">
 {% csrf_token %}

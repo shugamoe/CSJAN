@@ -27,7 +27,7 @@ class AssistantAdmin(admin.ModelAdmin):
     list_display = ('email', 'last_name', 'first_name')
 
 class FileAdmin(admin.ModelAdmin):
-    list_display = ('path', 'owner', 'course')
+    list_display = ('file_name', 'course')
 
 
 # Register your models here.
