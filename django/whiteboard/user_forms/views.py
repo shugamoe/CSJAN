@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import random
 import re
 from .chalk_crawler import get_courses, dl_specific_courses 
-from .directory_crawler import crawl_multiple_classes as get_demog_dicts
+from .directory_crawler_edit import crawl_multiple_classes as get_demog_dicts
 from .graph_class import graph_class 
 
 from django.core.management import call_command
@@ -274,7 +274,7 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     # of the file model in the database (to allow for search functionality and
     # opening of the file from the database.)
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
-     cnet_pw, session.people_only)
+     cnet_pw)
 
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
@@ -325,8 +325,6 @@ def a_or_u_files(file_dicts):
         file_dicts: dictionaries that can be used either to update or create 
                     instances of File models.
     '''
-    user = Student.objects.get(cnet_id = cnet_id)
-
     for file_dict in file_dicts:
         course_id = Course.objects.get(name = file_dict.pop('course')).id
 
