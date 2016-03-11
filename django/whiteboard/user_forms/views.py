@@ -279,8 +279,8 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': course_name_list,
-                                                {'error_message': 'Invalid'
-                                                'CNET ID or Password'}})
+                                                'error_message': 'Invalid' 
+                                                ' CNET ID \or Password'})
     demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
 
     # Depending on whether the demog_dicts correspond to instructors, TAs, or
@@ -305,6 +305,7 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
 
     # This command ensures that the search indexes for Haystack are updated.
     # (So you can search the latest files.)
+    # http://stackoverflow.com/questions/6250970/run-custom-admin-command-from-view
     call_command('update_index')
 
     return None
