@@ -9,6 +9,7 @@ class FileIndex(indexes.SearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='description')
     body = indexes.CharField(model_attr='body')
     path = indexes.CharField(model_attr='path')
+    classpk = indexes.CharField(model_attr='classpk')
 
     def get_model(self):
         return File

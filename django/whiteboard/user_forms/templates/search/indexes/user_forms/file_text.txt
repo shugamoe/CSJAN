@@ -1,6 +1,4 @@
-{{ object.file_name }}
+{{ object.classpk }}
 {{ object.heading }}
-{{ object.description }}
 {{ object.body }}
-{{ object.course_id }}
-
+{{ object.description }}

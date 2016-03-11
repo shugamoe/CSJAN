@@ -21,6 +21,8 @@ from .graph_class import graph_class
 from django.core.management import call_command
 from haystack.generic_views import SearchView
 from haystack.forms import SearchForm
+import subprocess
+import os
 
 
 # import folders 
@@ -235,7 +237,7 @@ def crawlers_link(course_name_list, cnet_id, cnet_pw, session_object):
 
     # This command ensures that the search indexes for Haystack are updated.
     # (So you can search the latest files.)
-    call_command('rebuild_index')
+    call_command('update_index')
 
     return None
 
@@ -254,7 +256,7 @@ def a_or_u_files(file_dicts, cnet_id):
     for file_dict in file_dicts:
         course_id = Course.objects.get(name = file_dict.pop('course')).id
         file_dict['course_id'] = course_id
-        file_dict['course_pk'] = course_id
+        file_dict['classpk'] = str(course_id)
         file_dict['owner_id'] = user.id
         existing_instance, created = File.objects.get_or_create(path = 
             file_dict['path'], defaults = file_dict)
@@ -426,17 +428,34 @@ class SearchClassFilesView(SearchView):
         print(queryset.count(), 'BEFORE FILTERING')
         cnet_id = self.kwargs['cnet_id']
         course_id = self.kwargs['course_id']
-        sqs = queryset.filter(course_id = course_id)
+        sqs = queryset.filter(classpk = str(course_id))
         print(sqs.count(), 'AFTER FILTERING')
-        return queryset.filter(course_id = course_id)
+        return sqs
 
     def get_context_data(self, *args, **kwargs):
         context = super(SearchClassFilesView, self).get_context_data(*args, 
             **kwargs)
         # do something
+
+        context['course_id'] = self.kwargs['course_id']
+        print("context is:", context)
         return context
 
+def view_file(request, file_id, course_id, query):
+    '''
+    '''
+    course_name = Course.objects.get(id = course_id)
+    file_object = File.objects.get(id = file_id)
+    file_name = file_object.file_name()
+    file_path = file_object.path
+    file_heading = file_object.heading
+    file_description = file_object.description
 
+    os.system('gnome-open' + ' ' + "'" + str(file_path) + "'")
+
+    return render(request, 'user_forms/view_file.html', {'course_name': 
+        course_name, 'file_name':file_name, 'heading': file_heading
+        , 'description': file_description, 'query': query})
 
 
 def get_courses_post(request):

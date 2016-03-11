@@ -5,10 +5,6 @@ from django.http import HttpResponse
 
 from . import views # have to add this in, to have views.THING down there
 
-def tmp(request):
-    from django.shortcuts import render
-    return render(request, 'search/search.html')
-
 urlpatterns = [
     url(r'^session=(?P<session_id>[0-9]+)/cnet_id=(?P<cnet_id>[a-zA-Z0-9]+)/se'
         r'lect_downloads/(?P<courses_to_confirm>.+)$', 
@@ -50,13 +46,15 @@ urlpatterns = [
     url(r'^view_assistant(?P<assistant_id>[0-9]+)$', 
         views.AssistantDetail.as_view(), name = 'view_assistant'),
 
-
-    # Search PDFs Test
-    url(r'^search/', include('haystack.urls')),
-
+    # Search pdfs and txt files for single class
     url(r'^search/(?P<cnet_id>[a-zA-Z0-9]+)/(?P<course_id>[0-9]+)/$', 
         views.SearchClassFilesView.as_view(), name = 'search_single_class_files'
          ),
+
+
+    # View a single file
+    url(r'^view_file(?P<file_id>[0-9]+)/for_course(?P<course_id>[0-9]+)/query='
+        r'(?P<query>.+)/$', views.view_file, name = 'view_file'),
 
     url(r'^$', views.start, name='start'),
     ]

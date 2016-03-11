@@ -88,9 +88,9 @@ class File(models.Model):
     description = models.TextField(blank = True)
     body = models.TextField(blank = True)
     path = models.CharField(max_length = 300)
-    format = models.CharField(max_length = 10)
+    format = models.CharField(max_length = 100)
 
-    course_pk = models.IntegerField()
+    classpk = models.CharField(max_length = 300)
 
     def file_name(self):
         # Extract the filename from the end of the path and return it
