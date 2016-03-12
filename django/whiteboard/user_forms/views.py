@@ -3,7 +3,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
 
-from .forms import SessionForm, FilterMajorForm, ClassFilesSearchForm
+from .forms import SessionForm, FilterMajorForm, ClassFilesSearchForm, \
+SelectCoursesForm
 from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
@@ -54,6 +55,7 @@ def get_chalk_info(request):
             # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
             # crawlers are integrated.
             courses_to_confirm = get_courses(form.cleaned_data)
+            print(courses_to_confirm, 'COURSES TO CONFIRM')
             if courses_to_confirm == None: # Invalid CNET ID OR PW
                 error_message = 'Invalid CNET ID or Password'
             else:
@@ -129,26 +131,29 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
     '''
     print('Select downloads (classes to download)')
     session = get_object_or_404(Session, pk=session_id)
-    
-    if request.method == 'POST':
-        cnet_pw = request.POST.get('cnet_pw')
-        courses = get_courses_post(request)
-        if not courses: # Invalid post request, return error message.
-            return render(request, 'user_forms/select_downloads.html', \
-                            {'courses': session.course_set.all(),
-                             'error_message': "You didn't choose any courses"})
-        else: # Successful post request.
+    courses = courses_to_confirm.split('***') # Unpack course names
+    error_message = None
 
-            # All file downloading and demographic information collection is 
-            # is done within the crawlers_link function.
-            crawlers_link(request, courses, cnet_id, cnet_pw, session)
+    if request.method == 'POST':
+        form = SelectCoursesForm(request.POST, **{'course_list': courses })
+        if form.is_valid():
+            confirmed_courses = form.cleaned_data['course_choices']
+            cnet_pw = form.cleaned_data['cnet_pw']
+
+            crawlers_link(request, confirmed_courses, cnet_id, cnet_pw, session)
             return HttpResponseRedirect(reverse('post', \
                                             args = (session.id,)))
-    else:
-        courses = courses_to_confirm.split('***') # Unpack course names
+        else:
+            error_message = 'Remember to enter your CNET ID and to select one'\
+            'or more courses'
+
+    form = SelectCoursesForm(**{'course_list': 
+            courses})  
 
     return render(request, 'user_forms/select_downloads.html', \
-                                                {'courses': courses})
+                                                {'courses': courses,
+                                                'form': form,
+                                                'error_message': error_message})
 
 
 def get_cnet_id(request):
@@ -274,7 +279,7 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     # of the file model in the database (to allow for search functionality and
     # opening of the file from the database.)
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
-     cnet_pw)
+     cnet_pw, session_object.people_only)
 
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
@@ -527,6 +532,7 @@ class StudentDetail(DetailView):
         course_ids = get_courses_get(self.request)
         course_ids = '/'.join(course_ids)
         context['course_ids'] = course_ids
+        print('course ids are', course_ids)
         return context
 
 class SearchClassFilesView(SearchView):
@@ -587,18 +593,6 @@ def view_file(request, file_id, course_id, query):
     return render(request, 'user_forms/view_file.html', {'course_name': 
         course_name, 'file_name':file_name, 'heading': file_heading,
          'description': file_description, 'query': query})
-
-
-def get_courses_post(request):
-    '''
-    This function is used to extract courses selected from a dynamic form 
-    populated with potential classes the user will want to download.
-    '''
-    courses = []
-    for i in range(1, len(request.POST) + 1):
-        if request.POST.get('course' + str(i)):
-            courses.append(request.POST.get('course' + str(i)))
-    return courses
     
 
 def get_courses_get(request):

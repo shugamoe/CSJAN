@@ -15,9 +15,9 @@
 <!-- Plot of Student Classes -->
 <div style="clear:both;">
 {% if course_ids %}
-{{ course_ids }}
-<img src="{% url 'student_classes_plot' cnet_id=student.cnet_id 
-course_ids=course_ids %}"alt="Class Stats" /> 
+<!-- Had to go over line here, graph wasn't appearing o/w. -->
+<img src="{% url 'student_classes_plot' cnet_id=student.cnet_id course_ids=course_ids %}" 
+alt="Class Stats" /> 
 {% else %}
 <img src="{% url 'student_classes_plot' cnet_id=student.cnet_id course_ids='No_courses_selected' %}" 
 alt="Class Stats" />

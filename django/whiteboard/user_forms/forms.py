@@ -67,6 +67,25 @@ class ClassFilesSearchForm(SearchForm):
         return sqs
 
 
+class SelectCoursesForm(forms.Form):
+    cnet_pw = forms.CharField(label = 'Re-enter CNET Password', widget = 
+        forms.PasswordInput, required = True)
+
+    def __init__(self, *args, **kwargs):
+        course_list = kwargs.pop('course_list', None)
+        super(SelectCoursesForm, self).__init__(*args, **kwargs)
+
+        course_choices = []
+        for course in course_list:
+            course_choices.append((course, course))
+
+        label = mark_safe("<b>Confirm Course Selection</b>")
+        self.fields['course_choices'] = forms.MultipleChoiceField(label = label, 
+            choices = course_choices, required = True)
+
+        class Meta:
+            fields = ['course_choices', 'cnet_pw']
+
 
 
 
