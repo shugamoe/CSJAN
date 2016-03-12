@@ -1,5 +1,5 @@
 # Chalk_Crawler - Andy Zhu
-# updates
+# remove self.username
 
 from selenium import webdriver
 try:
@@ -71,7 +71,7 @@ class Courses:
         # browser = webdriver.Firefox()
         browser = webdriver.PhantomJS(executable_path=os.path.abspath(PHANTOMJS_PATH))
         browser.set_window_size(1100, 660)
-        browser.implicitly_wait(2)
+        browser.implicitly_wait(10)
 
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(self.username)
@@ -143,7 +143,6 @@ class Courses:
             self.course_material_dict[self.username][check_folder_name(course)] = {}
             material_dict = self.course_material_dict[self.username][check_folder_name(course)]
             for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
-                print(course_link.text)
                 if course in course_link.text:
                     professor = course_link.find_element_by_class_name('name').text
                     prof_cnt = professor.count(';')
@@ -181,11 +180,12 @@ class Courses:
                             announcement_text = content.find_element_by_id('announcementList').text
                         else:
                             announcement_text = ''
-                    self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(check_folder_name(course))))
+                    if announcement_text != '':
+                        self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(check_folder_name(course))))
 
                 elif item_name not in ['Home', 'Announcements', 'Send Email', \
                         'My Grades', 'Discussion Board', 'Discussions', \
-                        'Library Course Reserves', 'Tools', 'Groups']:
+                        'Library Course Reserves', 'Tools', 'Groups', 'Calendar']:
                         component = check_folder_name(item.text)
                         material_dict[component] = {}
                         make_dirs(self.course_material_dict, self.default_folder)
@@ -198,6 +198,7 @@ class Courses:
                             num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
                             text_file = ''
                             for unit_index in range(num_of_items):
+                                time.sleep(1)
                                 unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
                                 if self.check_tag_exists_in_web_element(unit, 'img'):
                                     img = unit.find_element_by_tag_name('img')
@@ -213,8 +214,11 @@ class Courses:
                                             file_url = unit.find_element_by_tag_name('a').get_attribute('href')
                                             heading = unit.find_element_by_tag_name('h3').text
                                             file_dict = {'course': course, 'heading': heading, 'description': ''}
-                                            text_file = self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
-                                            self.file_list.append(file_dict)
+                                            text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
+                                            if delete_file_dict:
+                                                del file_dict
+                                            else:
+                                                self.file_list.append(file_dict)
 
                                         elif 'document_on' in img.get_attribute('src'):
                                             if self.check_tag_exists_in_web_element(unit, 'a'):
@@ -226,8 +230,11 @@ class Courses:
                                                     for paragraph in unit.find_elements_by_tag_name('p'):
                                                         description += paragraph.text + '\n'
                                                     file_dict = {'course': course, 'heading': heading, 'description': description}
-                                                    text_file = self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
-                                                    self.file_list.append(file_dict)
+                                                    text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
+                                                    if delete_file_dict:
+                                                        del file_dict
+                                                    else:
+                                                        self.file_list.append(file_dict)
                             if text_file != '':
                                 self.download_text('descriptions', text_file, '{:}/{:}/{:}/{:}/'.format(self.default_folder, self.username, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
                         if material_dict[component] == {}:
@@ -283,7 +290,7 @@ class Courses:
                             folder_name = check_folder_name(inner_unit.find_element_by_tag_name('a').text)
                             folder_dict[folder_name] = {}
                             make_dirs(self.course_material_dict, self.default_folder)
-                            self.gen_folder(inner_unit, path + '/{:}'.format(folder_name), folder_dict[folder_name])
+                            self.gen_folder(inner_unit, path + '/{:}'.format(folder_name), folder_dict[folder_name], course)
 
 
                         elif 'file_on' in img.get_attribute('src'):
@@ -291,8 +298,11 @@ class Courses:
                             file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
                             heading = inner_unit.find_element_by_tag_name('h3').text
                             file_dict = {'course': course, 'heading': heading, 'description': ''}
-                            text_file = self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict, text_file)
-                            self.file_list.append(file_dict)
+                            text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict, text_file)
+                            if delete_file_dict:
+                                del file_dict
+                            else:
+                                self.file_list.append(file_dict)
                         
 
                         elif 'document_on' in img.get_attribute('src'):
@@ -305,8 +315,11 @@ class Courses:
                                     for paragraph in inner_unit.find_elements_by_tag_name('p'):
                                         description += paragraph.text + '\n'
                                     file_dict = {'course': course, 'heading': heading, 'description': description}
-                                    text_file = self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict, text_file)
-                                    self.file_list.append(file_dict)
+                                    text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict, text_file)
+                                    if delete_file_dict:
+                                        del file_dict
+                                    else:
+                                        self.file_list.append(file_dict)
 
             if text_file != '':
                 self.download_text('descriptions', text_file, path) 
@@ -332,12 +345,15 @@ class Courses:
         s = requests.session()
         s.get(file_url, auth = (self.username, self.password))
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
-            
+        
+        file_dict['format'] = r.headers.get('content-type')
+        destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
+        file_dict['path'] = os.path.abspath(destination)
+        delete_file_dict = False
         if self.need_to_update(r, file_dict):
-            file_dict['format'] = r.headers.get('content-type')
-            destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
-            file_dict['path'] = os.path.abspath(destination)
-            with open(destination, 'wb') as f:  
+            print('downloading {:}'.format(unit_name))
+            make_dirs(self.course_material_dict, self.default_folder)
+            with open(check_folder_name(file_dict['path']), 'wb') as f:  
                 r.raw.decode_content = True
                 f.write(r.content)
             if 'pdf' in file_dict['format']:
@@ -353,22 +369,28 @@ class Courses:
             if file_dict['heading'] not in text_file:
                 return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n'
         else:
-            del file_dict
+            print('{:} already up to date'.format(unit_name))
+            delete_file_dict = True            
 
-        return text_file  
+        return text_file, delete_file_dict
 
 
     def need_to_update(self, r, file_dict):
+        
         months = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+        
         dl_file_mod_date = str(r.headers['last-modified']).split(' ') # ['Mon,', '04', 'Jan', '2016', '21:17:09', 'GMT'] 
         dl_file_mod_time = dl_file_mod_date[4].split(':')
-        dl_file_mod_date = datetime(dl_file_mod_date[3], months[dl_file_mod_date[2]], dl_file_mod_date[1], dl_file_mod_time[0], dl_file_mod_time[1], dl_file_mod_time[2]) 
+        dl_file_mod_date = datetime.datetime(int(dl_file_mod_date[3]), months[dl_file_mod_date[2]], int(dl_file_mod_date[1]), int(dl_file_mod_time[0]), int(dl_file_mod_time[1]), int(dl_file_mod_time[2])) 
+
+        if not os.path.exists(file_dict['path']):
+            return True
 
         local_file_mod_date = str(time.ctime(os.path.getmtime(file_dict['path']))).split(' ') # ['Thu', 'Mar', '10', '17:23:59', '2016'] (local timezone) 
         local_file_mod_time = local_file_mod_date[3].split(':')
-        local_file_mod_date = datetime(local_file_mod_date[4], months[local_file_mod_date[1]], local_file_mod_date[2], local_file_mod_time[0], local_file_mod_time[1], local_file_mod_time[2])
+        local_file_mod_date = datetime.datetime(int(local_file_mod_date[4]), months[local_file_mod_date[1]], int(local_file_mod_date[2]), int(local_file_mod_time[0]), int(local_file_mod_time[1]), int(local_file_mod_time[2]))
 
-        if dl_file_mod_date > local_file_mod_time:
+        if dl_file_mod_date > local_file_mod_date:
             return True
 
         return False
