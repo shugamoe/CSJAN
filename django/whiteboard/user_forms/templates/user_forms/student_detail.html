@@ -15,9 +15,9 @@
 <!-- Plot of Student Classes -->
 <div style="clear:both;">
 {% if course_ids %}
-{{ course_ids }}
-<img src="{% url 'student_classes_plot' cnet_id=student.cnet_id 
-course_ids=course_ids %}"alt="Class Stats" /> 
+<!-- Had to go over line here, graph wasn't appearing o/w. -->
+<img src="{% url 'student_classes_plot' cnet_id=student.cnet_id course_ids=course_ids %}" 
+alt="Class Stats" /> 
 {% else %}
 <img src="{% url 'student_classes_plot' cnet_id=student.cnet_id course_ids='No_courses_selected' %}" 
 alt="Class Stats" />
@@ -40,27 +40,8 @@ alt="Class Stats" />
 <input type="submit" value="View Plot of Selected Classes"/>
 </form>
 </ul>
-<!-- End  -->
-
-
-
-
-<ul style="float:left;">
-
-<b>
-{% if files %}
-My Files:
-{% else %}
-You have no files
-{% endif %}
-</b>
-{% for file in files %}
-<li>{{ file.file_name }}</li>
-{% endfor %}
-
-</ul>
-</div>
 
 
 {% endblock %}
+<!-- End  -->
 

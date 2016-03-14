@@ -48,6 +48,47 @@ class FilterMajorForm(forms.Form):
          choices = major_choices, required = False)
 
 
+<<<<<<< HEAD
+=======
+class ClassFilesSearchForm(SearchForm):
+    keyword = forms.CharField(required=True)
+
+    def search(self):
+        # First, store the SearchQuerySet received from other processing.
+        sqs = super(ClassFilesSearchForm, self).search()
+        if not self.is_valid():
+            return self.no_query_found()
+
+        # Check to see if a start_date was chosen.
+        if self.cleaned_data['keyword']:
+            kw = self.cleaned_data['keyword']
+            from django.db.models import Q
+            sqs = sqs.filter(Q(heading__contains = kw) | 
+                Q(description__contains = kw) | Q(body__contains = kw))
+
+        return sqs
+
+
+class SelectCoursesForm(forms.Form):
+    cnet_pw = forms.CharField(label = 'Re-enter CNET Password', widget = 
+        forms.PasswordInput, required = True)
+
+    def __init__(self, *args, **kwargs):
+        course_list = kwargs.pop('course_list', None)
+        super(SelectCoursesForm, self).__init__(*args, **kwargs)
+
+        course_choices = []
+        for course in course_list:
+            course_choices.append((course, course))
+
+        label = mark_safe("<b>Confirm Course Selection</b>")
+        self.fields['course_choices'] = forms.MultipleChoiceField(label = label, 
+            choices = course_choices, required = True)
+
+        class Meta:
+            fields = ['course_choices', 'cnet_pw']
+
+>>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
 
 
 

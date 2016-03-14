@@ -59,6 +59,9 @@
     {{ major_filter_form.as_p }}
     <input type="submit" value="Filter Students by Major"/>
 </form>
+{% if form_error %}
+{{ form_error }}
+{% endif %}
 <!-- End  -->
 
 
@@ -78,17 +81,15 @@ recent enough.
 
 <li><a href="{% url 'view_student' student_id=student.id %}">
 {% if student.duplicates %}
-    {{ student.cnet_id }}*
+    {{ student.full_name }}*</a></li>
     {% if filter_enabled %}
-        | {{ student.program }}
+        ^ {{ student.program }}
     {% endif %}
-    </a></li>
 {% else %}
-{{ student.cnet_id }}
+{{ student.full_name }}</a></li>
     {% if filter_enabled %}
-    | {{ student.program }}
+    ^ {{ student.program }}
     {% endif %}
-    </a></li>
 {% endif %}
 
 {% endfor %}
@@ -97,7 +98,7 @@ recent enough.
 
 <!-- Search Files -->
 <ul style="float:left;">
-<li><a href="{% url 'search_single_class_files' cnet_id=cnet_id course_id=course.id %}">
+<li><a href="{% url 'search_single_class_files' course_id=course.id %}">
     Search Files in Class
     </a></li>
 </ul>
@@ -108,22 +109,16 @@ recent enough.
 {% if files %}
 My Files:
 {% else %}
-You have no files for this class
+No files found for this class
 {% endif %}
 </b>
 {% for file in files %}
 
-<li>{{ file.file_name }}</li>
+<li><a href="{% url 'view_file' file_id=file.id course_id=course.id query='NOT FROM SEARCH' %}">{{ file.file_name }}</a></li>
+
 {% endfor %}
 </ul>
 <!-- End  -->
-
-
-
-
-
-
-
 
 
 {% endblock %}

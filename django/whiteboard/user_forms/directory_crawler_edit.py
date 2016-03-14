@@ -29,10 +29,12 @@ def process_student_names(list_of_names):
 			formatted_names.append(name)
 	return formatted_names
 
-def lookup_list(browser, list_of_names, names_type):
+def lookup_list(browser, list_of_names, names_type, CNET):
 	# names_type is either "s" for student, "i" for instructor, "a" for TA
 
+	not_searched = []
 	list_of_dictionaries = []
+
 	for query_name in list_of_names:
 
 		#enter the query name and return the results
@@ -43,6 +45,7 @@ def lookup_list(browser, list_of_names, names_type):
 		#if no directory results are found, print such and move on.
 		if len(results) == 0:
 			print(query_name, "not found in directory.")
+			not_searched.append(query_name)
 			continue
 		#if more than one result is found, click the first one.
 		elif len(results) > 1:
@@ -113,9 +116,14 @@ def lookup_list(browser, list_of_names, names_type):
 			if key == "Phone:":
 				user_dictionary["phone"] = value
 
+			if names_type == "s":
+				if user_dictionary["email"] == None:
+					user_dictionary["email"] = CNET + "@uchicago.edu"
+
 		#save, then return for more searchin'
 		list_of_dictionaries.append(user_dictionary)
 		browser.get(DIRECTORY)
+
 	return(list_of_dictionaries)
 
 def crawl_directory(list_input, CNET, PASSWORD):
@@ -156,9 +164,9 @@ def crawl_directory(list_input, CNET, PASSWORD):
 		print("Directory.uchicago.edu ~ login successful")
 
 	#lookup the directory entries for each list of people.
-	class_container["instructors"] = lookup_list(browser, list_of_instructor_names, "i")
-	class_container["TAs"] = lookup_list(browser, list_of_ta_names, "a")
-	class_container["students"] = lookup_list(browser, list_of_student_names, "s")
+	class_container["instructors"] = lookup_list(browser, list_of_instructor_names, "i", CNET)
+	class_container["TAs"] = lookup_list(browser, list_of_ta_names, "a", CNET)
+	class_container["students"] = lookup_list(browser, list_of_student_names, "s", CNET)
 	return class_container
 
 def crawl_multiple_classes(list_of_list_inputs, CNET, PASSWORD):
