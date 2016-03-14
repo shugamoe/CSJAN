@@ -111,13 +111,9 @@ class File(models.Model):
         else:
             return str(self.path)
 
-<<<<<<< HEAD
     def __str__(self):
         return str(self.heading)
 
-
-=======
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
 
 
 
