@@ -1,9 +1,0 @@
-<h1>Welcome!</h1>
-<p>
-  My name is {{ name }}.  My favorite foods are {{ foods }} 
-  Read more <a href={% url 'about' %}"/about/">about me</a>.</p>
-
-<ul>
-{% for food in foods %}
-<li> {{food}}</li>
-    {% endfor %}
