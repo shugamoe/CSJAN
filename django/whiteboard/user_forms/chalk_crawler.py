@@ -26,13 +26,19 @@ def get_courses(input_dict):
     
     a = create_object(input_dict)
 
+    if a.courses == None:
+        return None, 'invalid CNET ID'  
+    elif a.courses == []:
+        return None, 'There are no courses for {:}, {:}'.format(self.quarter, \
+        self.year)
+
     return a.courses
 
 
-def dl_specific_courses(list_of_courses, cnet_id, passwd, people_only):
+def dl_specific_courses(list_of_courses, cnet_id, passwd):
 
     a = Courses([], [], cnet_id, passwd, dl = True)
-    a.access_courses(list_of_courses, people_only)
+    a.access_courses(list_of_courses)
     a.browser.close()
     return a.course_info, a.file_list
 
@@ -132,7 +138,7 @@ class Courses:
         return all_courses, courses
 
 
-    def access_courses(self, list_of_courses, people_only):
+    def access_courses(self, list_of_courses):
         self.course_material_dict = {}
         
         for course in list_of_courses: 
@@ -145,99 +151,42 @@ class Courses:
                     prof_cnt = professor.count(';')
                     course_list.append(professor.split('; ')[:prof_cnt])
 
-            self.build_course_dict(self.course_info, material_dict, professor, course, course_list, people_only) 
+            self.build_course_dict(self.course_info, material_dict, professor, course, course_list) 
 
         return None
 
 
-    def build_course_dict(self, course_info, material_dict, professor, course, course_list, people_only):
+    def build_course_dict(self, course_info, material_dict, professor, course, course_list):
 
         self.browser.find_element_by_partial_link_text(course).click()
         
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
             item_name = item.text
-            if not people_only:
-                if item_name == 'Announcements':
-                    material_dict[item.text] = {}
-                    make_dirs(self.course_material_dict, self.default_folder)  
 
-                    item.find_element_by_tag_name('a').click()              
-                    if self.check_id_exists('content_listContainer'): 
+            if item_name == 'Announcements':
+                material_dict[item.text] = {}
+                make_dirs(self.course_material_dict, self.default_folder)  
 
-                        content_list_container = self.browser.find_element_by_id('content_listContainer')
-                        announcement_text = ''
+                item.find_element_by_tag_name('a').click()              
+                if self.check_id_exists('content_listContainer'): 
 
-                        for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
-                            announcement_text += file_or_folder.text + '\n\n' 
+                    content_list_container = self.browser.find_element_by_id('content_listContainer')
+                    announcement_text = ''
 
+                    for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
+                        announcement_text += file_or_folder.text + '\n\n' 
+
+                else:
+                    content = self.browser.find_element_by_id('content')
+                    if self.check_id_exists('announcementList'):
+                        announcement_text = content.find_element_by_id('announcementList').text
                     else:
-                        content = self.browser.find_element_by_id('content')
-                        if self.check_id_exists('announcementList'):
-                            announcement_text = content.find_element_by_id('announcementList').text
-                        else:
                             announcement_text = ''
-                    if announcement_text != '':
-                        self.download_text('Announcements', announcement_text, '{:}/{:}/Announcements/'.format(self.default_folder, str(check_folder_name(course))))
+                if announcement_text != '':
+                    self.download_text('Announcements', announcement_text, '{:}/{:}/Announcements/'.format(self.default_folder, str(check_folder_name(course))))
 
-                elif item_name not in ['Home', 'Announcements', 'Send Email', \
-                        'My Grades', 'Discussion Board', 'Discussions', \
-                        'Library Course Reserves', 'Tools', 'Groups', 'Calendar']:
-                        component = check_folder_name(item.text)
-                        material_dict[component] = {}
-                        make_dirs(self.course_material_dict, self.default_folder)
-                        item.find_element_by_tag_name('a').click()
-
-                        if self.check_xpath_exists('//*div[@class = "noItems container-empty"]'):
-                            continue
-
-                        elif self.check_id_exists('content_listContainer'):
-                            num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
-                            text_file = ''
-                            for unit_index in range(num_of_items):
-                                time.sleep(1)
-                                unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
-                                if self.check_tag_exists_in_web_element(unit, 'img'):
-                                    img = unit.find_element_by_tag_name('img')
-                                    if img.get_attribute('class') == 'item_icon':
-                                        if 'folder_on' in img.get_attribute('src'):
-                                            folder_name = check_folder_name(unit.find_element_by_tag_name('a').text)
-                                            material_dict[component][folder_name] = {}
-                                            make_dirs(self.course_material_dict, self.default_folder)
-                                            self.gen_folder(unit, '{:}/{:}/{:}'.format(check_folder_name(course), component, folder_name), material_dict[component][folder_name], course)
-                                        
-                                        elif 'file_on' in img.get_attribute('src'):
-                                            unit_name = unit.find_element_by_tag_name('a').text
-                                            file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                            heading = unit.find_element_by_tag_name('h3').text
-                                            file_dict = {'course': course, 'heading': heading, 'description': ''}
-                                            text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
-                                            if delete_file_dict:
-                                                del file_dict
-                                            else:
-                                                self.file_list.append(file_dict)
-
-                                        elif 'document_on' in img.get_attribute('src'):
-                                            if self.check_tag_exists_in_web_element(unit, 'a'):
-                                                for download_file in unit.find_elements_by_tag_name('a'):                                             
-                                                    unit_name = download_file.text
-                                                    file_url = download_file.get_attribute('href')
-                                                    heading = unit.find_element_by_tag_name('h3').text
-                                                    description = ''
-                                                    for paragraph in unit.find_elements_by_tag_name('p'):
-                                                        description += paragraph.text + '\n'
-                                                    file_dict = {'course': course, 'heading': heading, 'description': description}
-                                                    text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
-                                                    if delete_file_dict:
-                                                        del file_dict
-                                                    else:
-                                                        self.file_list.append(file_dict)
-                            if text_file != '':
-                                self.download_text('descriptions', text_file, '{:}/{:}/{:}/'.format(self.default_folder, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
-                        if material_dict[component] == {}:
-                            del material_dict[component] 
-           
-            if item_name == 'Send Email':
+            elif item_name == 'Send Email':
                 list_of_tas = []
                 list_of_students = []
                 item.find_element_by_tag_name('a').click()
@@ -262,13 +211,67 @@ class Courses:
                 course_list.append(list_of_students)
                 self.course_info.append(course_list)
 
-                       
+            elif item_name not in ['Home', 'Announcements', 'Send Email', \
+                'My Grades', 'Discussion Board', 'Discussions', \
+                'Library Course Reserves', 'Tools', 'Groups', 'Calendar']:
+                    component = check_folder_name(item.text)
+                    material_dict[component] = {}
+                    make_dirs(self.course_material_dict, self.default_folder)
+                    item.find_element_by_tag_name('a').click()
+
+                    if self.check_xpath_exists('//*div[@class = "noItems container-empty"]'):
+                        continue
+
+                    elif self.check_id_exists('content_listContainer'):
+                        num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+                        text_file = ''
+                        for unit_index in range(num_of_items):
+                            time.sleep(1)
+                            unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
+                            if self.check_tag_exists_in_web_element(unit, 'img'):
+                                img = unit.find_element_by_tag_name('img')
+                                if img.get_attribute('class') == 'item_icon':
+                                    if 'folder_on' in img.get_attribute('src'):
+                                        folder_name = check_folder_name(unit.find_element_by_tag_name('a').text)
+                                        material_dict[component][folder_name] = {}
+                                        make_dirs(self.course_material_dict, self.default_folder)
+                                        self.gen_folder(unit, '{:}/{:}/{:}'.format(check_folder_name(course), component, folder_name), material_dict[component][folder_name], course)
+                                    
+                                    elif 'file_on' in img.get_attribute('src'):
+                                        unit_name = unit.find_element_by_tag_name('a').text
+                                        file_url = unit.find_element_by_tag_name('a').get_attribute('href')
+                                        heading = unit.find_element_by_tag_name('h3').text
+                                        file_dict = {'course': course, 'heading': heading, 'description': ''}
+                                        text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
+                                        if delete_file_dict:
+                                            del file_dict
+                                        else:
+                                            self.file_list.append(file_dict)
+
+                                    elif 'document_on' in img.get_attribute('src'):
+                                        if self.check_tag_exists_in_web_element(unit, 'a'):
+                                            for download_file in unit.find_elements_by_tag_name('a'):                                             
+                                                unit_name = download_file.text
+                                                file_url = download_file.get_attribute('href')
+                                                heading = unit.find_element_by_tag_name('h3').text
+                                                description = ''
+                                                for paragraph in unit.find_elements_by_tag_name('p'):
+                                                    description += paragraph.text + '\n'
+                                                file_dict = {'course': course, 'heading': heading, 'description': description}
+                                                text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
+                                                if delete_file_dict:
+                                                    del file_dict
+                                                else:
+                                                    self.file_list.append(file_dict)
+                        
+                        if text_file != '':
+                            self.download_text('descriptions', text_file, '{:}/{:}/{:}/'.format(self.default_folder, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
+                    
+                    if material_dict[component] == {}:
+                        del material_dict[component]                 
 
         make_dirs(self.course_material_dict, self.default_folder)
-
-
         self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
-
   
         return material_dict
 
@@ -364,7 +367,7 @@ class Courses:
                  file_dict['body'] = ''
             
             if file_dict['heading'] not in text_file:
-                return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n'
+                return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n', False
         else:
             print('{:} already up to date'.format(unit_name))
             delete_file_dict = True            
