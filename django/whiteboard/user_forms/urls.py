@@ -52,15 +52,10 @@ urlpatterns = [
          ),
 
 
-<<<<<<< HEAD
-    url(r'^search/(?P<cnet_id>[a-zA-Z0-9]+)/(?P<course_id>[0-9]+)/$', 
-        views.SearchClassFilesView.as_view(), name = 'search_single_class_files'
-         ),
-=======
     # View a single file
     url(r'^view_file(?P<file_id>[0-9]+)/for_course(?P<course_id>[0-9]+)/query='
         r'(?P<query>.+)/$', views.view_file, name = 'view_file'),
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
+
 
     url(r'^$', views.start, name='start'),
     ]
