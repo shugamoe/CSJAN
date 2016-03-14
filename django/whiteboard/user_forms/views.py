@@ -56,8 +56,8 @@ def get_chalk_info(request):
             # crawlers are integrated.
             courses_to_confirm = get_courses(form.cleaned_data)
             print(courses_to_confirm, 'COURSES TO CONFIRM')
-            if courses_to_confirm == None: # Invalid CNET ID OR PW
-                error_message = 'Invalid CNET ID or Password'
+            if courses_to_confirm[0] == None: # Invalid CNET ID OR PW
+                error_message = courses_to_confirm[1]
             else:
                 # Clever trick I found on StackExchange to send information like
                 # pk's, and other information through the url.
@@ -76,7 +76,8 @@ def get_chalk_info(request):
 
     form = SessionForm()
 
-    return render(request, 'user_forms/dl_query.html', {'form': form})
+    return render(request, 'user_forms/dl_query.html', {'form': form, 
+        'error_message': error_message})
 
 
 def start(request):
