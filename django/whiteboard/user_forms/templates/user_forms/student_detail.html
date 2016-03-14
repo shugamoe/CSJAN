@@ -4,6 +4,11 @@
 {% block body %}
 
 <!-- Basic Info Section -->
+{% if student.duplicates %}
+<h1>{{ student.full_name }}*</h1>
+<p>* -Might contain incorrect information.  There were multiple directory entries for the given first and last name.
+</p>
+{% else %}
 <h1>{{ student.full_name }}</h1>
 
 
