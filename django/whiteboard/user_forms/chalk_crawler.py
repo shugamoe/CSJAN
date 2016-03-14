@@ -1,5 +1,4 @@
 # Chalk_Crawler - Andy Zhu
-# remove self.username
 
 from selenium import webdriver
 try:
@@ -10,11 +9,6 @@ import os
 import requests
 import time
 import datetime
-
-PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
-if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
-    PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
-
 
 PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
 if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
@@ -49,8 +43,8 @@ class Courses:
     def __init__(self, quarter, year, cnet_id, cnet_pw, dl = False): # dict
 
         self.url = 'https://chalk.uchicago.edu'
-        self.quarter = quarter # dict['quarter']
-        self.year = year # dict['year']
+        self.quarter = quarter 
+        self.year = year 
         self.username = cnet_id
         self.password = cnet_pw
         self.default_folder = '../../Classes'
@@ -63,7 +57,7 @@ class Courses:
 
 
         self.course_info = [] # list of lists: course_id, prof, tas, students
-        self.course_material_dict = {}
+        self.course_material_dict = {} # file path 
 
         # 'list of dicts, {'owner', 'course', 'heading', 'description', 'body', 
         # 'path', 'format'}; format is in the form of 'application/...'
@@ -72,15 +66,9 @@ class Courses:
 
     def login(self):
         
-        # browser = webdriver.Firefox()
-<<<<<<< HEAD
-        browser = webdriver.PhantomJS(executable_path=PHANTOMJS_PATH, service_args=['--ignore-ssl-errors=true'])
-        browser.implicitly_wait(2)
-=======
         browser = webdriver.PhantomJS(executable_path=os.path.abspath(PHANTOMJS_PATH))
         browser.set_window_size(1100, 660)
-        browser.implicitly_wait(10)
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
+        browser.implicitly_wait(5)
 
         browser.get(self.url)
         browser.find_element_by_name('user_id').send_keys(self.username)
@@ -145,12 +133,12 @@ class Courses:
 
 
     def access_courses(self, list_of_courses, people_only):
-        self.course_material_dict[self.username] = {}
+        self.course_material_dict = {}
         
         for course in list_of_courses: 
             course_list = [course]
-            self.course_material_dict[self.username][check_folder_name(course)] = {}
-            material_dict = self.course_material_dict[self.username][check_folder_name(course)]
+            self.course_material_dict[check_folder_name(course)] = {}
+            material_dict = self.course_material_dict[check_folder_name(course)]
             for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
                 if course in course_link.text:
                     professor = course_link.find_element_by_class_name('name').text
@@ -190,7 +178,7 @@ class Courses:
                         else:
                             announcement_text = ''
                     if announcement_text != '':
-                        self.download_text('Announcements', announcement_text, '{:}/{:}/{:}/Announcements/'.format(self.default_folder, self.username, str(check_folder_name(course))))
+                        self.download_text('Announcements', announcement_text, '{:}/{:}/Announcements/'.format(self.default_folder, str(check_folder_name(course))))
 
                 elif item_name not in ['Home', 'Announcements', 'Send Email', \
                         'My Grades', 'Discussion Board', 'Discussions', \
@@ -245,7 +233,7 @@ class Courses:
                                                     else:
                                                         self.file_list.append(file_dict)
                             if text_file != '':
-                                self.download_text('descriptions', text_file, '{:}/{:}/{:}/{:}/'.format(self.default_folder, self.username, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
+                                self.download_text('descriptions', text_file, '{:}/{:}/{:}/'.format(self.default_folder, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
                         if material_dict[component] == {}:
                             del material_dict[component] 
            
@@ -340,11 +328,11 @@ class Courses:
 
     def download_text(self, filename, text, path):
 
-        if os.path.exists('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename)):
+        if os.path.exists('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)):
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename))
+            os.remove('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename))
 
-        with open('{:}/{:}/{:}/{:}.txt'.format(self.default_folder, self.username, path, filename), 'w') as f:
+        with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename), 'w') as f:
             f.write(text)
 
 
@@ -356,7 +344,7 @@ class Courses:
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
         
         file_dict['format'] = r.headers.get('content-type')
-        destination = '{:}/{:}/{:}/{:}'.format(self.default_folder, self.username, path, unit_name)
+        destination = '{:}/{:}/{:}'.format(self.default_folder, path, unit_name)
         file_dict['path'] = os.path.abspath(destination)
         delete_file_dict = False
         if self.need_to_update(r, file_dict):
