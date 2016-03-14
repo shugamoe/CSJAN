@@ -48,6 +48,8 @@ class FilterMajorForm(forms.Form):
          choices = major_choices, required = False)
 
 
+<<<<<<< HEAD
+=======
 class ClassFilesSearchForm(SearchForm):
     keyword = forms.CharField(required=True)
 
@@ -86,6 +88,7 @@ class SelectCoursesForm(forms.Form):
         class Meta:
             fields = ['course_choices', 'cnet_pw']
 
+>>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
 
 
 
