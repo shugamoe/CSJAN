@@ -651,7 +651,7 @@ def student_classes_plot(request, cnet_id, course_ids):
         if len(course_ids) == 1:
             return single_class_plot(request, courses[0].id)
 
-    user_object = Student.object.filter(cnet_id=cnet_id)       
+    user_object = Student.objects.filter(cnet_id=cnet_id)       
 
     class_lists = []
     labels_dictionary = {}
