@@ -10,19 +10,26 @@ import requests
 import time
 import datetime
 
+
+# phantomjs executable used for headless webdriver
 PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
 if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
     PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
 
 
 def create_object(input_dict):
+    '''Creates and outputs Course object given an input dict of 'cnet_id', 
+    'cnet_pw', 'quarter', 'year'.'''
     
-    a = Courses(input_dict['quarter'], input_dict['year'], input_dict['cnet_id'], input_dict['cnet_pw'])
+    a = Courses(input_dict['quarter'], input_dict['year'], \
+    input_dict['cnet_id'], input_dict['cnet_pw'])
     
     return a
 
 
 def get_courses(input_dict):
+    '''Obtains a user's list of courses that matches the quarter and year 
+    specified.'''
     
     a = create_object(input_dict)
 
@@ -347,6 +354,7 @@ class Courses:
         file_dict['format'] = r.headers.get('content-type')
         destination = '{:}/{:}/{:}'.format(self.default_folder, path, check_folder_name(unit_name))
         file_dict['path'] = os.path.abspath(destination)
+        delete_file_dict = False
         if self.need_to_update(r, file_dict):
             print('downloading {:}'.format(unit_name))
             make_dirs(self.course_material_dict, self.default_folder)
@@ -364,7 +372,7 @@ class Courses:
                  file_dict['body'] = ''
             
             if file_dict['heading'] not in text_file:
-                return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n', False
+                return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n', delete_file_dict
         else:
             print('{:} already up to date'.format(unit_name))
             delete_file_dict = True            
