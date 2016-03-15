@@ -74,10 +74,6 @@ Information Available:
 
     Individual Course Plots: Breakdown of majors within individual classes.
 
-    Collective Course Plots: Network Analysis plots showing common students 
-    between either all the classes a certain student is in, or a subset 
-    selection made by the user from all the classes a certain student is in.
-
     Student Information: Whiteboard can display the student's full name, their program of study, their email, their CNET ID, and a list of courses that 
     the Chalk crawler has found them in.
 
