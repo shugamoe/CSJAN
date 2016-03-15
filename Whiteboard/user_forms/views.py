@@ -661,7 +661,7 @@ def student_classes_plot(request, cnet_id, course_ids):
         class_lists.append(students_in_course)
 
     if len(class_lists) > 0:
-        first_set = class_lists[0]
+        first_set = set(class_lists[0])
     else:
         return plt.plot()
     for course in class_lists:
