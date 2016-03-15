@@ -222,16 +222,19 @@ class Courses:
                 if course in course_link.text:
                     # Adds [prof] on to course list
                     professors = course_link.find_elements_by_class_name('name')
+                    prof_list = []
                     for professor in professors:
-                        course_list.append(professor.text.rstrip()[:-1])
+                        prof_list.append(professor.text.rstrip()[:-1])
 
-            self.build_course_dict(self.course_info, material_dict, professors,\
-            course, course_list) # Collects course list and file list info
+            course_list.append(prof_list)
+            # Collects course list and file list info
+            self.build_course_dict(self.course_info, material_dict, \
+            prof_list, course, course_list) 
 
         return None
 
 
-    def build_course_dict(self, course_info, material_dict, professors, course,\
+    def build_course_dict(self, course_info, material_dict, prof_list, course,\
     course_list):
         '''Crawls a course in Chalk to download course materials into the correct
         path in the local directory, and to compile a list of dictionaries with 
@@ -307,8 +310,7 @@ class Courses:
                     'USERS_AVAIL').find_elements_by_tag_name('option')
 
                     for student_web_element in list_of_students_web_elements:
-                        for professor in professors:
-                            prof_str = professor.text.rstrip().replace(';', '')
+                        for professor in prof_list:
                             prof_str = prof_str.split(' ')[1] + ', ' + \
                             prof_str.split(' ')[0]
 
