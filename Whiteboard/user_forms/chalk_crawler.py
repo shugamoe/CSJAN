@@ -221,21 +221,17 @@ class Courses:
 
                 if course in course_link.text:
                     # Adds [prof] on to course list
-                    professor = course_link.find_element_by_class_name('name').\
-                    text
-                    print(professor)
-                    prof_cnt = professor.count(';')
-                    print(prof_cnt)
-                    print(professor.split('; ')[:prof_cnt])
-                    course_list.append(professor.split('; ')[:prof_cnt])
+                    professors = course_link.find_elements_by_class_name('name')
+                    for professor in professors:
+                        course_list.append(professor.text.rstrip()[:-1])
 
-            self.build_course_dict(self.course_info, material_dict, professor, \
+            self.build_course_dict(self.course_info, material_dict, professors,\
             course, course_list) # Collects course list and file list info
 
         return None
 
 
-    def build_course_dict(self, course_info, material_dict, professor, course, \
+    def build_course_dict(self, course_info, material_dict, professors, course,\
     course_list):
         '''Crawls a course in Chalk to download course materials into the correct
         path in the local directory, and to compile a list of dictionaries with 
@@ -310,11 +306,9 @@ class Courses:
                     find_element_by_id('stepcontent1').find_element_by_name(
                     'USERS_AVAIL').find_elements_by_tag_name('option')
 
-                    prof_cnt = professor.count(';')
-
                     for student_web_element in list_of_students_web_elements:
-                        for professor in professor.split('; ')[:prof_cnt]:
-                            professor.replace(';', '')
+                        for professor in professors.split(', ')
+                            prof_str = professor.text.replace(';', '')
                             prof_str = professor.split(' ')[1] + ', ' + \
                             professor.split(' ')[0]
 
