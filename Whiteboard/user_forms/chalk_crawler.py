@@ -454,9 +454,9 @@ class Courses:
                         
                         # downloads text for describing each icon
                         if text_file != '': 
-                            self.download_text('descriptions', text_file, \
-                            '{:}/{:}/'.format(str(check_folder_name(course)), \
-                            str(check_folder_name(item_name)))) 
+                            self.download_text('Chalk context for files', \
+                            text_file, '{:}/{:}/'.format(str(check_folder_name(
+                            course)), str(check_folder_name(item_name)))) 
                     
                     # deletes folder if empty
                     if folder_empty:
@@ -546,6 +546,7 @@ class Courses:
                                     text_file, delete_file_dict = self.\
                                     download_file_or_doc(unit_name, file_url, \
                                     download_file, path, file_dict, text_file)
+
                                     # if file already exists, delete 
                                     # file_dict, else append it to 
                                     # file_list     
@@ -556,7 +557,7 @@ class Courses:
             # download descriptions text describing all headers and descriptions
             # of each file in a folder if the descriptions text is not empty
             if text_file != '':
-                self.download_text('descriptions', text_file, path) 
+                self.download_text('Chalk context for files', text_file, path) 
 
         self.browser.execute_script("window.history.go(-1)")
 
@@ -625,7 +626,9 @@ class Courses:
         # downloading occurs
         else: 
             print('{:} already up to date'.format(unit_name))
-            delete_file_dict = True            
+            delete_file_dict = True  
+
+        file_dict['path'] = file_dict['path'].replace("'", "")          
 
         return text_file, delete_file_dict
 
