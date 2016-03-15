@@ -130,7 +130,7 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
 
             if key == "Appointment(s):":
                 user_dictionary["title"] = value
-            if key == "CNetID:" and names_type != "i":
+            if key == "CNetID:" and names_type != "i" and names_type != "a":
                 user_dictionary["cnet_id"] = value
             if key == "Current Program Of Study:" and names_type != "i":
                 user_dictionary["program"] = value
