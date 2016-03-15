@@ -76,7 +76,7 @@ class SelectCoursesForm(forms.Form):
         for course in course_list:
             course_choices.append((course, course))
 
-        label = mark_safe("<b>Confirm Course Selection</b>")
+        label = mark_safe("Confirm Course Selection")
         self.fields['course_choices'] = forms.MultipleChoiceField(label = label, 
             choices = course_choices, required = True)
 

@@ -43,7 +43,7 @@ def get_chalk_info(request):
         Otherwise if there is a valid POST request it returns a response 
         redirect to 'select_downloads' url.
     '''
-    print('Obtaining Chalk Credentials and Filters')
+    print('DJANGO: Obtaining Chalk Credentials and Filters')
     if request.method == 'POST':
         form = SessionForm(request.POST)
         if form.is_valid():
@@ -51,7 +51,6 @@ def get_chalk_info(request):
             # Replace with chalk_crawler.get_prelim(form.cleaned_data) when 
             # crawlers are integrated.
             courses_to_confirm = get_courses(form.cleaned_data)
-            print(courses_to_confirm, 'COURSES TO CONFIRM')
             if courses_to_confirm[0] == None: # Invalid CNET ID OR PW
                 error_message = courses_to_confirm[1]
                 return render(request, 'user_forms/dl_query.html', {'form': form, 
@@ -89,7 +88,7 @@ def start(request):
     Outputs:
         Renders start.html.
     '''
-    print('Start page')
+    print('DJANGO: Start page')
     return render(request, 'user_forms/start.html')
 
 
@@ -104,7 +103,7 @@ def browse_classes(request):
     Outputs:
         Renders browse_classes.html.
     '''
-    print('At view stats page')
+    print('DJANGO: At view stats page')
     return render(request, 'user_forms/browse_classes.html')
  
     
@@ -128,7 +127,7 @@ def select_downloads(request, session_id, cnet_id, courses_to_confirm):
         post request the same render is returned with an error message.  A
         successful POST request this view redirects to 'post' url.
     '''
-    print('Select downloads (classes to download)')
+    print('DJANGO: Select downloads (classes to download)')
     session = get_object_or_404(Session, pk=session_id)
     courses = courses_to_confirm.split('***') # Unpack course names
     error_message = None
@@ -168,7 +167,7 @@ def get_cnet_id(request):
         submits with no CNET ID.  Otherwise if a CNET_ID is entered it redirects
         to 'view_courses' url.
     '''
-    print('Get CNET ID')
+    print('DJANGO: Get CNET ID')
     if request.method == 'POST':
         cnet_id = request.POST.get('cnet_id')
         if not cnet_id: # User didn't enter a CNET ID
@@ -177,7 +176,6 @@ def get_cnet_id(request):
         else:
             # Quickly check to see if a student with that CNET ID exists.
             test = Student.objects.filter(cnet_id = cnet_id).count()
-            print('test', test)
             if test == 0: # Return error if no info for CNET ID exists.
                 return render(request, 'user_forms/get_cnet_id.html',
                     {'does_not_exist': True, 'wrong_cnet': cnet_id})
@@ -377,6 +375,10 @@ def a_or_u_people(people_dicts, model_used, course_name):
     course_object = Course.objects.get(name = course_name)
 
     for ppl_dict in people_dicts:
+        # temporary fix 
+        if model_used == Assistant:
+            del ppl_dict['cnet_id']
+
         existing_instance, created = model_used.objects.get_or_create(email = 
             ppl_dict['email'], defaults = ppl_dict)
         if not created:
@@ -533,7 +535,6 @@ class StudentDetail(DetailView):
         course_ids = get_courses_get(self.request)
         course_ids = '/'.join(course_ids)
         context['course_ids'] = course_ids
-        print('course ids are', course_ids)
         return context
 
 class SearchClassFilesView(SearchView):
