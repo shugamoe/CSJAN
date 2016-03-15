@@ -64,7 +64,10 @@ class Instructor(models.Model):
 
 
     def cnet_id(self):
-        return re.search(r'^([a-z0-9]*[a-z0-9]?)', self.email).group()
+        if '@uchicago.edu' in self.email:
+            return re.search(r'^([a-z0-9]*[a-z0-9]?)', self.email).group()
+        else:
+            return "<Can't confirm CNET ID>"
     
     def full_name(self):
         return str(self.first_name + ' ' + self.last_name)
