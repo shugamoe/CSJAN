@@ -102,8 +102,6 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
             user_dictionary = {"first_name": None,
                                "last_name": None,
                                "program": None,
-                               "email": "No Email Listed",
-                               "cnet_id": None,
                                "duplicates": duplicates}
         else:
             print("Error: third argument must be 'i', 'a', or 's'.")
@@ -144,7 +142,7 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
             if names_type == "s":
                 if key == "CNetID:":
                     user_dictionary["cnet_id"] = value
-                if "cnet_id" not in user_dictionary and "email"  in user_dictionary:
+                if "cnet_id" not in user_dictionary and "email" in user_dictionary:
                     user_dictionary["cnet_id"] = user_dictionary["email"].split("@")[0]
 
         #save, then return for more searchin'
