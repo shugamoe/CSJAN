@@ -237,9 +237,9 @@ class Courses:
 
     def build_course_dict(self, course_info, material_dict, professor, course, \
     course_list):
-    '''Crawls a course in Chalk to download course materials into the correct
-    path in the local directory, and to compile a list of dictionaries with 
-    information of each file'''
+        '''Crawls a course in Chalk to download course materials into the correct
+        path in the local directory, and to compile a list of dictionaries with 
+        information of each file'''
 
         # Click course link on Chalk home page
         self.browser.find_element_by_partial_link_text(course).click()
