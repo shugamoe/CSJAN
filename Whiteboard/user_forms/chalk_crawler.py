@@ -312,7 +312,7 @@ class Courses:
                         for professor in prof_list:
                             prof_str = professor.split(' ')[1] + ', ' + \
                             professor.split(' ')[0]
-                            print(prof_str)
+                            print(student_web_element.text, prof_str)
 
                             # excluding profs and TA's from list of students
                             if student_web_element.text not in prof_str and \
