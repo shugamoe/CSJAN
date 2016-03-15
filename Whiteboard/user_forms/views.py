@@ -725,6 +725,8 @@ def single_class_plot(request, course_id):
     formatted_dictionary = {"Other": 0}
 
     for key in program_dictionary:
+        if "College:" in key:
+            key = key[9:]
         value = program_dictionary[key]
         if value >= 4:
             formatted_dictionary[key] = value
