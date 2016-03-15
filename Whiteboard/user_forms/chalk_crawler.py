@@ -308,7 +308,7 @@ class Courses:
 
                     for student_web_element in list_of_students_web_elements:
                         for professor in professors.split(', ')
-                            prof_str = professor.text.replace(';', '')
+                            prof_str = professor.text.rstrip().replace(';', '')
                             prof_str = professor.split(' ')[1] + ', ' + \
                             professor.split(' ')[0]
 
