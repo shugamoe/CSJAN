@@ -1,4 +1,5 @@
 # Chalk_Crawler - Andy Zhu
+# Citation: http://selenium-python.readthedocs.org/api.html
 
 from selenium import webdriver
 try:
@@ -54,39 +55,49 @@ def dl_specific_courses(list_of_courses, cnet_id, passwd):
     # get_courses
     a = Courses([], [], cnet_id, passwd, dl = True) 
 
-    a.access_courses(list_of_courses)
+    a.access_courses(list_of_courses) # Performs downloading
     a.browser.close()
+
     return a.course_info, a.file_list
 
 
 
 class Courses:
     
-    def __init__(self, quarter, year, cnet_id, cnet_pw, dl = False): # dict
+    def __init__(self, quarter, year, cnet_id, cnet_pw, dl = False): 
 
         self.url = 'https://chalk.uchicago.edu'
         self.quarter = quarter 
         self.year = year 
         self.username = cnet_id
         self.password = cnet_pw
-        self.default_folder = '../../Classes'
+
+        # Determines location of first folder relative to this file that 
+        # contains all course material
+        self.default_folder = '../../Classes' 
         
         self.browser = self.login() 
 
-        if not dl:
+        if not dl:  
+        # Compiles list of all courses and courses matching the quarter and year                   
             self.all_courses, self.courses = self.compile_courses()
 
+        # list of lists: [course_id, [prof], [tas], [students]] for each course
+        self.course_info = [] 
 
-        self.course_info = [] # list of lists: course_id, prof, tas, students
-        self.course_material_dict = {} # file path 
+        # file path dictionary. Generates path when calling 'make_dirs' function
+        self.course_material_dict = {} 
 
-        # 'list of dicts, {'owner', 'course', 'heading', 'description', 'body', 
-        # 'path', 'format'}; format is in the form of 'application/...'
+        # 'list of dicts, {'course', 'heading', 'description', 'body', 'path', 
+        # 'format'} for each file; 'format' is in the form of 'application/...'
         self.file_list = [] 
    
 
     def login(self):
+        '''Logs in using a headless webdriver, returns 'browser', a webdriver
+        object; it is essentially a virtual browser'''
         
+        # Refer to citation on top; used Selenium API doc extensively
         browser = webdriver.PhantomJS(executable_path=os.path.abspath(PHANTOMJS_PATH))
         browser.set_window_size(1100, 660)
         browser.implicitly_wait(5)
@@ -101,17 +112,22 @@ class Courses:
 
 
     def compile_courses(self): 
+        '''Returns a list of all of the user's courses, and a list of the user's
+        courses matching the specified quarter and year'''
 
         all_courses = []
         courses = []
         
-        if self.quarter == []:
+        if self.quarter == []: # no quarter specified
             self.quarter = ''
 
-        if 'Welcome' not in self.browser.title:
+        if 'Welcome' not in self.browser.title: # Invalid login
             return None, None
 
-        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course List Module Settings"]').click()
+        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course \
+        List Module Settings"]').click() # Clicks the settings 'gear' on Chalk
+
+
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
 
@@ -198,7 +214,7 @@ class Courses:
                     else:
                             announcement_text = ''
                 if announcement_text != '':
-                    self.download_text('Announcements', announcement_text, '{:}/Announcements/'.format(str(check_folder_name(course))))
+                    self.download_text('Announcements', announcement_text, '{:}/Announcements'.format(str(check_folder_name(course))))
 
             elif item_name == 'Send Email':
                 list_of_tas = []
