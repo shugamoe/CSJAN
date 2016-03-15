@@ -657,13 +657,16 @@ def student_classes_plot(request, cnet_id, course_ids):
     labels_dictionary = {}
 
     for identifier in course_ids:
-        students_in_course = [identifier, set(Student.objects.filter(courses_in__id=identifier))]
+        students_in_course = [identifier, Student.objects.filter(courses_in__id=identifier)]
         class_lists.append(students_in_course)
 
     if len(class_lists) > 0:
         first_set = set(class_lists[0])
     else:
-        return plt.plot()
+        plt.plot()
+        plt.label = "No common students"
+        plt.savefig(response)
+        return response
     for course in class_lists:
         first_set = course[1] & first_set
 
@@ -672,7 +675,7 @@ def student_classes_plot(request, cnet_id, course_ids):
         plt.plot()
         plt.label = "No common students"
         plt.savefig(response)
-        return plt
+        return response
     else:
         for person in first_set:
             G.add_node(person.id)
