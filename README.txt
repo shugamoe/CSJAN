@@ -3,15 +3,21 @@ Whiteboard ReadMe
 Before starting whiteboard please make sure to install all modules.  
 
 1. Open "Software & Updates" and make sure the following boxes
-   are checked: 
+   are checked under the "Updates" tab:
 
     Important Security Updates
     Recommended Updates
     Unsupported Updates
 
+    1.1 Also under "Software & Updates" make sure "Canonical-supported free and
+        open-source software (main)" is checked under the "Ubuntu Software" tab.
+
 2. Run the following command from the CSJAN directory:
 
     sudo ./get_modules.sh
+
+    2.1 The script might hit you with some y/n prompts, hit yes.  The script
+        will also seem to stop working ina  few places, be patient.
 
 3. After, navigate to CSJAN/pdfminer-master and run the 
    following command:
@@ -24,7 +30,8 @@ installed.  Navigate to CSJAN/Whiteboard and run the following command:
 
     python manage.py runserver
 
-The server should now be running.  Open Firefox or other internet browser and navigate to:
+The server should now be running.  Open Firefox or other internet browser and 
+navigate to:
 
  localhost:8000/start 
 

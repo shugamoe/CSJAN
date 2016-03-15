@@ -1,7 +1,8 @@
 #!/bin/bash  
  
 # Bash script for installing most modules for Whiteboard.
- 
+
+sudo apt-get clean
 sudo apt-get update
 sudo python3 -m pip install Django==1.8.8
 sudo python3 -m pip install django-haystack
