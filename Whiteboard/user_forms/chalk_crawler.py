@@ -215,75 +215,127 @@ class Courses:
             course_list = [course]
             self.course_material_dict[check_folder_name(course)] = {}
             material_dict = self.course_material_dict[check_folder_name(course)]
-            for course_link in self.browser.find_element_by_id('div_25_1').find_elements_by_tag_name('li'):
+
+            for course_link in self.browser.find_element_by_id('div_25_1').\
+            find_elements_by_tag_name('li'):
+
                 if course in course_link.text:
-                    professor = course_link.find_element_by_class_name('name').text
+                    # Adds [prof] on to course list
+                    professor = course_link.find_element_by_class_name('name').\
+                    text
+                    print(professor)
                     prof_cnt = professor.count(';')
+                    print(prof_cnt)
+                    print(profess.split('; ')[:prof_cnt])
                     course_list.append(professor.split('; ')[:prof_cnt])
 
-            self.build_course_dict(self.course_info, material_dict, professor, course, course_list) 
+            self.build_course_dict(self.course_info, material_dict, professor, \
+            course, course_list) # Collects course list and file list info
 
         return None
 
 
-    def build_course_dict(self, course_info, material_dict, professor, course, course_list):
+    def build_course_dict(self, course_info, material_dict, professor, course, \
+    course_list):
+    '''Crawls a course in Chalk to download course materials into the correct
+    path in the local directory, and to compile a list of dictionaries with 
+    information of each file'''
 
+        # Click course link on Chalk home page
         self.browser.find_element_by_partial_link_text(course).click()
         
-        for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
-            item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
+        for item_index in range(len(self.browser.find_element_by_id(
+        'courseMenuPalette_contents').find_elements_by_tag_name('li'))):
+            # For each item on the left panel (i.e. Announcements, Syllabus...)
+            item = self.browser.find_element_by_id('courseMenuPalette_contents'
+            ).find_elements_by_tag_name('li')[item_index]
             item_name = item.text
+
             if item_name == 'Announcements':
-                material_dict[item.text] = {}
-                make_dirs(self.course_material_dict, self.default_folder)  
+                material_dict[item_name] = {}
+                # Generate item_name folder
+                make_dirs(self.course_material_dict, self.default_folder)   
 
-                item.find_element_by_tag_name('a').click()              
+                item.find_element_by_tag_name('a').click() 
+
                 if self.check_id_exists('content_listContainer'): 
-
-                    content_list_container = self.browser.find_element_by_id('content_listContainer')
+                    content_list_container = self.browser.find_element_by_id(
+                    'content_listContainer')
                     announcement_text = ''
 
-                    for file_or_folder in content_list_container.find_elements_by_tag_name('li'):
-                        announcement_text += file_or_folder.text + '\n\n' 
+                    # Adds text of each icon on to announcement_text
+                    for unit in content_list_container.\
+                    find_elements_by_tag_name('li'):
+                        announcement_text += unit.text + '\n\n' 
 
-                else:
+                else: # if no container exists
                     content = self.browser.find_element_by_id('content')
+                    # if announcements is a list of text
                     if self.check_id_exists('announcementList'):
-                        announcement_text = content.find_element_by_id('announcementList').text
+                        announcement_text = content.find_element_by_id(
+                        'announcementList').text
+
                     else:
-                            announcement_text = ''
+                            announcement_text = '' # No announcements
+
                 if announcement_text != '':
-                    self.download_text('Announcements', announcement_text, '{:}/Announcements'.format(str(check_folder_name(course))))
+
+                    self.download_text('Announcements', announcement_text, \
+                    '{:}/Announcements'.format(str(check_folder_name(course))))
+
 
             elif item_name == 'Send Email':
                 list_of_tas = []
                 list_of_students = []
                 item.find_element_by_tag_name('a').click()
                 
-                self.browser.find_element_by_link_text('All Teaching Assistant Users').click()
+                self.browser.find_element_by_link_text(
+                'All Teaching Assistant Users').click()
                 
+                # If TA's present and available
                 if not self.check_id_exists('inlineReceipt_bad'):
-                    list_of_tas = self.browser.find_element_by_id('stepcontent1').find_elements_by_tag_name('li')[0].text[3:].split('; ')
+                    list_of_tas = self.browser.find_element_by_id(
+                    'stepcontent1').find_elements_by_tag_name('li')[0].\
+                    text[3:].split('; ')
+
                 course_list.append(list_of_tas)
-                self.browser.execute_script("window.history.go(-1)")
+                # Navigate browser back one page
+                self.browser.execute_script("window.history.go(-1)") 
                 
                 if self.check_link_text_exists('Select Users'):
-                    self.browser.find_element_by_link_text('Select Users').click()
-                    list_of_students_web_elements = self.browser.find_element_by_id('stepcontent1').find_element_by_name('USERS_AVAIL').find_elements_by_tag_name('option')
+                    self.browser.find_element_by_link_text('Select Users').\
+                    click()
+
+                    list_of_students_web_elements = self.browser.\
+                    find_element_by_id('stepcontent1').find_element_by_name(
+                    'USERS_AVAIL').find_elements_by_tag_name('option')
+
                     prof_cnt = professor.count(';')
+
                     for student_web_element in list_of_students_web_elements:
                         for professor in professor.split('; ')[:prof_cnt]:
-                            prof_str = professor.split(' ')[1] + ', ' + professor.split(' ')[0]
-                            if student_web_element.text not in prof_str and student_web_element.text not in list_of_tas and 'PreviewUser' not in student_web_element.text:
+                            professor.replace(';', '')
+                            prof_str = professor.split(' ')[1] + ', ' + \
+                            professor.split(' ')[0]
+
+                            # excluding profs and TA's from list of students
+                            if student_web_element.text not in prof_str and \
+                            student_web_element.text not in list_of_tas and \
+                            'PreviewUser' not in student_web_element.text:
+
                                 list_of_students.append(student_web_element.text)
+                    # Navigate browser back one page
                     self.browser.execute_script("window.history.go(-1)")
+
                 course_list.append(list_of_students)
                 self.course_info.append(course_list)
+
 
             elif item_name not in ['Home', 'Announcements', 'Send Email', \
                 'My Grades', 'Discussion Board', 'Discussions', \
                 'Library Course Reserves', 'Tools', 'Groups', 'Calendar']:
-                    component = check_folder_name(item.text)
+
+                    component = check_folder_name(item_name)
                     material_dict[component] = {}
                     make_dirs(self.course_material_dict, self.default_folder)
                     item.find_element_by_tag_name('a').click()
