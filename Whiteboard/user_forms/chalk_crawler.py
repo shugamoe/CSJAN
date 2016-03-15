@@ -135,6 +135,7 @@ class Courses:
             all_courses.append(course_web_element.text[20:]) 
 
             if self.quarter != '':
+
                 for quarter in self.quarter:
                     # Check if quarter and year match by seeing if '(<quarter> 
                     # <year>)' is contained in course web element where quarter
@@ -147,21 +148,38 @@ class Courses:
 
                         # Exclude courses with materials that are unavailable
                         if 'Unavailable' not in course_web_element.text:
+                            # Clicks checkboxes corresponding to name, id, and 
+                            # instructor; these will show up in the user's 
+                            # Chalk home page
                             courses.append(course_web_element.text[20:])
-                            course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
+
+                            course_name_box = self.browser.\
+                            find_element_by_xpath('//*[@title="{:}'.format(
+                            course_web_element.text) + ': Course Name"]')
+
                             course_name_box.click()
-                            course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
+
+                            course_id_box = self.browser.\
+                            find_element_by_xpath('//*[@title="{:}'.format(
+                            course_web_element.text) + ': Course ID"]')
+                            
                             course_id_box.click()
-                            course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
+                            
+                            course_instructor_box = self.browser.\
+                            find_element_by_xpath('//*[@title="{:}'.format(
+                            course_web_element.text) + ': Instructors"]')
+
                             course_instructor_box.click()
 
-            else:
+            # if no quarter is specified, match courses with specified year
+            else: 
                 if '{:})'.format(str(self.year)[2:]) in \
                     course_web_element.text.lower(): 
 
                     if 'Unavailable' not in course_web_element.text:
                         courses.append(course_web_element.text[20:])
-                        course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
+                        course_name_box = self.browser.find_element_by_xpath(
+                            '//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
                         course_name_box.click()
                         course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
                         course_id_box.click()
@@ -365,7 +383,7 @@ class Courses:
 
     def download_text(self, filename, text, path):
 
-        if os.path.exists('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)):
+        if os.path.exists(os.path.abspath('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename))):
             print('{:}'.format(filename) + ' already exists. Updating file.')
             os.remove('{:}/{:}.txt'.format(self.default_folder, path, filename))
 
