@@ -175,7 +175,7 @@ def get_cnet_id(request):
             {'error_message': "You didn't enter a CNET ID"})
         else:
             # Quickly check to see if a student with that CNET ID exists.
-            test = Student.objects.filter(cnet_id = cnet_id).count()
+            test = Session.objects.filter(cnet_id = cnet_id).count()
             if test == 0: # Return error if no info for CNET ID exists.
                 return render(request, 'user_forms/get_cnet_id.html',
                     {'does_not_exist': True, 'wrong_cnet': cnet_id})
