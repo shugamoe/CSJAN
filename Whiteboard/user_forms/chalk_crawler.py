@@ -317,7 +317,7 @@ class Courses:
                     for student_web_element in list_of_students_web_elements:    
                         # excluding profs and TA's from list of students
                         if student_web_element.text not in compare_profs \
-                        and student_web_element.text not in list_of_tas and\
+                        and student_web_element.text not in list_of_tas and \
                         'PreviewUser' not in student_web_element.text:
                             
                             list_of_students.append(student_web_element.text)
@@ -382,8 +382,8 @@ class Courses:
                                     # if icon is a file
                                     elif 'file_on' in img.get_attribute('src'):
                                         folder_empty = False
-                                        unit_name = unit.find_element_by_tag_\
-                                        name('a').text
+                                        unit_name = unit.find_element_by_tag_name(
+                                        'a').text
 
                                         file_url = unit.find_element_by_tag_name(
                                         'a').get_attribute('href')
