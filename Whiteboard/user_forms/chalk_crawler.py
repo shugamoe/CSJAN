@@ -140,8 +140,8 @@ class Courses:
                     # Check if quarter and year match by seeing if '(<quarter> 
                     # <year>)' is contained in course web element where quarter
                     # can just be the first three characters
-                    if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
-                    in course_web_element.text.lower() or \
+                    if '({:} '.format(quarter.lower()) + '{:})'.format(
+                    self.year)[2:] in course_web_element.text.lower() or \
                     '({:} '.format(quarter.lower()[:3]) + \
                     '{:})'.format(self.year)[2:] in \
                     course_web_element.text.lower(): 
@@ -181,16 +181,28 @@ class Courses:
                     if 'Unavailable' not in course_web_element.text:
                         # Clicks checkboxes...         
                         courses.append(course_web_element.text[20:])
+
                         course_name_box = self.browser.find_element_by_xpath(
-                            '//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
+                        '//*[@title="{:}'.format(course_web_element.text) + \
+                        ': Course Name"]')
+
                         course_name_box.click()
-                        course_id_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course ID"]')
+
+                        course_id_box = self.browser.find_element_by_xpath(
+                        '//*[@title="{:}'.format(course_web_element.text) + \
+                        ': Course ID"]')
+
                         course_id_box.click()
-                        course_instructor_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Instructors"]')
+
+                        course_instructor_box = self.browser.
+                        find_element_by_xpath('//*[@title="{:}'.format(
+                        course_web_element.text) + ': Instructors"]')
+                        
                         course_instructor_box.click()
 
         submit_button = self.browser.find_element_by_name('top_Submit')
         submit_button.click()
+
         return all_courses, courses
 
 
@@ -388,7 +400,7 @@ class Courses:
 
         if os.path.exists(os.path.abspath('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename))):
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove(os.path.abspath('{:}/{:}.txt'.format(self.default_folder, path, filename)))
+            os.remove(os.path.abspath('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)))
 
         with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename), 'w') as f:
             f.write(text)
