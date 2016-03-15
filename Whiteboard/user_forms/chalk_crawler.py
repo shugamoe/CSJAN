@@ -594,7 +594,6 @@ class Courses:
         check_folder_name(unit_name))
 
         file_dict['path'] = os.path.abspath(destination)
-        print(file_dict['path'])
         delete_file_dict = False
 
         if self.need_to_update(r, file_dict):
@@ -607,7 +606,8 @@ class Courses:
             # Obtain body of file depending on file format
             if 'pdf' in file_dict['format']:
                 try:
-                    file_dict['body'] = convert_pdf(file_dict['path'])  
+                    file_dict['body'] = convert_pdf(file_dict['path'].replace(
+                    "'", ""))  
                 except:
                     file_dict['body'] = ''         
             elif 'txt' in file_dict['format']:
