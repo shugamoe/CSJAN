@@ -15,7 +15,7 @@ class Session(models.Model):
     Track the current download session of the user.
     '''
     cnet_id = models.CharField(max_length = 42)
-    date = models.DateTimeField('date published', default = timezone.now)
+    date = models.DateTimeField('date', default = timezone.now)
     year = models.IntegerField(default=datetime.date.today().year)
     people_only = models.BooleanField(default = False)
 
