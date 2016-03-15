@@ -606,6 +606,8 @@ class Courses:
             # Obtain body of file depending on file format
             if 'pdf' in file_dict['format']:
                 try:
+                    # prevent unterminated quote string due to apostrophe in 
+                    # file name
                     file_dict['body'] = convert_pdf(file_dict['path'].replace(
                     "'", ""))  
                 except:
