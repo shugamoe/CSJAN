@@ -417,6 +417,7 @@ class Courses:
                                             find_elements_by_tag_name('a'):    
 
                                                 unit_name = download_file.text
+
                                                 file_url = download_file.\
                                                 get_attribute('href')
 
@@ -593,7 +594,8 @@ class Courses:
         destination = '{:}/{:}/{:}'.format(self.default_folder, path, \
         check_folder_name(unit_name))
 
-        file_dict['path'] = os.path.abspath(destination)
+        # Deleting apostrophes to prevent unterminated quote strings
+        file_dict['path'] = os.path.abspath(destination).replace("'", "")
         delete_file_dict = False
 
         if self.need_to_update(r, file_dict):
@@ -606,10 +608,7 @@ class Courses:
             # Obtain body of file depending on file format
             if 'pdf' in file_dict['format']:
                 try:
-                    # prevent unterminated quote string due to apostrophe in 
-                    # file name
-                    file_dict['body'] = convert_pdf(file_dict['path'].replace(
-                    "'", ""))  
+                    file_dict['body'] = convert_pdf(file_dict['path'])  
                 except:
                     file_dict['body'] = ''         
             elif 'txt' in file_dict['format']:
