@@ -627,8 +627,7 @@ class Courses:
         else: 
             print('{:} already up to date'.format(unit_name))
             delete_file_dict = True  
-
-        file_dict['path'] = file_dict['path'].replace("'", "")          
+        
 
         return text_file, delete_file_dict
 
