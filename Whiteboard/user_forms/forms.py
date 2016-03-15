@@ -22,13 +22,10 @@ class SessionForm(ModelForm):
                           initial=datetime.now().year, required = False)
     cnet_pw = forms.CharField(label='CNET Password', widget=forms.PasswordInput)
     cnet_id = forms.CharField(label='CNET ID')
-    people_only = forms.BooleanField(label='Retrieve Demographic Information'\
-        ' Only',
-        required=False)
 
     class Meta:
         model = Session
-        fields = ['cnet_id','cnet_pw', 'quarter', 'year', 'people_only']
+        fields = ['cnet_id','cnet_pw', 'quarter', 'year']
 
 
 # Dynamic form for filtering the list of students on the individual course 
