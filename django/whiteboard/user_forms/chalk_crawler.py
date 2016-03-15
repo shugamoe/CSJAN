@@ -345,7 +345,7 @@ class Courses:
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
         
         file_dict['format'] = r.headers.get('content-type')
-        destination = '{:}/{:}/{:}'.format(self.default_folder, path, unit_name)
+        destination = '{:}/{:}/{:}'.format(self.default_folder, path, check_folder_name(unit_name))
         file_dict['path'] = os.path.abspath(destination)
         if self.need_to_update(r, file_dict):
             print('downloading {:}'.format(unit_name))
