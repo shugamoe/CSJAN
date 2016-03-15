@@ -5,7 +5,7 @@
 apt-get update
 python3 -m pip install Django==1.8.8
 python3 -m pip install django-haystack
-pip install --user Whoosh
+python3 -m pip install Whoosh
 apt-get build-dep python-matplotlib
 apt-get install python3-matplotlib
 python3 -m pip install --user selenium
