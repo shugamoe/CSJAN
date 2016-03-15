@@ -3,12 +3,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 
 
-<<<<<<< HEAD
-from .forms import SessionForm, FilterMajorForm
-=======
 from .forms import SessionForm, FilterMajorForm, ClassFilesSearchForm, \
 SelectCoursesForm
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
 from .models import Session, Course, Student, Instructor, Assistant, File
 from django.views.generic import ListView, DetailView
 
@@ -315,10 +311,8 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
 
     # This command ensures that the search indexes for Haystack are updated.
     # (So you can search the latest files.)
-<<<<<<< HEAD
-=======
+
     # http://stackoverflow.com/questions/6250970/run-custom-admin-command-from-view
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
     call_command('update_index')
 
     return None
@@ -364,11 +358,6 @@ def a_or_u_files(file_dicts):
 
 def a_or_u_people(people_dicts, model_used, course_name):
     '''
-<<<<<<< HEAD
-    This function takes in a list of dictionaries that can be used to create
-    or update instances of the model_used.  The course_name is used to link 
-    these instances to the course that they are a part of.
-=======
     This function takes in a list of people_dicts, where each element is a 
     a dictionary that can be directly converted to an instance of the model_used
     class.
@@ -386,7 +375,6 @@ def a_or_u_people(people_dicts, model_used, course_name):
 
     Returns:
         None
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
     '''
     course_object = Course.objects.get(name = course_name)
 
@@ -468,13 +456,10 @@ class CourseDetail(DetailView):
 
         # Handle the filter by major form.
         if self.request.method == 'GET':
-<<<<<<< HEAD
             form = FilterMajorForm(self.request.GET, **{'majors_list': 
                 majors_list})
-=======
             form = FilterMajorForm(self.request.GET, 
                 **{'majors_list': majors_list})
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
             if form.is_valid():
                 majors = form.cleaned_data['major_filters']
             else: 
@@ -491,14 +476,7 @@ class CourseDetail(DetailView):
         context['assistants'] = Assistant.objects.filter(courses_in__id = 
         course_id)
 
-<<<<<<< HEAD
-        # This will retrieve the user's files.
         context['files'] = File.objects.filter(course__id = course_id)
-        context['cnet_id'] = self.kwargs['cnet_id']
-=======
-        # Retrieve all files for this class.
-        context['files'] = File.objects.filter(course__id = course_id)
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
 
         return context
 
@@ -571,23 +549,12 @@ class SearchClassFilesView(SearchView):
 
     def get_queryset(self):
         queryset = super(SearchClassFilesView, self).get_queryset()
-<<<<<<< HEAD
-        print('initial queryset has', queryset.count(), 'results')
-        cnet_id = self.kwargs['cnet_id']
-        course_id = self.kwargs['course_id']
-        # further filter queryset based on some set of criteria
-
-        self.sqs = queryset.filter(course__id = course_id)
-        print(self.sqs.count(), '(num_results)')
-        return self.sqs
-=======
         course_id = self.kwargs['course_id']
 
         # Ensure that we are only searching through files pertaining to a 
         # certain course.
         sqs = queryset.filter(classpk = str(course_id))
         return sqs
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
 
     def get_context_data(self, *args, **kwargs):
         context = super(SearchClassFilesView, self).get_context_data(*args, 
@@ -598,12 +565,9 @@ class SearchClassFilesView(SearchView):
         context['course_name'] = Course.objects.get(id = course_id).name
         return context
 
-<<<<<<< HEAD
 
-def get_courses_post(request):
-=======
 def view_file(request, file_id, course_id, query):
->>>>>>> f384d0a7c655203404acd4b251544e64a9e05893
+
     '''
     This view deploys when the user views a file.  The webpage rendered displays
     information about the file.  If the user is viewing the file from the search
