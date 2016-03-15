@@ -317,7 +317,7 @@ class Courses:
                     for student_web_element in list_of_students_web_elements:    
                         # excluding profs and TA's from list of students
                         if student_web_element.text not in compare_profs \
-                        and student_web_element.text not in list_of_tas and\
+                        and student_web_element.text not in list_of_tas and \
                         'PreviewUser' not in student_web_element.text:
                             
                             list_of_students.append(student_web_element.text)
@@ -382,14 +382,14 @@ class Courses:
                                     # if icon is a file
                                     elif 'file_on' in img.get_attribute('src'):
                                         folder_empty = False
-                                        unit_name = unit.find_element_by_tag_\
-                                        name('a').text
+                                        unit_name = unit.find_element_by_tag_name(
+                                        'a').text
 
-                                        file_url = unit.find_element_by_tag_\
-                                        name('a').get_attribute('href')
+                                        file_url = unit.find_element_by_tag_name(
+                                        'a').get_attribute('href')
 
-                                        heading = unit.find_element_by_tag_\
-                                        name('h3').text
+                                        heading = unit.find_element_by_tag_name(
+                                        'h3').text
 
                                         file_dict = {'course': course, \
                                         'heading': heading, 'description': ''}
@@ -413,19 +413,20 @@ class Courses:
                                         folder_empty = False
                                         if self.check_tag_exists_in_web_element(
                                         unit, 'a'): # if download links present
-                                            for download_file in unit.find_\
-                                            elements_by_tag_name('a'):    
+                                            for download_file in unit.\
+                                            find_elements_by_tag_name('a'):    
 
                                                 unit_name = download_file.text
                                                 file_url = download_file.\
                                                 get_attribute('href')
 
-                                                heading = unit.find_element_by_\
-                                                tag_name('h3').text
+                                                heading = unit.\
+                                                find_element_by_tag_name('h3').\
+                                                text
 
                                                 description = ''
-                                                for paragraph in unit.find_\
-                                                elements_by_tag_name('p'):
+                                                for paragraph in unit.\
+                                                find_elements_by_tag_name('p'):
 
                                                     description += paragraph.\
                                                     text + '\n'
@@ -437,8 +438,8 @@ class Courses:
                                                 text_file, delete_file_dict = \
                                                 self.download_file_or_doc(
                                                 unit_name, file_url, \
-                                                download_file, check_folder_\
-                                                name(course) + '/' + component,\
+                                                download_file, check_folder_name(
+                                                course) + '/' + component,\
                                                 file_dict, text_file) 
 
                                                 # if file already exists, delete 
@@ -447,7 +448,8 @@ class Courses:
                                                 if delete_file_dict:
                                                     del file_dict
                                                 else:
-                                                    self.file_list.append(file_dict)
+                                                    self.file_list.append(
+                                                    file_dict)
                         
                         # downloads text for describing each icon
                         if text_file != '': 
@@ -511,8 +513,8 @@ class Courses:
                             file_dict = {'course': course, 'heading': heading, \
                             'description': ''}
 
-                            text_file, delete_file_dict = self.download_file_or\
-                            _doc(unit_name, file_url, inner_unit, path, \
+                            text_file, delete_file_dict = self.download_file_or_doc(
+                            unit_name, file_url, inner_unit, path, \
                             file_dict, text_file)
                             # if file already exists, delete file_dict, else 
                             # append it to file_list     
@@ -697,7 +699,7 @@ class Courses:
 
     def check_xpath_exists(self, xpath):
         '''Check if an xpath exists for a web element'''
-        
+
         try:
             web_element.find_element_by_xpath(xpath)
         except:
