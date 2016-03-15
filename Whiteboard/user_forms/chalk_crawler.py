@@ -77,7 +77,7 @@ class Courses:
         self.default_folder = '../../Classes' 
         
         self.browser = self.login() 
-
+        time.sleep(1)
         if not dl:  
         # Compiles list of all courses and courses matching the quarter and year                   
             self.all_courses, self.courses = self.compile_courses()
@@ -127,11 +127,13 @@ class Courses:
         self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course \
         List Module Settings"]').click() # Clicks the settings 'gear' on Chalk
 
-
+        # course_web_element corresponds to each course 
         for course_web_element in \
             self.browser.find_elements_by_tag_name('strong'):
 
-            all_courses.append(course_web_element.text[20:])
+            # Slice off the first 20 characters of each course id since they 
+            # are unused
+            all_courses.append(course_web_element.text[20:]) 
 
             if self.quarter != '':
                 for quarter in self.quarter:
