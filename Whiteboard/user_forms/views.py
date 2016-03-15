@@ -657,7 +657,7 @@ def student_classes_plot(request, cnet_id, course_ids):
     labels_dictionary = {}
 
     for identifier in course_ids:
-        students_in_course = [identifier, Student.objects.filter(courses_in__id=identifier)]
+        students_in_course = [identifier, Student.objects.filter(courses_in__id=identifier).values_list('cnet_id', flat = True)]
         class_lists.append(students_in_course)
 
     if len(class_lists) > 0:
