@@ -594,6 +594,7 @@ class Courses:
         check_folder_name(unit_name))
 
         file_dict['path'] = os.path.abspath(destination)
+        print(file_dict['path'])
         delete_file_dict = False
 
         if self.need_to_update(r, file_dict):
