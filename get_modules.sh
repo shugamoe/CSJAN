@@ -13,3 +13,5 @@ sudo python3 -m pip install bs4
 cd pdfminer-master
 python2 setup.py install
 cd ../
+cd Whiteboard
+python manage.py flush
