@@ -20,7 +20,7 @@ Before starting whiteboard please make sure to install all modules.
 
 
 Now, all the modules required to run whiteboard should be 
-installed.  Navigate to CSJAN/whiteboard and run the following command:
+installed.  Navigate to CSJAN/Whiteboard and run the following command:
 
     python manage.py runserver
 
@@ -75,7 +75,7 @@ Location of code:
 Code we have written independently (or with some Stackexchange help as is indicated) is contained within:
 
 
-    CSJAN/whiteboard/user_forms
+    CSJAN/Whiteboard/user_forms
 
         views.py
         models.py
@@ -88,7 +88,7 @@ Code we have written independently (or with some Stackexchange help as is indica
         search_indexes.py
         /templates
 
-    CSJAN/whiteboard/whiteboard
+    CSJAN/Whiteboard/whiteboard
 
         urls.py
 
