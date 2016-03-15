@@ -734,6 +734,8 @@ def single_class_plot(request, course_id):
             formatted_dictionary["Other"] += value
 
     for key in formatted_dictionary:
+        if "College:" in key:
+            key = key[9:]
         pie_names.append(key)
         pie_nums.append(formatted_dictionary[key])
 
