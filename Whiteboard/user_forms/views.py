@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import random
 import re
 from .chalk_crawler import get_courses, dl_specific_courses 
-from .directory_crawler_edit import crawl_multiple_classes as get_demog_dicts
+from .session import crawl_multiple_classes as get_demog_dicts
 from .graph_class import graph_class 
 
 from django.core.management import call_command
@@ -24,10 +24,6 @@ from haystack.generic_views import SearchView
 from haystack.forms import SearchForm
 import subprocess
 import os
-from django.core.exceptions import ObjectDoesNotExist
-
-# import folders 
-# Create your views here.
 
 TEST_COURSES_0 = ['STAT 244', 'ENGL 169']
 TEST_COURSES_1 = ['CMSC 122', 'MATH 195']
@@ -58,6 +54,8 @@ def get_chalk_info(request):
             print(courses_to_confirm, 'COURSES TO CONFIRM')
             if courses_to_confirm[0] == None: # Invalid CNET ID OR PW
                 error_message = courses_to_confirm[1]
+                return render(request, 'user_forms/dl_query.html', {'form': form, 
+                        'error_message': error_message})
             else:
                 # Clever trick I found on StackExchange to send information like
                 # pk's, and other information through the url.
@@ -280,7 +278,7 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     # of the file model in the database (to allow for search functionality and
     # opening of the file from the database.)
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
-     cnet_pw, session_object.people_only)
+     cnet_pw)
 
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
