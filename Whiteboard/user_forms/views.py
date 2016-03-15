@@ -175,7 +175,7 @@ def get_cnet_id(request):
             {'error_message': "You didn't enter a CNET ID"})
         else:
             # Quickly check to see if a student with that CNET ID exists.
-            test = Student.objects.filter(cnet_id = cnet_id).count()
+            test = Session.objects.filter(cnet_id = cnet_id).count()
             if test == 0: # Return error if no info for CNET ID exists.
                 return render(request, 'user_forms/get_cnet_id.html',
                     {'does_not_exist': True, 'wrong_cnet': cnet_id})
@@ -376,9 +376,6 @@ def a_or_u_people(people_dicts, model_used, course_name):
     course_object = Course.objects.get(name = course_name)
 
     for ppl_dict in people_dicts:
-        # temporary fix 
-        if model_used == Assistant:
-            del ppl_dict['cnet_id']
         # Directory Crawler isn't robust enough to conform to models :(.
 
         try:
@@ -415,7 +412,7 @@ class CourseList(ListView):
 
         # Only want to view courses that the user is in.
         return Course.objects.filter(sessions__cnet_id = cnet_id)\
-             .order_by('dept')
+             .order_by('dept').distinct()
 
 
     def get_context_data(self, *args, **kwargs):
