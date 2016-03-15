@@ -1,5 +1,6 @@
 # Chalk_Crawler - Andy Zhu
-# Citation: http://selenium-python.readthedocs.org/api.html
+# Selenium Citation: http://selenium-python.readthedocs.org/api.html
+# Requests Citation: http://docs.python-requests.org/en/master/
 
 from selenium import webdriver
 try:
@@ -16,7 +17,6 @@ import datetime
 PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
 if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
     PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
-
 
 def create_object(input_dict):
     '''Creates and outputs Course object given an input dict of 'cnet_id', 
@@ -35,7 +35,7 @@ def get_courses(input_dict):
     a = create_object(input_dict)
 
     if a.courses == None: # Accounting for invalid logins
-        return None, 'invalid CNET ID' 
+        return None, 'invalid CNET ID or Password' 
 
     elif a.courses == []: # Accounting for no courses
         return None, 'There are no courses for {:}, {:}'.format(a.quarter, \
@@ -334,6 +334,7 @@ class Courses:
 
                     component = check_folder_name(item_name)
                     material_dict[component] = {}
+                    folder_empty = True
                     # Generates item_name folder in folder path
                     make_dirs(self.course_material_dict, self.default_folder)
                     item.find_element_by_tag_name('a').click()
@@ -350,6 +351,7 @@ class Courses:
 
                         for unit_index in range(num_of_items):
                             time.sleep(1) # Wait for element to be found
+
                             # each unit on the content panel
                             unit = self.browser.find_element_by_id(
                             'content_listContainer').find_elements_by_tag_name(
@@ -360,97 +362,196 @@ class Courses:
                                 
                                 img = unit.find_element_by_tag_name('img')
                                 if img.get_attribute('class') == 'item_icon':
-
+                                    # if icon is a folder
                                     if 'folder_on' in img.get_attribute('src'):   
-                                        folder_name = check_folder_name(unit.find_element_by_tag_name('a').text)
-                                        material_dict[component][folder_name] = {}
-                                        make_dirs(self.course_material_dict, self.default_folder)
-                                        self.gen_folder(unit, '{:}/{:}/{:}'.format(check_folder_name(course), component, folder_name), material_dict[component][folder_name], course)
+                                        folder_empty = False
+                                        folder_name = check_folder_name(
+                                        unit.find_element_by_tag_name('a').text)
+                                        
+                                        material_dict[component][folder_name] \
+                                        = {}
+                                        # Generate new folder
+                                        make_dirs(self.course_material_dict, \
+                                        self.default_folder) 
+
+                                        self.gen_folder(unit, '{:}/{:}/{:}'.\
+                                        format(check_folder_name(course), \
+                                        component, folder_name), material_dict[
+                                        component][folder_name], course)
                                     
+                                    # if icon is a file
                                     elif 'file_on' in img.get_attribute('src'):
-                                        unit_name = unit.find_element_by_tag_name('a').text
-                                        file_url = unit.find_element_by_tag_name('a').get_attribute('href')
-                                        heading = unit.find_element_by_tag_name('h3').text
-                                        file_dict = {'course': course, 'heading': heading, 'description': ''}
-                                        text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, unit, check_folder_name(course) + '/' + component, file_dict, text_file)
+                                        folder_empty = False
+                                        unit_name = unit.find_element_by_tag_\
+                                        name('a').text
+
+                                        file_url = unit.find_element_by_tag_\
+                                        name('a').get_attribute('href')
+
+                                        heading = unit.find_element_by_tag_\
+                                        name('h3').text
+
+                                        file_dict = {'course': course, \
+                                        'heading': heading, 'description': ''}
+
+                                        text_file, delete_file_dict = self.\
+                                        download_file_or_doc(unit_name, \
+                                        file_url, unit, check_folder_name(
+                                        course) + '/' + component, \
+                                        file_dict, text_file)
+                                        
+                                        # if file already exists, delete 
+                                        # file_dict, else append it to file_list
                                         if delete_file_dict:
                                             del file_dict
                                         else:
                                             self.file_list.append(file_dict)
 
-                                    elif 'document_on' in img.get_attribute('src'):
-                                        if self.check_tag_exists_in_web_element(unit, 'a'):
-                                            for download_file in unit.find_elements_by_tag_name('a'):                                             
+                                    # if icon is a document with download links
+                                    elif 'document_on' in img.get_attribute(
+                                    'src'):
+                                        folder_empty = False
+                                        if self.check_tag_exists_in_web_element(
+                                        unit, 'a'): # if download links present
+                                            for download_file in unit.find_\
+                                            elements_by_tag_name('a'):    
+
                                                 unit_name = download_file.text
-                                                file_url = download_file.get_attribute('href')
-                                                heading = unit.find_element_by_tag_name('h3').text
+                                                file_url = download_file.\
+                                                get_attribute('href')
+
+                                                heading = unit.find_element_by_\
+                                                tag_name('h3').text
+
                                                 description = ''
-                                                for paragraph in unit.find_elements_by_tag_name('p'):
-                                                    description += paragraph.text + '\n'
-                                                file_dict = {'course': course, 'heading': heading, 'description': description}
-                                                text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, download_file, check_folder_name(course) + '/' + component, file_dict, text_file)      
+                                                for paragraph in unit.find_\
+                                                elements_by_tag_name('p'):
+
+                                                    description += paragraph.\
+                                                    text + '\n'
+
+                                                file_dict = {'course': course, \
+                                                'heading': heading, \
+                                                'description': description}
+
+                                                text_file, delete_file_dict = \
+                                                self.download_file_or_doc(
+                                                unit_name, file_url, \
+                                                download_file, check_folder_\
+                                                name(course) + '/' + component,\
+                                                file_dict, text_file) 
+
+                                                # if file already exists, delete 
+                                                # file_dict, else append it to 
+                                                # file_list     
                                                 if delete_file_dict:
                                                     del file_dict
                                                 else:
                                                     self.file_list.append(file_dict)
                         
-                        if text_file != '':
-                            self.download_text('descriptions', text_file, '{:}/{:}/'.format(str(check_folder_name(course)), str(check_folder_name(item_name)))) 
+                        # downloads text for describing each icon
+                        if text_file != '': 
+                            self.download_text('descriptions', text_file, \
+                            '{:}/{:}/'.format(str(check_folder_name(course)), \
+                            str(check_folder_name(item_name)))) 
                     
-                    if material_dict[component] == {}:
+                    # deletes folder if empty
+                    if folder_empty:
                         del material_dict[component]                 
 
         make_dirs(self.course_material_dict, self.default_folder)
-        self.browser.find_element_by_id('My Chalk').find_element_by_tag_name('a').click()
+
+        # Go back to Chalk Home Page
+        self.browser.find_element_by_id('My Chalk').find_element_by_tag_name(
+        'a').click()
   
         return material_dict
 
 
     def gen_folder(self, unit, path, folder_dict, course): 
+        '''Generate a folder and perform operations within that folder'''
+
         unit.find_element_by_tag_name('a').click() 
         if self.check_id_exists('content_listContainer'):
-            num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+            num_of_items = len(self.browser.find_element_by_id(
+            'content_listContainer').find_elements_by_tag_name('li'))
+            
             text_file = ''
             for unit_index in range(num_of_items):
-                inner_unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
+                inner_unit = self.browser.find_element_by_id(
+                'content_listContainer').find_elements_by_tag_name('li')\
+                [unit_index]
+
                 if self.check_tag_exists_in_web_element(inner_unit, 'img'):
                     img = inner_unit.find_element_by_tag_name('img')
                     if img.get_attribute('class') == 'item_icon':
+                        # if icon is a folder
                         if 'folder_on' in img.get_attribute('src'):
-                            folder_name = check_folder_name(inner_unit.find_element_by_tag_name('a').text)
+                            folder_name = check_folder_name(inner_unit.\
+                            find_element_by_tag_name('a').text)
+
                             folder_dict[folder_name] = {}
-                            make_dirs(self.course_material_dict, self.default_folder)
-                            self.gen_folder(inner_unit, path + '/{:}'.format(folder_name), folder_dict[folder_name], course)
+                            make_dirs(self.course_material_dict, \
+                            self.default_folder)
+                            # Recursively generate folders within folders
+                            self.gen_folder(inner_unit, path + '/{:}'.format(
+                            folder_name), folder_dict[folder_name], course)
 
-
+                        # if icon is a file
                         elif 'file_on' in img.get_attribute('src'):
-                            unit_name = inner_unit.find_element_by_tag_name('a').text
-                            file_url = inner_unit.find_element_by_tag_name('a').get_attribute('href')
-                            heading = inner_unit.find_element_by_tag_name('h3').text
-                            file_dict = {'course': course, 'heading': heading, 'description': ''}
-                            text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, inner_unit, path, file_dict, text_file)
+                            unit_name = inner_unit.find_element_by_tag_name(
+                            'a').text
+
+                            file_url = inner_unit.find_element_by_tag_name(
+                            'a').get_attribute('href')
+
+                            heading = inner_unit.find_element_by_tag_name(
+                            'h3').text
+
+                            file_dict = {'course': course, 'heading': heading, \
+                            'description': ''}
+
+                            text_file, delete_file_dict = self.download_file_or\
+                            _doc(unit_name, file_url, inner_unit, path, \
+                            file_dict, text_file)
+                            # if file already exists, delete file_dict, else 
+                            # append it to file_list     
                             if delete_file_dict:
                                 del file_dict
                             else:
                                 self.file_list.append(file_dict)
                         
-
+                        # if icon is a document
                         elif 'document_on' in img.get_attribute('src'):
-                            if self.check_tag_exists_in_web_element(inner_unit, 'a'):
-                                for download_file in inner_unit.find_elements_by_tag_name('a'):
+                            if self.check_tag_exists_in_web_element(
+                            inner_unit, 'a'):
+                                for download_file in inner_unit.\
+                                find_elements_by_tag_name('a'):
+
                                     unit_name = download_file.text
-                                    file_url = download_file.get_attribute('href')
+                                    file_url = download_file.get_attribute(
+                                    'href')
                                     heading = inner_unit.find_element_by_tag_name('h3').text
                                     description = ''
+
                                     for paragraph in inner_unit.find_elements_by_tag_name('p'):
                                         description += paragraph.text + '\n'
-                                    file_dict = {'course': course, 'heading': heading, 'description': description}
-                                    text_file, delete_file_dict = self.download_file_or_doc(unit_name, file_url, download_file, path, file_dict, text_file)
+
+                                    file_dict = {'course': course, 'heading': \
+                                    heading, 'description': description}
+
+                                    text_file, delete_file_dict = self.\
+                                    download_file_or_doc(unit_name, file_url, \
+                                    download_file, path, file_dict, text_file)
+                                    # if file already exists, delete 
+                                    # file_dict, else append it to 
+                                    # file_list     
                                     if delete_file_dict:
                                         del file_dict
                                     else:
                                         self.file_list.append(file_dict)
-
+            # download descriptions text describing all headers and descriptions
+            # of each file in a folder if the descriptions text is not empty
             if text_file != '':
                 self.download_text('descriptions', text_file, path) 
 
@@ -460,32 +561,47 @@ class Courses:
 
 
     def download_text(self, filename, text, path):
+        '''Download text of filename to path in the local directory'''
 
-        if os.path.exists(os.path.abspath('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename))):
+        if os.path.exists(os.path.abspath('{:}/{:}/{:}.txt'.format(
+        self.default_folder, path, filename))):
+
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove(os.path.abspath('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)))
+            os.remove(os.path.abspath('{:}/{:}/{:}.txt'.format(
+            self.default_folder, path, filename))) # remove old text file
 
-        with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename), 'w') as f:
+        # download text file
+        with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)\
+        , 'w') as f:
             f.write(text)
 
 
-    def download_file_or_doc(self, unit_name, file_url, unit, path, file_dict, text_file):
-        
+    def download_file_or_doc(self, unit_name, file_url, unit, path, file_dict, \
+    text_file):
+        '''Download file or document unit_name on to path in the local 
+        directory.'''        
 
         s = requests.session()
         s.get(file_url, auth = (self.username, self.password))
+        # reaccess site with authentication since Chalk always returns an error
+        # page; access is obtained only after the second attempt
         r = s.get(file_url, stream = True, auth = (self.username, self.password))  
         
         file_dict['format'] = r.headers.get('content-type')
-        destination = '{:}/{:}/{:}'.format(self.default_folder, path, check_folder_name(unit_name))
+        destination = '{:}/{:}/{:}'.format(self.default_folder, path, \
+        check_folder_name(unit_name))
+
         file_dict['path'] = os.path.abspath(destination)
         delete_file_dict = False
+
         if self.need_to_update(r, file_dict):
             print('downloading {:}'.format(unit_name))
             make_dirs(self.course_material_dict, self.default_folder)
+            # Downloading process
             with open(file_dict['path'], 'wb') as f:  
                 r.raw.decode_content = True
                 f.write(r.content)
+            # Obtain body of file depending on file format
             if 'pdf' in file_dict['format']:
                 try:
                     file_dict['body'] = convert_pdf(file_dict['path'])  
@@ -497,8 +613,13 @@ class Courses:
                  file_dict['body'] = ''
             
             if file_dict['heading'] not in text_file:
-                return text_file + file_dict['heading'] + '\n' + file_dict['description'] + '\n\n', delete_file_dict
-        else:
+                # Adding heading and description of each file 
+                return text_file + file_dict['heading'] + '\n' + \
+                file_dict['description'] + '\n\n', delete_file_dict
+
+        # If the file already exists, the file_dict is deleted and no 
+        # downloading occurs
+        else: 
             print('{:} already up to date'.format(unit_name))
             delete_file_dict = True            
 
@@ -506,20 +627,38 @@ class Courses:
 
 
     def need_to_update(self, r, file_dict):
+        '''Determines whether a file in the local directory needs to be updated
+        based on the modified date of the local file and the download file 
+        online'''
         
-        months = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+        months = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, \
+        'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
         
-        dl_file_mod_date = str(r.headers['last-modified']).split(' ') # ['Mon,', '04', 'Jan', '2016', '21:17:09', 'GMT'] 
-        dl_file_mod_time = dl_file_mod_date[4].split(':')
-        dl_file_mod_date = datetime.datetime(int(dl_file_mod_date[3]), months[dl_file_mod_date[2]], int(dl_file_mod_date[1]), int(dl_file_mod_time[0]), int(dl_file_mod_time[1]), int(dl_file_mod_time[2])) 
+        # Ex. ['Mon,', '04', 'Jan', '2016', '21:17:09', 'GMT'] 
+        dl_file_mod_date = str(r.headers['last-modified']).split(' ') 
+        dl_file_mod_time = dl_file_mod_date[4].split(':') # [Hour, Minute, Sec]
+        # Calling datetime object instance
+        dl_file_mod_date = datetime.datetime(int(dl_file_mod_date[3]), \
+        months[dl_file_mod_date[2]], int(dl_file_mod_date[1]), int(
+        dl_file_mod_time[0]), int(dl_file_mod_time[1]), int(dl_file_mod_time[2])) 
 
+        # File needs to be updated since it doesn't exist in the first place
         if not os.path.exists(file_dict['path']):
             return True
 
-        local_file_mod_date = str(time.ctime(os.path.getmtime(file_dict['path']))).split(' ') # ['Thu', 'Mar', '10', '17:23:59', '2016'] (local timezone) 
-        local_file_mod_time = local_file_mod_date[3].split(':')
-        local_file_mod_date = datetime.datetime(int(local_file_mod_date[4]), months[local_file_mod_date[1]], int(local_file_mod_date[2]), int(local_file_mod_time[0]), int(local_file_mod_time[1]), int(local_file_mod_time[2]))
+        # Ex. ['Thu', 'Mar', '10', '17:23:59', '2016'] 
+        local_file_mod_date = str(time.ctime(os.path.getmtime(file_dict['path']\
+        ))).split(' ') 
+        # [Hour, Minute, Sec]
+        local_file_mod_time = local_file_mod_date[3].split(':') 
+        # Calling datetime object instance
+        local_file_mod_date = datetime.datetime(int(local_file_mod_date[4]), \
+        months[local_file_mod_date[1]], int(local_file_mod_date[2]), int(
+        local_file_mod_time[0]), int(local_file_mod_time[1]), int(
+        local_file_mod_time[2]))
 
+        # If the download file is modified after the local one, it needs to be 
+        # updated
         if dl_file_mod_date > local_file_mod_date:
             return True
 
@@ -527,6 +666,8 @@ class Courses:
 
     
     def check_id_exists(self, id_): 
+        '''Check if an id attribute exists for a web element'''
+
         try:
             self.browser.find_element_by_id(id_)
         except:
@@ -535,6 +676,8 @@ class Courses:
 
 
     def check_link_text_exists(self, link_text): 
+        '''Check if a link text attribute exists for a web element'''
+
         try:
             self.browser.find_element_by_link_text(link_text)
         except:
@@ -543,6 +686,8 @@ class Courses:
 
 
     def check_tag_exists_in_web_element(self, web_element, tag):
+        '''Check if a tag exists for a web element'''
+
         try:
             web_element.find_element_by_tag_name(tag)
         except:
@@ -551,6 +696,8 @@ class Courses:
 
 
     def check_xpath_exists(self, xpath):
+        '''Check if an xpath exists for a web element'''
+        
         try:
             web_element.find_element_by_xpath(xpath)
         except:
