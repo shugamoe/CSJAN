@@ -1,5 +1,0 @@
-{{ object.classpk }}
-{{ object.heading }}
-{{ object.body }}
-{{ object.description }}
-

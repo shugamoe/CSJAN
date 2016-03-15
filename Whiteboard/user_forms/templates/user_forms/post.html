@@ -1,0 +1,32 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+<p>Congratulations {{ cnet_id }}!  You have downloaded:
+{% for course in courses %}
+    <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+            {{ course.name }}</a></li>
+{% endfor %}
+<p>(Click to view)</p>
+</p>
+
+<l><a href="{% url 'dl_query' %}">Download more classes</a></l>
+<l><a href="{% url 'view_courses' cnet_id=cnet_id %}">Browse My Classes</a></l>
+
+
+{% if repeat_user %}
+ <h2>Classes Previously Downloaded</h2>
+ <ul>
+    {% for course in prev_courses %}
+    <li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+            {{ course.name }}</a></li>
+    {% endfor %} 
+</ul>
+{% endif %}
+
+
+{% endblock %}
+
+
+

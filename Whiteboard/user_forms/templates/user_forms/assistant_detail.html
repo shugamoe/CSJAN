@@ -1,0 +1,31 @@
+{% extends 'user_forms/base.html' %}
+
+
+{% block body %}
+
+<!-- Basic Info Section -->
+<h1>{{ assistant.full_name }}</h1>
+
+
+    <l> {{ assistant.email }}</l> | 
+    <l>Program of Study: {{ assistant.program }}</l>
+
+<!-- End Section -->
+
+
+<!-- Classes Taken/Select -->
+<div style="clear:both;">
+<ul style="float:left;">
+<b>Classes TAd: </b>
+    {% for course in courses_in %}
+<li><a href="{% url 'course_detail' course_id=course.id cnet_id=cnet_id %}">
+    {{ course.name }}</a></li>
+    {% endfor %}
+</form>
+</ul>
+<!-- End  -->
+
+{% endblock %}
+
+
+

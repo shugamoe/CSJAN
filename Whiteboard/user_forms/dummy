@@ -1,0 +1,18 @@
+import urllib
+import requests
+import getpass
+import os
+
+url = 'https://chalk.uchicago.edu/bbcswebdav/pid-3036956-dt-content-rid-6479904_1/xid-6479904_1'
+
+def go():    
+
+    username = input('enter username: ') 
+    password = getpass.getpass('enter password: ')
+
+    s = requests.session()
+    s.get(url, auth = (username, password))
+    r = s.get(url, stream = True, auth = (username, password))
+    with open(os.getcwd() + '/test', 'wb') as f:
+        r.raw.decode_content = True
+        f.write(r.content)

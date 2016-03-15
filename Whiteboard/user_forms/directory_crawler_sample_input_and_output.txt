@@ -1,0 +1,50 @@
+input, function "crawl_multiple_classes" from directory_crawler.py:
+
+input 1: a list of lists, where the inner lists are:
+	[0] course identifier
+	[1] list of instructor names from chalk
+	[2] list of ta names from chalk
+	[3] lit of student names from chalk
+
+input 2: CNET ID
+input 3: CNET PASSWORD
+
+~~
+example of [0] from above:
+
+		       instructors                         TAs                    Students
+["hello_world 101", ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]
+~~
+
+So, an example of a full call to this function is:
+
+crawl_multiple_classes(
+	[["hello_world 101, ["Rogers, Anne", "Wachs, Matthew"], ["McClellan, Julian"], ["Zhu, Andy"]]
+	["hello_world 102: advanced 'hello_world'", ["Yourself, Frick"], ["Hole, Butt"], ["Hunt, Mike"]], MY_CNET_ID, MY_CNET_PASSWORD)
+
+however, the first entry will just be the output from andy's function. Therefore, the function call will be of the form:
+
+crawl_multiple_classes(chalk_crawler_name_outputs, CNET ID, CNET PASSWORD)
+
+
+
+
+
+The output of the directory crawler will be nested dictionaries where
+the first (outer) key is a course identifier
+the second key is either "students", "TAs", or "instructors"
+the second value is a list of dictionaries where each dictionary contains a complete copy of directory information.
+
+
+for example, (formatted for your viewing pleasure)
+
+>{'hello_world 101':
+>	{'students':
+>		[{'e-mail': 'andyz422@uchicago.edu', 'program': 'College: Computational and Applied Mathematics', 'mult_entries': None, 'cnet_id': 'andyz422', 'last': 'Zhu', 'first': 'Andy'}],
+>	 'TAs':
+>		[{'e-mail': 'jmcclellan@uchicago.edu', 'program': 'College: Economics', 'mult_entries': None, 'cnet_id': 'jmcclellan', 'last': 'McClellan', 'first': 'Julian'}],
+>	 'instructors':
+>		[{'faculty exchange': 'Ry 175-A', 'phone': '(773) 702-6497', 'mult_entries': None, 'title': 'Lecturer', 'e-mail': 'mwachs@uchicago.edu', 'last': 'Wachs', 'first': 'Matthew'},
+>		 {'faculty exchange': 'Ry 162-B', 'phone': '(773) 349-2670', 'mult_entries': None, 'title': 'Associate Professor, Institute Senior Fellow', 'e-mail': 'amr@cs.uchicago.edu', 'last': 'Rogers', 'first': 'Anne'}]
+>	 }
+>}
