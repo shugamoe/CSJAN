@@ -120,7 +120,7 @@ indicated) is contained within:
         forms.py
         urls.py
         chalk_crawler.py
-        directory_crawler.py
+        session.py <The directory.uchicago crawler>
         admin.py
         folders.py
         search_indexes.py
