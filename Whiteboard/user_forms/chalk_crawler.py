@@ -220,18 +220,20 @@ class Courses:
             find_elements_by_tag_name('li'):
 
                 if course in course_link.text:
-                    # Adds [prof] on to course list
                     professors = course_link.find_elements_by_class_name('name')
+                    prof_list = []
                     for professor in professors:
-                        course_list.append(professor.text.rstrip()[:-1])
-
-            self.build_course_dict(self.course_info, material_dict, professors,\
-            course, course_list) # Collects course list and file list info
+                        prof_list.append(professor.text.rstrip()[:-1])
+            # Adds [prof] on to course list
+            course_list.append(prof_list)
+            # Collects course list and file list info
+            self.build_course_dict(self.course_info, material_dict, \
+            prof_list, course, course_list) 
 
         return None
 
 
-    def build_course_dict(self, course_info, material_dict, professors, course,\
+    def build_course_dict(self, course_info, material_dict, prof_list, course,\
     course_list):
         '''Crawls a course in Chalk to download course materials into the correct
         path in the local directory, and to compile a list of dictionaries with 
@@ -306,18 +308,19 @@ class Courses:
                     find_element_by_id('stepcontent1').find_element_by_name(
                     'USERS_AVAIL').find_elements_by_tag_name('option')
 
-                    for student_web_element in list_of_students_web_elements:
-                        for professor in professors.split(', '):
-                            prof_str = professor.text.rstrip().replace(';', '')
-                            prof_str = prof_str.split(' ')[1] + ', ' + \
-                            prof_str.split(' ')[0]
+                    compare_profs = []
+                    for professor in prof_list:
+                        prof_str = professor.split(' ')[1] + ', ' + \
+                        professor.split(' ')[0]
+                        compare_profs.append(prof_str)
 
-                            # excluding profs and TA's from list of students
-                            if student_web_element.text not in prof_str and \
-                            student_web_element.text not in list_of_tas and \
-                            'PreviewUser' not in student_web_element.text:
-
-                                list_of_students.append(student_web_element.text)
+                    for student_web_element in list_of_students_web_elements:    
+                        # excluding profs and TA's from list of students
+                        if student_web_element.text not in compare_profs \
+                        and student_web_element.text not in list_of_tas and\
+                        'PreviewUser' not in student_web_element.text:
+                            
+                            list_of_students.append(student_web_element.text)
                     # Navigate browser back one page
                     self.browser.execute_script("window.history.go(-1)")
 
@@ -331,22 +334,34 @@ class Courses:
 
                     component = check_folder_name(item_name)
                     material_dict[component] = {}
+                    # Generates item_name folder in folder path
                     make_dirs(self.course_material_dict, self.default_folder)
                     item.find_element_by_tag_name('a').click()
 
-                    if self.check_xpath_exists('//*div[@class = "noItems container-empty"]'):
+                    if self.check_xpath_exists('//*div[@class = "noItems'\
+                    'container-empty"]'):
                         continue
 
                     elif self.check_id_exists('content_listContainer'):
-                        num_of_items = len(self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li'))
+                        num_of_items = len(self.browser.find_element_by_id(
+                        'content_listContainer').find_elements_by_tag_name('li'))
+                        
                         text_file = ''
+
                         for unit_index in range(num_of_items):
-                            time.sleep(1)
-                            unit = self.browser.find_element_by_id('content_listContainer').find_elements_by_tag_name('li')[unit_index]
-                            if self.check_tag_exists_in_web_element(unit, 'img'):
+                            time.sleep(1) # Wait for element to be found
+                            # each unit on the content panel
+                            unit = self.browser.find_element_by_id(
+                            'content_listContainer').find_elements_by_tag_name(
+                            'li')[unit_index]
+
+                            if self.check_tag_exists_in_web_element(
+                            unit, 'img'):
+                                
                                 img = unit.find_element_by_tag_name('img')
                                 if img.get_attribute('class') == 'item_icon':
-                                    if 'folder_on' in img.get_attribute('src'):
+
+                                    if 'folder_on' in img.get_attribute('src'):   
                                         folder_name = check_folder_name(unit.find_element_by_tag_name('a').text)
                                         material_dict[component][folder_name] = {}
                                         make_dirs(self.course_material_dict, self.default_folder)

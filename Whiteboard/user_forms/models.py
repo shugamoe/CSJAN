@@ -18,7 +18,6 @@ class Session(models.Model):
     date = models.DateTimeField('date published', default = timezone.now)
     year = models.IntegerField(default=datetime.date.today().year)
     people_only = models.BooleanField(default = False)
-    repeat_user = models.BooleanField(default = False)
 
     def __str__(self):
         return str(self.cnet_id)

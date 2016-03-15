@@ -8,7 +8,7 @@ class CourseInline(admin.TabularInline):
 
 
 class SessionAdmin(admin.ModelAdmin): 
-    list_display = ('cnet_id', 'date', 'people_only', 'year')
+    list_display = ('cnet_id', 'date','year')
     list_filter = ['date']
     # search_fields = ['username']
 
