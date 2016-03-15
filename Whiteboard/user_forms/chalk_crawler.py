@@ -173,10 +173,13 @@ class Courses:
 
             # if no quarter is specified, match courses with specified year
             else: 
+                # Checks if year matches with course by seeing if it contains
+                # '<year>)' in the course web element
                 if '{:})'.format(str(self.year)[2:]) in \
                     course_web_element.text.lower(): 
 
                     if 'Unavailable' not in course_web_element.text:
+                        # Clicks checkboxes...         
                         courses.append(course_web_element.text[20:])
                         course_name_box = self.browser.find_element_by_xpath(
                             '//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
@@ -385,7 +388,7 @@ class Courses:
 
         if os.path.exists(os.path.abspath('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename))):
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove('{:}/{:}.txt'.format(self.default_folder, path, filename))
+            os.remove(os.path.abspath('{:}/{:}.txt'.format(self.default_folder, path, filename)))
 
         with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename), 'w') as f:
             f.write(text)
