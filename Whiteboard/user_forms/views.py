@@ -633,13 +633,11 @@ def student_classes_plot(request, cnet_id, course_ids):
     Ouputs:
         response: an image/png HttpResponse
     '''
-    test_names = ['Stud_cls_plt', 'CLASS 2', cnet_id]
-    test_nums = [100, 50, 100]
+    response = HttpResponse(content_type='image/png')
 
     # If we recieve course_ids, that means that the user has hand selected
     # the classes they want to retrieve information about.  Thus, the plot 
     # presented will only attain information for those selected courses.  
-    # (Still needs to be fully implemented)
     if course_ids != 'No_courses_selected':
         course_ids = course_ids.split('/')
         course_ids = [int(course_id) for course_id in course_ids]
@@ -649,14 +647,41 @@ def student_classes_plot(request, cnet_id, course_ids):
             return single_class_plot(request, course_ids[0])
         test_names[0] = 'Override CNET_ID'
     else:
-        courses = Course.objects.filter(student__cnet_id = cnet_id)
-        if len(courses) == 1:
+        course_ids = Course.objects.filter(student__cnet_id = cnet_id).values_list('id', flat = True)
+        if len(course_ids) == 1:
             return single_class_plot(request, courses[0].id)
-    
-    response = HttpResponse(content_type='image/png')
+
+    user_object = Student.object.filter(cnet_id=cnet_id)       
+
+    class_lists = []
+    labels_dictionary = {}
+
+    for identifier in course_ids:
+        students_in_course = [indentifier, Set(Student.objects.filter(courses_in__id=identifier))]
+        class_lists.append(students_in_course)
+
+    if len(class_lists) > 0:
+        first_set = class_lists[0]
+    else:
+        return plt.plot()
+    for course in class_lists:
+        first_set = course[1] & first_set
+
+    graph_size = len(first_set)
+    if graph_size == 0:
+        plt.plot()
+        plt.label = "No common students"
+        plt.savefig(response)
+        return plt
+    else:
+        for person in first_set:
+            G.add_node(person.id)
+            if person != user_object:
+                G.add_edge(user_object.id, person.id)
+    pos = nx.shell_layout(G)
+
     plt.figure(figsize=(6, 6))
 
-    plt.pie(test_nums, labels=test_names)
     plt.savefig(response)
     plt.close()
 
