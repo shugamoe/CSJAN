@@ -61,12 +61,10 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
         else:
             last = name[1] + name[2]
 
-
         #enter the query name and return the results
         browser.find_element_by_name('name').send_keys(query_name)
         browser.find_element_by_class_name('icon-search').click()
-        results = browser.find_elements_by_link_text(query_name)
-        print("length of results:", len(results))
+        results = browser.find_elements_by_class_name("person")
 
         #if no directory results are found, print such and move on.
         if len(results) == 0:
@@ -77,12 +75,12 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
         #if more than one result is found, click the first one.
         elif len(results) > 1:
             duplicates = True
-            browser.find_element_by_link_text(query_name).click()
+            results[0].find_element_by_partial_link_text(first).click()
             print("Multiple search matches for the name", query_name)
         #if there is only one result, click on it and continue as usual.
         else:
             duplicates = False
-            browser.find_element_by_link_text(query_name).click()
+            results[0].find_element_by_partial_link_text(first).click()
             print("Querying Directory.uchicago.edu for" + " " + query_name)
 
         #prepare an appropriate dictionary for the type of directory page.
@@ -92,19 +90,19 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
                                "title": None,
                                "faculty_exchange": "No Exchange Found",
                                "phone": "No Phone Number Listed",
-                               "email": None,
+                               "email": "No Email Listed",
                                "duplicates": duplicates}
         elif names_type == "a":
             user_dictionary = {"first_name": None,
                                "last_name": None,
                                "program": None,
-                               "email": None,
+                               "email": "No Email Listed",
                                "duplicates": duplicates}
         elif names_type == "s":
             user_dictionary = {"first_name": None,
                                "last_name": None,
                                "program": None,
-                               "email": None,
+                               "email": "No Email Listed",
                                "cnet_id": None,
                                "duplicates": duplicates}
         else:
@@ -128,6 +126,11 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
             user_dictionary["first_name"] = first
             user_dictionary["last_name"] = last
 
+            if (key == "Email:") or (key == "Primary Email:"):
+                user_dictionary["email"] = value 
+            if "email" not in user_dictionary and "cnet_id" in user_dictionary:
+                user_dictionary["email"] = user_dictionary["cnet_id"] + "@uchicago.edu"
+
             if names_type == "i":
                 if key == "Appointment(s):":
                     user_dictionary["title"] = value
@@ -137,14 +140,12 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
                     user_dictionary["phone"] = value
             if names_type == "a" or names_type == "s":
                 if key == "Current Program Of Study:":
-                    user_dictionary["program"] = value
-                if (key == "Email:") or (key == "Primary Email:"):
-                    user_dictionary["email"] = value   
+                    user_dictionary["program"] = value  
             if names_type == "s":
                 if key == "CNetID:":
                     user_dictionary["cnet_id"] = value
-                if user_dictionary["email"] == None and user_dictionary["cnet_id"] != None:
-                    user_dictionary["email"] = user_dictionary["cnet_id"] + "@uchicago.edu"
+                if "cnet_id" not in user_dictionary and "email"  in user_dictionary:
+                    user_dictionary["cnet_id"] = user_dictionary["email"].split("@")[0]
 
         #save, then return for more searchin'
         list_of_dictionaries.append(user_dictionary)
