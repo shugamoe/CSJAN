@@ -278,11 +278,17 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
      cnet_pw)
 
+
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': course_name_list,
                                                 'error_message': 'Invalid' 
                                                 ' CNET ID \or Password'})
+
+    # Add or update instances of the File model in the database from information
+    # returned by the Chalk Crawler.
+    a_or_u_files(file_dicts)
+
     demog_dicts = get_demog_dicts(demog_names, cnet_id, cnet_pw)
 
     # Depending on whether the demog_dicts correspond to instructors, TAs, or
@@ -299,11 +305,6 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
             elif stud_ta_or_instr == 'TAs':
                 a_or_u_people(demog_dicts[course][stud_ta_or_instr], 
                     Assistant, course)
-
-    # Add or update instances of the File model in the database from information
-    # returned by the Chalk Crawler.
-    a_or_u_files(file_dicts)
-
 
     # This command ensures that the search indexes for Haystack are updated.
     # (So you can search the latest files.)
@@ -378,9 +379,16 @@ def a_or_u_people(people_dicts, model_used, course_name):
         # temporary fix 
         if model_used == Assistant:
             del ppl_dict['cnet_id']
+        # Directory Crawler isn't robust enough to conform to models :(.
 
-        existing_instance, created = model_used.objects.get_or_create(email = 
-            ppl_dict['email'], defaults = ppl_dict)
+        try:
+            existing_instance, created = model_used.objects.get_or_create(email = 
+                ppl_dict['email'], defaults = ppl_dict)
+        except:
+            print("Directory Crawler isn't robust enough to conform to"\
+                " the Models")
+            return None
+
         if not created:
             for attr, value in ppl_dict.items():
                 setattr(existing_instance, attr, value)
@@ -392,7 +400,7 @@ def a_or_u_people(people_dicts, model_used, course_name):
             existing_instance.save
             existing_instance.courses_in.add(course_object)
 
-    return model_used.objects.all()
+    return None
 
 
 class CourseList(ListView):
@@ -406,7 +414,7 @@ class CourseList(ListView):
         cnet_id = self.kwargs['cnet_id']
 
         # Only want to view courses that the user is in.
-        return Course.objects.filter(student__cnet_id = cnet_id)\
+        return Course.objects.filter(sessions__cnet_id = cnet_id)\
              .order_by('dept')
 
 
