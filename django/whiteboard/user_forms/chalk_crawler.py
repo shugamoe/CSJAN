@@ -29,8 +29,8 @@ def get_courses(input_dict):
     if a.courses == None:
         return None, 'invalid CNET ID'  
     elif a.courses == []:
-        return None, 'There are no courses for {:}, {:}'.format(self.quarter, \
-        self.year)
+        return None, 'There are no courses for {:}, {:}'.format(a.quarter, \
+        a.year)
 
     return a.courses
 
@@ -59,7 +59,6 @@ class Courses:
 
         if not dl:
             self.all_courses, self.courses = self.compile_courses()
-
 
 
         self.course_info = [] # list of lists: course_id, prof, tas, students
@@ -163,7 +162,6 @@ class Courses:
         for item_index in range(len(self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li'))):
             item = self.browser.find_element_by_id('courseMenuPalette_contents').find_elements_by_tag_name('li')[item_index]
             item_name = item.text
-
             if item_name == 'Announcements':
                 material_dict[item.text] = {}
                 make_dirs(self.course_material_dict, self.default_folder)  
@@ -265,7 +263,7 @@ class Courses:
                                                     self.file_list.append(file_dict)
                         
                         if text_file != '':
-                            self.download_text('descriptions', text_file, '{:}/{:}/{:}/'.format(self.default_folder, str(check_folder_name(course)), str(check_folder_name(item_name)))) 
+                            self.download_text('descriptions', text_file, '{:}/{:}/'.format(str(check_folder_name(course)), str(check_folder_name(item_name)))) 
                     
                     if material_dict[component] == {}:
                         del material_dict[component]                 
@@ -349,11 +347,10 @@ class Courses:
         file_dict['format'] = r.headers.get('content-type')
         destination = '{:}/{:}/{:}'.format(self.default_folder, path, unit_name)
         file_dict['path'] = os.path.abspath(destination)
-        delete_file_dict = False
         if self.need_to_update(r, file_dict):
             print('downloading {:}'.format(unit_name))
             make_dirs(self.course_material_dict, self.default_folder)
-            with open(check_folder_name(file_dict['path']), 'wb') as f:  
+            with open(file_dict['path'], 'wb') as f:  
                 r.raw.decode_content = True
                 f.write(r.content)
             if 'pdf' in file_dict['format']:
