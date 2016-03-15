@@ -308,19 +308,19 @@ class Courses:
                     find_element_by_id('stepcontent1').find_element_by_name(
                     'USERS_AVAIL').find_elements_by_tag_name('option')
 
-                    for student_web_element in list_of_students_web_elements:
-                        for professor in prof_list:
-                            prof_str = professor.split(' ')[1] + ', ' + \
-                            professor.split(' ')[0]
-                            print(student_web_element.text, prof_str)
+                    compare_profs = []
+                    for professor in prof_list:
+                        prof_str = professor.split(' ')[1] + ', ' + \
+                        professor.split(' ')[0]
+                        compare_profs.append(prof_str)
 
-                            # excluding profs and TA's from list of students
-                            if student_web_element.text not in prof_str and \
-                            student_web_element.text not in list_of_tas and \
-                            'PreviewUser' not in student_web_element.text and \
-                            student_web_element.text not in list_of_students:
-
-                                list_of_students.append(student_web_element.text)
+                    for student_web_element in list_of_students_web_elements:    
+                        # excluding profs and TA's from list of students
+                        if student_web_element.text not in compare_profs \
+                        and student_web_element.text not in list_of_tas and\
+                        'PreviewUser' not in student_web_element.text:
+                            
+                            list_of_students.append(student_web_element.text)
                     # Navigate browser back one page
                     self.browser.execute_script("window.history.go(-1)")
 
