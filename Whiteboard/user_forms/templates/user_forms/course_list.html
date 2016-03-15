@@ -29,7 +29,8 @@
 
 
 
-<!-- Student Classes Plot -->
+<!-- Student Classes Plot Will now just return a major breakdown of 
+the class the user selects-->
 {% if course_ids %}
 <img src="{% url 'student_classes_plot' cnet_id=cnet_id course_ids=course_ids %}" 
 alt="Class Stats" />
