@@ -16,7 +16,7 @@ TEST_CLASSES = ['Class 1', 'Class 2']
 # to begin the process of finding classes and downloading that information
 # from Chalk.
 class SessionForm(ModelForm):
-    quarter = forms.MultipleChoiceField(label='Quarter(s)', \
+    quarter = forms.MultipleChoiceField(label='Quarter(s) (Optional)', \
                                      choices=QUARTER_CHOICES, required = False)
     year = forms.IntegerField(label='Course year', \
                           initial=datetime.now().year, required = False)
