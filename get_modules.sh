@@ -2,14 +2,13 @@
  
 # Bash script for installing most modules for Whiteboard.
  
-apt-get update
-python3 -m pip install Django==1.8.8
-python3 -m pip install django-haystack
-python3 -m pip install Whoosh
-apt-get build-dep python-matplotlib
-apt-get install python-matplotlib
-python3 -m pip install --user selenium
-python3 -m pip install --user bs4
+sudo apt-get update
+sudo python3 -m pip install Django==1.8.8
+sudo python3 -m pip install django-haystack
+sudo python3 -m pip install Whoosh
+sudo apt-get install python3-matplotlib
+sudo python3 -m pip install selenium
+sudo python3 -m pip install bs4
 cd pdfminer-master
 python2 setup.py install
 cd ../
