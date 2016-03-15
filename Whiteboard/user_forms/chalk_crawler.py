@@ -226,7 +226,7 @@ class Courses:
                     print(professor)
                     prof_cnt = professor.count(';')
                     print(prof_cnt)
-                    print(profess.split('; ')[:prof_cnt])
+                    print(professor.split('; ')[:prof_cnt])
                     course_list.append(professor.split('; ')[:prof_cnt])
 
             self.build_course_dict(self.course_info, material_dict, professor, \
