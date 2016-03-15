@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     # added
     'user_forms', # Our sole 'app'
-    'haystack', # File search functionality
+    # 'haystack', # File search functionality
 ]
 
 
