@@ -1,6 +1,6 @@
 Whiteboard ReadMe
 
-Before starting whiteboard please make sure to install all modules.  
+I. Getting Started
 
 1. Open "Software & Updates" and make sure the following boxes
    are checked under the "Updates" tab:
@@ -19,11 +19,8 @@ Before starting whiteboard please make sure to install all modules.
     2.1 The script might hit you with some y/n prompts, hit yes.  The script
         will also seem to stop working ina  few places, be patient.
 
-3. After, navigate to CSJAN/pdfminer-master and run the 
-   following command:
 
-    sudo python2 setup.py install
-
+II. Running and using Whiteboard
 
 Now, all the modules required to run whiteboard should be 
 installed.  Navigate to CSJAN/Whiteboard and run the following command:
