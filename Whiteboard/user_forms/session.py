@@ -128,24 +128,23 @@ def lookup_list(browser, list_of_names, names_type, CNET, PASSWORD, first_run):
             user_dictionary["first_name"] = first
             user_dictionary["last_name"] = last
 
-            if key == "Appointment(s):":
-                user_dictionary["title"] = value
-            if key == "CNetID:" and names_type != "i" and names_type != "a":
-                user_dictionary["cnet_id"] = value
-            if key == "Current Program Of Study:" and names_type != "i":
-                user_dictionary["program"] = value
-            if (key == "Email:") or (key == "Primary Email:"):
+            if names_type == "i":
+                if key == "Appointment(s):":
+                    user_dictionary["title"] = value
+                if key == "Faculty Exchange:":
+                    user_dictionary["faculty_exchange"] = value
+                if key == "Phone:":
+                    user_dictionary["phone"] = value
+            if names_type == "a" or names_type == "s":
+                if key == "Current Program Of Study:":
+                    user_dictionary["program"] = value
+                if (key == "Email:") or (key == "Primary Email:"):
                 user_dictionary["email"] = value   
-            if key == "Faculty Exchange:" and names_type == "i":
-                user_dictionary["faculty_exchange"] = value
-            if key == "Phone:":
-                user_dictionary["phone"] = value
-
-            if names_type == "s":
+            if names_type == "s"
+                if key == "CNetID:":
+                    user_dictionary["cnet_id"] = value
                 if user_dictionary["email"] == None and user_dictionary["cnet_id"] != None:
                     user_dictionary["email"] = user_dictionary["cnet_id"] + "@uchicago.edu"
-
-        print(user_dictionary)
 
         #save, then return for more searchin'
         list_of_dictionaries.append(user_dictionary)
