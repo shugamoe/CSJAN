@@ -309,8 +309,8 @@ class Courses:
                     for student_web_element in list_of_students_web_elements:
                         for professor in professors.split(', '):
                             prof_str = professor.text.rstrip().replace(';', '')
-                            prof_str = professor.split(' ')[1] + ', ' + \
-                            professor.split(' ')[0]
+                            prof_str = prof_str.split(' ')[1] + ', ' + \
+                            prof_str.split(' ')[0]
 
                             # excluding profs and TA's from list of students
                             if student_web_element.text not in prof_str and \
