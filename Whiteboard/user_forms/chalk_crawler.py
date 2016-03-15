@@ -194,7 +194,7 @@ class Courses:
 
                         course_id_box.click()
 
-                        course_instructor_box = self.browser.
+                        course_instructor_box = self.browser. \
                         find_element_by_xpath('//*[@title="{:}'.format(
                         course_web_element.text) + ': Instructors"]')
                         
@@ -207,7 +207,9 @@ class Courses:
 
 
     def access_courses(self, list_of_courses):
-        self.course_material_dict = {}
+        '''Accesses courses to download'''
+
+        self.course_material_dict = {} # File path dictionary
         
         for course in list_of_courses: 
             course_list = [course]
