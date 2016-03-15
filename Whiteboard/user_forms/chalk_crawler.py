@@ -74,7 +74,7 @@ class Courses:
 
         # Determines location of first folder relative to this file that 
         # contains all course material
-        self.default_folder = '../../Classes' 
+        self.default_folder = '../Classes' 
         
         self.browser = self.login() 
         if not dl:  
@@ -138,14 +138,14 @@ class Courses:
                 for quarter in self.quarter:
                     # Check if quarter and year match by seeing if '(<quarter> 
                     # <year>)' is contained in course web element where quarter
-                    # is either 
+                    # can just be the first three characters
                     if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
                     in course_web_element.text.lower() or \
                     '({:} '.format(quarter.lower()[:3]) + \
                     '{:})'.format(self.year)[2:] in \
                     course_web_element.text.lower(): 
 
-
+                        # Exclude courses with materials that are unavailable
                         if 'Unavailable' not in course_web_element.text:
                             courses.append(course_web_element.text[20:])
                             course_name_box = self.browser.find_element_by_xpath('//*[@title="{:}'.format(course_web_element.text) + ': Course Name"]')
@@ -367,7 +367,7 @@ class Courses:
 
         if os.path.exists('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)):
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove('{:}/{:}.txt'.format(path, filename))
+            os.remove('{:}/{:}.txt'.format(self.default_folder, path, filename))
 
         with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename), 'w') as f:
             f.write(text)
