@@ -77,7 +77,6 @@ class Courses:
         self.default_folder = '../../Classes' 
         
         self.browser = self.login() 
-        time.sleep(1)
         if not dl:  
         # Compiles list of all courses and courses matching the quarter and year                   
             self.all_courses, self.courses = self.compile_courses()
@@ -124,8 +123,8 @@ class Courses:
         if 'Welcome' not in self.browser.title: # Invalid login
             return None, None
 
-        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course \
-        List Module Settings"]').click() # Clicks the settings 'gear' on Chalk
+        self.browser.find_element_by_xpath('//*[@title="Manage Chalk Course ' \
+        'List Module Settings"]').click() # Clicks the settings 'gear' on Chalk
 
         # course_web_element corresponds to each course 
         for course_web_element in \
@@ -137,6 +136,9 @@ class Courses:
 
             if self.quarter != '':
                 for quarter in self.quarter:
+                    # Check if quarter and year match by seeing if '(<quarter> 
+                    # <year>)' is contained in course web element where quarter
+                    # is either 
                     if '({:} '.format(quarter.lower()) + '{:})'.format(self.year)[2:] \
                     in course_web_element.text.lower() or \
                     '({:} '.format(quarter.lower()[:3]) + \
