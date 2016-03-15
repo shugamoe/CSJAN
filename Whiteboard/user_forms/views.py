@@ -383,8 +383,8 @@ def a_or_u_people(people_dicts, model_used, course_name):
                 ppl_dict['email'], defaults = ppl_dict)
         except:
             print("Directory Crawler isn't robust enough to conform to"\
-                " the Models")
-            return None
+                " the Models", ppl_dict, 'model used: ', model_used)
+            continue
 
         if not created:
             for attr, value in ppl_dict.items():
