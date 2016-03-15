@@ -376,9 +376,6 @@ def a_or_u_people(people_dicts, model_used, course_name):
     course_object = Course.objects.get(name = course_name)
 
     for ppl_dict in people_dicts:
-        # temporary fix 
-        if model_used == Assistant:
-            del ppl_dict['cnet_id']
         # Directory Crawler isn't robust enough to conform to models :(.
 
         try:
@@ -415,7 +412,7 @@ class CourseList(ListView):
 
         # Only want to view courses that the user is in.
         return Course.objects.filter(sessions__cnet_id = cnet_id)\
-             .order_by('dept')
+             .order_by('dept').distinct()
 
 
     def get_context_data(self, *args, **kwargs):
