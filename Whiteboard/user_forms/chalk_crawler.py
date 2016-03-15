@@ -28,14 +28,15 @@ def create_object(input_dict):
 
 
 def get_courses(input_dict):
-    '''Obtains a user's list of courses that matches the quarter and year 
+    '''Returns a user's list of courses that matches the quarter and year 
     specified.'''
     
     a = create_object(input_dict)
 
-    if a.courses == None:
-        return None, 'invalid CNET ID'  
-    elif a.courses == []:
+    if a.courses == None: # Accounting for invalid logins
+        return None, 'invalid CNET ID' 
+
+    elif a.courses == []: # Accounting for no courses
         return None, 'There are no courses for {:}, {:}'.format(a.quarter, \
         a.year)
 
@@ -43,8 +44,16 @@ def get_courses(input_dict):
 
 
 def dl_specific_courses(list_of_courses, cnet_id, passwd):
+    '''Downloads specified courses that match a quarter and year.
+    list_of_courses is the set or a subset of a.courses from the previous 
+    function. cnet_id and passwd are required to reauthenticate the user and 
+    actually download course material. This returns course_info and file_list,
+    which are both specified in the Courses object.'''
 
-    a = Courses([], [], cnet_id, passwd, dl = True)
+    # dl key arg skips compiling courses since this should be done in 
+    # get_courses
+    a = Courses([], [], cnet_id, passwd, dl = True) 
+
     a.access_courses(list_of_courses)
     a.browser.close()
     return a.course_info, a.file_list
@@ -189,7 +198,7 @@ class Courses:
                     else:
                             announcement_text = ''
                 if announcement_text != '':
-                    self.download_text('Announcements', announcement_text, '{:}/{:}/Announcements/'.format(self.default_folder, str(check_folder_name(course))))
+                    self.download_text('Announcements', announcement_text, '{:}/Announcements/'.format(str(check_folder_name(course))))
 
             elif item_name == 'Send Email':
                 list_of_tas = []
@@ -338,7 +347,7 @@ class Courses:
 
         if os.path.exists('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename)):
             print('{:}'.format(filename) + ' already exists. Updating file.')
-            os.remove('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename))
+            os.remove('{:}/{:}.txt'.format(path, filename))
 
         with open('{:}/{:}/{:}.txt'.format(self.default_folder, path, filename), 'w') as f:
             f.write(text)
