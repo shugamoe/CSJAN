@@ -15,7 +15,7 @@ import datetime
 
 # phantomjs executable used for headless webdriver
 PHANTOMJS_PATH = os.path.abspath("./phantomjs/bin/phantomjs")
-if "whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
+if "Whiteboard/user_forms/phantomjs" not in PHANTOMJS_PATH:
     PHANTOMJS_PATH = os.path.abspath("./user_forms/phantomjs/bin/phantomjs")
 
 def create_object(input_dict):

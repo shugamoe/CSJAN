@@ -249,6 +249,15 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
     quart_pat = r'(?<=\()([A-Z]{1}[a-z]+)'
     dept_pat = r'[A-Z]{4}'
 
+    # Utilize the chalk crawler to  obtain demog_names: a list of first and
+    # last names of instructors, TAs, and students (may not exist if the class
+    # is too far in the past).  Chalk crawler also obtains file_dicts for each
+    # file downloaded.  These dicts are used to update or create instances 
+    # of the file model in the database (to allow for search functionality and
+    # opening of the file from the database.)
+    demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
+     cnet_pw)
+
     for course_name in course_name_list:
         # Check if the course already exists, course_name is a unique 
         # identifier in the form DEPT ##### (QUARTER ##) COURSE TITLE.
@@ -268,17 +277,7 @@ def crawlers_link(request, course_name_list, cnet_id, cnet_pw, session_object):
         # Either way we track that this course was utilized in the current
         # session by adding the session object to it.
         course_object.sessions.add(session_object)
-
-    # Utilize the chalk crawler to  obtain demog_names: a list of first and
-    # last names of instructors, TAs, and students (may not exist if the class
-    # is too far in the past).  Chalk crawler also obtains file_dicts for each
-    # file downloaded.  These dicts are used to update or create instances 
-    # of the file model in the database (to allow for search functionality and
-    # opening of the file from the database.)
-    demog_names, file_dicts = dl_specific_courses(course_name_list, cnet_id,
-     cnet_pw)
-
-
+        
     if (demog_names == None) and (file_dicts == None): # Invalid credentials
         render(request, 'user_forms/select_downloads.html', \
                                                 {'courses': course_name_list,
